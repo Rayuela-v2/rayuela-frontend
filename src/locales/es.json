@@ -1,6 +1,9 @@
 {
     "navBar": {
-        "about": "Acerca de"
+        "about": "Acerca de",
+        "button_login": "Ingresar",
+        "button_signup": "Registrarse",
+        "button_logout": "Cerrar sesión"
     },
 
     "footer": {
@@ -11,8 +14,8 @@
 
     "login": {
         "title": "Iniciar sesión",
-        "email_field": "Correo electrónico",
-        "email_placeholder": "Ingrese correo electrónico",
+        "username_field": "Usuario/a",
+        "username_placeholder": "Ingrese nombre de usuario/a",
         "password": "Contraseña",
         "password_placeholder": "Ingrese contraseña",
         "button_login": "Ingresar",
@@ -21,12 +24,14 @@
 
     "register": {
         "title": "Registro de cuenta",
-        "user_field": "Usuario/a",
-        "user_placeholder": "Ingrese nombre de usuario/a",
+        "username_field": "Usuario/a",
+        "username_placeholder": "Ingrese nombre de usuario/a",
         "email_field": "Correo electrónico",
         "email_placeholder": "Ingrese correo electrónico",
-        "password": "Contraseña",
-        "password_placeholder": "Ingrese contraseña",
+        "password1": "Contraseña",
+        "password2": "Repetir contraseña",
+        "password1_placeholder": "Ingrese contraseña",
+        "password2_placeholder": "Repita contraseña",
         "checkbox": "Acepto los ",
         "terms": "términos y condiciones",
         "button_signup": "Registrarse",
@@ -37,9 +42,13 @@
         "subtitle": "Ciencia ciudadana"
     },
 
+    "dashboard": {
+    },
+
+
     "projects": {
         "title": "Rayuela",
-        "subtitle": "Proyectos de Ciencia ciudadana",
+        "subtitle": "Ciencia ciudadana",
         "button_login": "Ingresar",
         "button_signup": "Registrarse"
     },

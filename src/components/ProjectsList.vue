@@ -1,36 +1,40 @@
 <script setup>
 import axios from 'axios'
 import Project from './TheProject.vue'
+import { useRouter } from 'vue-router';
 import { ref, onMounted } from 'vue'
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
 
+const router = useRouter()
 const projects = ref([])
 const errors = []
 const showModal = ref(false)
 
 onMounted(async() => {
-  try {
-    const response = await axios.get(import.meta.env.VITE_ROOT_API+`/projects/`)
-    projects.value = response.data
-  } catch (e) {
-    errors.push(e)
+  if(localStorage.getItem("token")){
+    router.push({ path: '/dashboard' })
   }
+  else{
+    if (localStorage.getItem("msg_logout")=="1"){
+      toast.success("Sesión finalizada correctamente", {autoClose: 3000});
+      localStorage.removeItem("msg_logout")
+    }
+  }
+    try {
+      const response = await axios.get(import.meta.env.VITE_ROOT_API+`/projects/`)
+      projects.value = response.data.slice(0,3)
+  } catch (e) {
+      errors.push(e)
+  }
+
 })
+
 </script>
 
 <template>
 <div>
-  <div>
-    <h2 class="title">{{ $t("projects.title") }}</h2>
-    <h3 class="subtitle">{{ $t("projects.subtitle") }} </h3>
-  </div>
-  <div class="buttons">
-    <div class="left">
-      <RouterLink to="/login"><button class="button is-success">{{ $t("projects.button_login") }}</button></RouterLink>
-    </div>
-    <div class="right">
-      <RouterLink to="/register"><button class="button is-link">{{ $t("projects.button_signup") }}</button></RouterLink>
-    </div>
-  </div> 
+    <h2 class="subtitle">Proyectos disponibles</h2>
     <div class="container">
       <Teleport to="body">
         <!-- use the modal component, pass in the prop -->
@@ -50,21 +54,26 @@ onMounted(async() => {
               </div>
               <div class="content">
                 <div>
-                  <div v-if="project.description.length<120">{{ project.description }}</div>
-                  <div v-else>{{ project.description.substring(0,110)+"..." }}</div>
+                  <div v-if="project.description.length<30">
+                    {{ project.description }}
+                  </div>
+                  <div v-else>
+                    {{ project.description.substring(0,25)+"..." }}
+                  </div>
                 </div>
               </div>
             </div>
         </div>
       </div>
+      <button class="button-more button is-link is-light"> Ver más </button>
     </div>
 </div>
 </template>
 
 <style scoped>
 .card{
-  height: 440px;
-  width: 360px;
+  height: 350px;
+  width: 200px;
   margin: 10px;
   padding: 5px;
   -webkit-box-shadow: 4px 4px 5px 1px rgba(15,14,15,0.6);
@@ -83,7 +92,8 @@ onMounted(async() => {
 }
 
 .title, .subtitle{
-  text-align: center;
+  font-size: large;
+  padding: 1rem;
 }
 
 .content{
@@ -100,6 +110,16 @@ onMounted(async() => {
   display: flex;
   flex-direction: column;
   padding: 1rem;
+}
+
+.button-more{
+  height: 350px;
+  width: 100px;
+  margin: 10px;
+  padding: 5px;
+  -webkit-box-shadow: 4px 4px 5px 1px rgba(15,14,15,0.6);
+  -moz-box-shadow: 4px 4px 5px 1px rgba(15,14,15,0.6);
+  box-shadow: 4px 4px 5px 1px rgba(15,14,15,0.6);
 }
 
 </style>
