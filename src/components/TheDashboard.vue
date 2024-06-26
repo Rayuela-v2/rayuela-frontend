@@ -66,10 +66,6 @@ async function user_data() {
 <template>
 <div class="container">
   <div>
-    <h1 class="title">Panel  {{ complete_name }}</h1>
-  </div>
-  <br>
-  <div>
     <h2 class="subtitle">Mis proyectos</h2>
   </div>
   <div>
@@ -83,8 +79,13 @@ async function user_data() {
               </figure>
             </div>
             <div class="card-content">
-              <div class="title is-4">
-                {{ project.name }}
+              <div class="title is-6">
+                <div v-if="project.name.length<12">
+                  {{ project.name }}
+                </div>
+                <div v-else>
+                  {{ project.description.substring(0,9)+"..." }}
+                </div>
               </div>
               <div class="content">
                 <div>
@@ -109,8 +110,12 @@ async function user_data() {
 </template>
 
 <style>
-.title, .subtitle{
+
+.subtitle{
   font-size: large;
+  margin: 10px;
+  justify-content: center;
+  padding: 1rem;
 }
 
 .container{

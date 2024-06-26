@@ -1,11 +1,11 @@
 <script setup>
 import Dashboard from '../components/TheDashboard.vue'
-import ProjectList from '../components/ProjectsList.vue'
+import ProjectsWithoutTheUser from '../components/ProjectsWithoutTheUser.vue';
 </script>
 
 <template>
   <main>
     <Dashboard />
-    <ProjectList />
+    <ProjectsWithoutTheUser />
   </main>
 </template>

@@ -1,33 +1,27 @@
 <script setup>
 import axios from 'axios'
 import Project from './TheProject.vue'
-import { useRouter } from 'vue-router';
 import { ref, onMounted } from 'vue'
-import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 
-const router = useRouter()
 const projects = ref([])
 const errors = []
 const showModal = ref(false)
 
 onMounted(async() => {
-  if(localStorage.getItem("token")){
-    router.push({ path: '/dashboard' })
-  }
-  else{
-    if (localStorage.getItem("msg_logout")=="1"){
-      toast.success("Sesión finalizada correctamente", {autoClose: 3000});
-      localStorage.removeItem("msg_logout")
+  const token = localStorage.getItem("token")
+  const headers = {
+    headers: {
+      'Authorization': 'Bearer ' + token
     }
   }
-    try {
-      const response = await axios.get(import.meta.env.VITE_ROOT_API+`/projects/`)
+  try {
+      const response = await axios.get(import.meta.env.VITE_ROOT_API+`/projects_diff/`, headers)
       projects.value = response.data.slice(0,3)
+      console.log(projects)
   } catch (e) {
       errors.push(e)
   }
-
 })
 
 </script>
@@ -49,7 +43,7 @@ onMounted(async() => {
               </figure>
             </div>
             <div class="card-content">
-              <div class="title is-4">
+              <div class="title is-6">
                 <div v-if="project.name.length<12">
                   {{ project.name }}
                 </div>
@@ -90,15 +84,22 @@ onMounted(async() => {
   max-width: 100%;
 }
 
+.card title{
+  font-size: small;
+}
+
 .container{
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
 }
 
-.title, .subtitle{
+.subtitle{
+  display: flex;
+  flex-wrap: wrap;
   font-size: large;
-  padding: 1rem;
+  justify-content: center;
+  padding: 10px;
 }
 
 .content{
