@@ -1,70 +1,75 @@
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router';
+import {ref} from 'vue'
+import {useRouter} from 'vue-router';
 import axios from "axios";
+import {toast} from "vue3-toastify";
 
 const router = useRouter()
 const username = ref("")
 const email = ref("")
 const password1 = ref("")
 const password2 = ref("")
+const readAgreement = ref("")
 const errors = ref({
   username: "",
   email: "",
   password1: "",
-  password2: ""
+  password2: "",
+  readAgreement: "",
 })
 
+function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
 function is_valid_form(){
-  let valid = true;
+  const validations = [
+    {
+      field: 'email',
+      isInvalid: !email.value || !isValidEmail(email.value),
+      message: 'El correo no tiene un formato correcto',
+    },
+    {
+      field: 'username',
+      isInvalid: !username.value,
+      message: 'El correo no tiene un formato correcto',
+    },
+    {
+      field: 'password1',
+      isInvalid: !password1.value,
+      message: 'El correo no tiene un formato correcto',
+    },
+    {
+      field: 'password2',
+      isInvalid: password1.value !== password2.value,
+      message: 'Las contraseñas no coinciden',
+    },
+    {
+      field: 'readAgreement',
+      isInvalid: !readAgreement.value,
+      message: 'Debe aceptar los términos y condiciones primero',
+    },
+  ]
 
-  if(!username.value){
-    errors.value.username = "El campo no puede estar vacío";
-  } else {
-    errors.value.username = "";
-  }
-  
-  if(!email.value){
-    errors.value.email = "El campo no puede estar vacío";
-  } else {
-    errors.value.email = "";
-  }
-
-  if(!password1.value){
-    errors.value.password1 = "El campo no puede estar vacío";
-  } else {
-    errors.value.email = "";
-  }
-
-  if(password1.value && password2.value && password1.value != password2.value){
-    errors.value.password2 = "Las contraseñas no coinciden";
-  } else {
-    errors.value.password2 = "";
-  }
-
-  if(errors.value.username || errors.value.email || errors.value.password1 || errors.value.password2){
-    valid = false;
-  }
-
-  return valid;
+  validations.forEach(validation => {
+    errors.value[validation.field] = validation.isInvalid ? validation.message : '';
+  })
+  return validations.every(v => !v.isInvalid);
 }
 async function signup() {
   if(is_valid_form()){
     const user = {"username": username.value, "email": email.value, "password": password1.value}
-    axios.post(import.meta.env.VITE_ROOT_API + "/register/", user).then( (response) => {
+    axios.post(import.meta.env.VITE_ROOT_API + "/register/", user).then( () => {
+      toast.success('¡Registro exitoso!', {autoClose: 2000});
+      setTimeout(() => {
         router.push({ path: '/login' })
-        console.log("CORRECTO - REGISTRADO" + response.data);
-        // username.value = ""
-        // email.value = ""
-        // password1.value = ""
-        // password2.value = ""
-    }).catch ( () => {
-      //toast.error("Credenciales de acceso incorrectas", {autoClose: 3000});
-      console.log("ERROR AL REGISTRAR");
+      },2000)
+    }).catch ( (err) => {
+      Object.keys(err?.response?.data).map( k => {
+        toast.error(err.response.data[k], {autoClose: 3000});
+      })
     })
-  } else {
-    console.log("NO PASA EL VALID")
-    console.log("user: " + errors.value.username, "EMAIL: " + errors.value.email, "PASS1: " + errors.value.password1, "PASS2: " + errors.value.password2)
   }
 }
 
@@ -88,7 +93,7 @@ async function signup() {
       <div class="field">
         <label class="label">{{ $t("register.email_field") }}</label>
         <div class="control">
-          <input class="input" type="email" v-model="email" :placeholder="$t('register.email_placeholder')">
+          <input class="input" type="text" v-model="email" :placeholder="$t('register.email_placeholder')">
           <small v-if="errors.email">
             <p class="help is-danger"> {{ errors.email }}</p>
           </small>
@@ -118,9 +123,12 @@ async function signup() {
       <div class="field">
         <div class="control">
           <label class="checkbox">
-            <input type="checkbox">
+            <input type="checkbox" v-model="readAgreement">
             {{ $t("register.checkbox") }}<a href="#">{{ $t("register.terms") }}</a>
           </label>
+          <small v-if="errors.readAgreement">
+            <p class="help is-danger"> {{ errors.readAgreement }}</p>
+          </small>
         </div>
       </div>
 
