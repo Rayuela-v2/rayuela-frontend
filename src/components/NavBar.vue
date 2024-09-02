@@ -50,39 +50,64 @@ function logout(){
         <div class="select is-rounded">
           <select v-model="$i18n.locale">
             <option v-for="(lang, i) in langs" :key="`Lang${i}`" :value="lang">
-              {{ lang }} 
+              {{ lang }}
             </option>
           </select>
         </div>
-        <RouterLink to="/about"><a class="navbar-item">{{ $t("navBar.about") }}</a></RouterLink> 
+        <RouterLink to="/about"><a class="navbar-item">{{ $t("navBar.about") }}</a></RouterLink>
       </div>
 
       <div class="navbar-end">
         <div>
-          <div v-if=token>
-            {{ username }}
-            <img :src="profile_image" width="32" height="32">
+          <div v-if="token" class="navbar-container">
+            <div class="user-info">
+              <span>{{ username }}</span>
+              <img :src="profile_image" width="32" height="32" alt="profile-pic">
+            </div>
             <button class="button is-danger" @click="logout()" value="logout">{{ $t("navBar.button_logout") }}</button>
           </div>
           <div v-else>
-            <div class="buttons">
+            <div class="buttons" style="gap: 8px">
               <div class="left">
                 <RouterLink to="/login"><button class="button is-success">{{ $t("navBar.button_login") }}</button></RouterLink>
               </div>
               <div class="right">
                 <RouterLink to="/register"><button class="button is-link">{{ $t("navBar.button_signup") }}</button></RouterLink>
               </div>
-            </div> 
-          </div> 
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </nav>
-      
+
 </template>
 
 <style scoped>
-nav{
+.navbar {
   margin-bottom: 20px;
+}
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .navbar-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .user-info {
+    margin-bottom: 10px;
+  }
 }
 </style>

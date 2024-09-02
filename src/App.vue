@@ -5,18 +5,20 @@ import TheFooter from './components/TheFooter.vue';
 
 <template>
   <header>
-    <NavBar />
-    
+    <NavBar/>
+
   </header>
 
-  <RouterView />
+  <div class="container">
+    <RouterView/>
+  </div>
 
   <footer>
-    <TheFooter />
+    <TheFooter/>
   </footer>
 
 </template>
 
 <style>
-  
+
 </style>

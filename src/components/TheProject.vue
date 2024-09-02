@@ -75,14 +75,10 @@ const props = defineProps({
 }
 
 .modal-body {
-  margin: 20px 0;
   flex-wrap: wrap;
   max-width: 1080px;
   margin: 10px;
   text-align: center;
-  -webkit-box-shadow: 4px 4px 5px 1px rgba(15,14,15,0.6);
-  -moz-box-shadow: 4px 4px 5px 1px rgba(15,14,15,0.6);
-  box-shadow: 4px 4px 5px 1px rgba(15,14,15,0.6);
 }
 
 .modal-image{
@@ -100,10 +96,6 @@ const props = defineProps({
   justify-content: center;
   padding: 1rem;
   margin: 1rem;
-}
-
-.modal-default-button {
-  float: right;
 }
 
 .modal-description{
