@@ -1,14 +1,15 @@
-<script>
- import {ref} from "vue";
+<script setup>
+import {sliceTextAt} from "../utils/textUtils";
+import Project from "@/components/TheProject.vue";
+import {ref} from "vue";
 
- let show = ref(false);
- const showModal = () => {
-   show.value = true;
- }
+let showId = ref(null);
+
+defineProps(['project'])
 </script>
 
 <template>
-  <div class="card" @click="showModal">
+  <div class="card" @click="showId = project.id">
     <div>
       <figure class="image is-4by3">
         <img :src="project.image" alt="Project image">
@@ -27,17 +28,10 @@
       </div>
     </div>
   </div>
-  <Project :show="show" :name="project.name" :web="project.web" :image="project.image"
-           :description="project.description" @close="show=false">
+  <Project :show="showId === project.id" :name="project.name" :web="project.web" :image="project.image"
+           :description="project.description" @close="showId=null">
   </Project>
 </template>
-
-<script setup>
-  import {sliceTextAt} from "../utils/textUtils";
-  import Project from "@/components/TheProject.vue";
-
-  defineProps(['project'])
-</script>
 
 <style>
 .card {
