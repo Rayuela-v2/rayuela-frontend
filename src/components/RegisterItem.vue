@@ -33,12 +33,12 @@ function is_valid_form(){
     {
       field: 'username',
       isInvalid: !username.value,
-      message: 'El correo no tiene un formato correcto',
+      message: 'El nombre de usuario es requerido',
     },
     {
       field: 'password1',
       isInvalid: !password1.value,
-      message: 'El correo no tiene un formato correcto',
+      message: 'La contraseña es requerida',
     },
     {
       field: 'password2',
