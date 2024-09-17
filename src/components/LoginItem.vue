@@ -17,10 +17,10 @@ onMounted( () =>{
 
 async function login() {
   const user = {"username": username.value, "password": password.value}
-  authService.token(user)
+  authService.loginWithPw(user)
       .then( () => {
         router.push({ path: '/dashboard' })
-        location.reload();
+        //location.reload();
       })
       .catch ( () => {
         toast.error("Credenciales de acceso incorrectas", {autoClose: 3000});

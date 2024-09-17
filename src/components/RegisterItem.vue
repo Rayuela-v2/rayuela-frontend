@@ -59,7 +59,13 @@ function is_valid_form(){
 }
 async function signup() {
   if(is_valid_form()){
-    const user = {username: username.value, email: email.value, password: password1.value}
+    const user = {
+      username: username.value,
+      email: email.value,
+      password: password1.value,
+      profile_image: "https://example.com/image.jpg",
+      complete_name: username.value,
+    }
     AuthService.register(user).then( () => {
       toast.success('¡Registro exitoso!', {autoClose: 2000});
       setTimeout(() => {

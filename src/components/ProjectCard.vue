@@ -1,5 +1,5 @@
 <script setup>
-import {sliceTextAt} from "../utils/textUtils";
+import {sliceTextAt} from "@/utils/textUtils";
 import Project from "@/components/TheProject.vue";
 import {ref} from "vue";
 

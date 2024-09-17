@@ -3,12 +3,12 @@ import RayuelaService from "@/services/RayuelaService";
 
 class ProjectsService extends RayuelaService{
     getProjects() {
-        return axios.get(this.baseUrl + `/projects/`)
+        return axios.get(this.baseUrl + `/projects/`, this.getHeaders())
             .then((response) => response.data);
     }
 
     async getDiffProjects() {
-        return axios.get(this.baseUrl + `/projects_diff/`, this.getHeaders())
+        return axios.get(this.baseUrl + `/projects/`, this.getHeaders())
             .then(res => res.data)
     }
 }
