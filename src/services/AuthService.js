@@ -3,7 +3,7 @@ import RayuelaService from "@/services/RayuelaService";
 
 class AuthService extends RayuelaService{
     token(user) {
-        return axios.post(import.meta.env.VITE_ROOT_API + "/token/", user)
+        return axios.post(this.baseUrl + "/token/", user)
             .then( (response) => {
                 if(response.status===200){
                     localStorage.setItem("msg_login", "1")
@@ -15,11 +15,11 @@ class AuthService extends RayuelaService{
     }
 
     register(user) {
-        return axios.post(import.meta.env.VITE_ROOT_API + "/register/", user)
+        return axios.post(this.baseUrl + "/register/", user)
     }
 
     login() {
-        return axios.get(import.meta.env.VITE_ROOT_API + "/login/", this.getHeaders())
+        return axios.get(this.baseUrl + "/login/", this.getHeaders())
             .then(res => res.data)
     }
 }
