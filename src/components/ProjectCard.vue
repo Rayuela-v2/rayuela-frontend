@@ -1,36 +1,64 @@
 <script setup>
 import {sliceTextAt} from "@/utils/textUtils";
-import Project from "@/components/TheProject.vue";
 import {ref} from "vue";
 
 let showId = ref(null);
 
 defineProps(['project'])
+
 </script>
 
 <template>
-  <div class="card" @click="showId = project.id">
-    <div>
-      <figure class="image is-4by3">
-        <img :src="project.image" alt="Project image">
-      </figure>
-    </div>
-    <div class="card-content">
-      <div class="title is-6">
-        <div class="text">
-          {{ sliceTextAt(project.name, 10) }}
-        </div>
-      </div>
-      <div class="content text">
+  <v-dialog max-width="700">
+    <template v-slot:activator="{ props: activatorProps }">
+      <div class="card" v-bind="activatorProps" @click="showId = project.id">
         <div>
-          {{ sliceTextAt(project.description, 25) }}
+          <figure class="image is-4by3">
+            <img :src="project.image" alt="Project image">
+          </figure>
+        </div>
+        <div class="card-content">
+          <div class="title is-6">
+            <div class="text">
+              {{ sliceTextAt(project.name, 10) }}
+            </div>
+          </div>
+          <div class="content text">
+            <div>
+              {{ sliceTextAt(project.description, 25) }}
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
-  <Project :show="showId === project.id" :name="project.name" :web="project.web" :image="project.image"
-           :description="project.description" @close="showId=null">
-  </Project>
+    </template>
+
+    <template v-slot:default="{ isActive }">
+      <v-card :title="project.name">
+        <v-img
+            height="200"
+            aspect-ratio="16/9"
+            cover
+            :src="project.image" :alt="project.name"
+        ></v-img>
+        <v-card-text>
+          {{ project.description}}
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+              text="Cerrar"
+              @click="isActive.value = false"
+          ></v-btn>
+          <v-btn
+              variant="tonal"
+              append-icon="fa-solid fa-share"
+              text="Ir al sitio"
+              :href="project.web"
+          ></v-btn>
+        </v-card-actions>
+      </v-card>
+    </template>
+  </v-dialog>
 </template>
 
 <style>
