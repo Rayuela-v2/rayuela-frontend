@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import ProjectsService from '@/services/ProjectsService';
 import { toast } from 'vue3-toastify';
+import GeoMap from "@/views/Admin/GeoMap.vue";
 
 const route = useRoute();
 const project = ref({
@@ -72,6 +73,7 @@ const saveProject = async () => {
       <v-card class="pa-4 mb-4">
         <h3>Áreas</h3>
         <div v-for="(area, index) in project.areas" :key="index">
+          <GeoMap :area="area" />
           <v-text-field label="ID del área" v-model="area.id" />
           <v-text-field label="Tipo" v-model="area.type" />
           <v-text-field label="Fuente" v-model="area.properties.source_object" />
@@ -94,7 +96,6 @@ const saveProject = async () => {
         <h3>Intervalos de tiempo</h3>
         <div v-for="(interval, index) in project.timeIntervals" :key="index">
           <v-text-field label="Nombre del intervalo" v-model="interval.name" />
-          {{[interval.time.start,interval.time.end]}}
           <v-range-slider
               :model-value="[interval.time.start,interval.time.end]"
               label="Intervalo de tiempo"
