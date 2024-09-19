@@ -19,12 +19,8 @@ onMounted(async() => {
 })
 
 function logout(){
+  localStorage.clear()
   localStorage.setItem("msg_logout", "1")
-  localStorage.removeItem("token")
-  localStorage.removeItem("username")
-  localStorage.removeItem("profile_image")
-  localStorage.removeItem("complete_name")
-  localStorage.removeItem("projects_user")
   token.value = false
   router.push({ path: '/' })
 }

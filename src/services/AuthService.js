@@ -18,7 +18,12 @@ class AuthService extends RayuelaService {
 
     getUser() {
         return axios.get(this.baseUrl + "/user", this.getHeaders())
-            .then(res => res.data)
+            .then(res => {
+                localStorage.setItem("complete_name", res.data.complete_name)
+                localStorage.setItem("profile_image", res.data.profile_image)
+                localStorage.setItem("role", res.data.role)
+                return res.data
+            })
     }
 }
 

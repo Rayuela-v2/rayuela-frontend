@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import ProjectDetails from "@/views/Admin/ProjectDetails.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -31,7 +32,18 @@ const router = createRouter({
       path: '/dashboard',
       name: 'dashboard',
       component: () => import('../views/DashboardView.vue')
-    }
+    },
+    {
+      path: '/admin/project/:id',
+      name: 'ProjectDetails',
+      component: ProjectDetails,
+      props: true // Permite pasar el parámetro 'id' como prop
+    },
+    {
+      path: '/admin',
+      name: 'admin',
+      component: () => import('../views/Admin/AdminView.vue')
+    },
   ]
 })
 

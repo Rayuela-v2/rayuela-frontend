@@ -32,10 +32,8 @@ onMounted(async () => {
 async function user_data() {
   AuthService.getUser()
       .then(response => {
-        localStorage.setItem("complete_name", response.complete_name)
-        localStorage.setItem("profile_image", response.profile_image)
-        complete_name.value = localStorage.getItem("complete_name")
-        profile_image.value = localStorage.getItem("profile_image")
+        complete_name.value = response.complete_name
+        profile_image.value = response.profile_image
       })
       .catch(error => {
         console.log("AXIOS CATCH: " + error)
