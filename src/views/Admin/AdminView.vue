@@ -7,7 +7,7 @@ import {toast} from "vue3-toastify";
 const projects = ref([]);
 const headers = ref([
   {title: 'Nombre del proyecto', value: 'name'},
-  {title: 'Web', value: 'web'},
+  //{title: 'Web', value: 'web'},
   {title: 'Acciones', value: 'actions', sortable: false}
 ]);
 

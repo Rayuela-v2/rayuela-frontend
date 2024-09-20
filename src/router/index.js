@@ -36,7 +36,7 @@ const router = createRouter({
     {
       path: '/admin/project/:id',
       name: 'ProjectDetails',
-      component: ProjectDetails,
+      component: () => import('../views/Admin/ProjectDetails.vue'),
       props: true // Permite pasar el parámetro 'id' como prop
     },
     {

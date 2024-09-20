@@ -1,8 +1,8 @@
 <script setup>
-import { onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import {onMounted, ref} from 'vue';
+import {useRoute} from 'vue-router';
 import ProjectsService from '@/services/ProjectsService';
-import { toast } from 'vue3-toastify';
+import {toast} from 'vue3-toastify';
 import GeoMap from "@/views/Admin/GeoMap.vue";
 
 const route = useRoute();
@@ -19,13 +19,13 @@ const project = ref({
 const isNew = ref(false);
 
 const daysOfWeek = [
-  { value: 1, text: 'Lunes' },
-  { value: 2, text: 'Martes' },
-  { value: 3, text: 'Miércoles' },
-  { value: 4, text: 'Jueves' },
-  { value: 5, text: 'Viernes' },
-  { value: 6, text: 'Sábado' },
-  { value: 7, text: 'Domingo' }
+  {value: 1, text: 'Lunes'},
+  {value: 2, text: 'Martes'},
+  {value: 3, text: 'Miércoles'},
+  {value: 4, text: 'Jueves'},
+  {value: 5, text: 'Viernes'},
+  {value: 6, text: 'Sábado'},
+  {value: 7, text: 'Domingo'}
 ];
 
 onMounted(async () => {
@@ -64,21 +64,27 @@ const saveProject = async () => {
     <h1>{{ isNew ? 'Crear nuevo proyecto' : 'Editar proyecto' }}</h1>
 
     <v-form @submit.prevent="saveProject">
-      <v-text-field label="Nombre del proyecto" v-model="project.name" required />
-      <v-textarea label="Descripción del proyecto" v-model="project.description" required />
-      <v-text-field label="URL de la imagen" v-model="project.image" />
-      <v-text-field label="Sitio web del proyecto" v-model="project.web" />
-      <v-switch label="Disponible" v-model="project.available" />
+      <v-text-field label="Nombre del proyecto" v-model="project.name" required/>
+      <v-textarea label="Descripción del proyecto" v-model="project.description" required/>
+      <v-text-field label="URL de la imagen" v-model="project.image"/>
+      <v-text-field label="Sitio web del proyecto" v-model="project.web"/>
+      <v-switch label="Disponible" v-model="project.available" color="black"/>
 
       <v-card class="pa-4 mb-4">
         <h3>Áreas</h3>
-        <div v-for="(area, index) in project.areas" :key="index">
-          <GeoMap :area="area" />
-          <v-text-field label="ID del área" v-model="area.id" />
-          <v-text-field label="Tipo" v-model="area.type" />
-          <v-text-field label="Fuente" v-model="area.properties.source_object" />
-          <v-text-field label="Posición" v-model="area.properties.pos" />
-        </div>
+        <v-expansion-panels>
+          <v-expansion-panel v-for="(area, index) in project.areas" :key="index" :title="area.id">
+            <v-expansion-panel-text>
+
+              <GeoMap :area="area"/>
+              <v-text-field label="ID del área" v-model="area.id"/>
+              <v-text-field label="Tipo" v-model="area.type"/>
+              <v-text-field label="Fuente" v-model="area.properties.source_object"/>
+              <v-text-field label="Posición" v-model="area.properties.pos"/>
+            </v-expansion-panel-text>
+
+          </v-expansion-panel>
+        </v-expansion-panels>
       </v-card>
 
       <v-card class="pa-4 mb-4">
@@ -95,7 +101,7 @@ const saveProject = async () => {
       <v-card class="pa-4 mb-4">
         <h3>Intervalos de tiempo</h3>
         <div v-for="(interval, index) in project.timeIntervals" :key="index">
-          <v-text-field label="Nombre del intervalo" v-model="interval.name" />
+          <v-text-field label="Nombre del intervalo" v-model="interval.name"/>
           <v-range-slider
               :model-value="[interval.time.start,interval.time.end]"
               label="Intervalo de tiempo"
@@ -107,17 +113,17 @@ const saveProject = async () => {
               thumb-label="always"
           />
           <h4>Días de la semana</h4>
-          <div v-for="day in daysOfWeek" :key="day.value">
             <v-checkbox
+                v-for="day in daysOfWeek" :key="day.value"
                 v-model="interval.days"
                 :label="day.text"
                 :value="day.value"
+                hide-details
             />
-          </div>
         </div>
       </v-card>
 
-      <v-btn type="submit" variant="elevated" color="black" width="100%" >{{ isNew ? 'Crear' : 'Actualizar' }}</v-btn>
+      <v-btn type="submit" variant="elevated" color="black" width="100%">{{ isNew ? 'Crear' : 'Actualizar' }}</v-btn>
     </v-form>
   </v-container>
 </template>
