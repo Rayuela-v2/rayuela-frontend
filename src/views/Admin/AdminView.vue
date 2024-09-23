@@ -1,18 +1,17 @@
 <script setup>
-import {onMounted, ref} from "vue";
+import { onMounted, ref } from "vue";
 import ProjectsService from "@/services/ProjectsService";
-import {useRouter} from "vue-router";
-import {toast} from "vue3-toastify";
+import { useRouter } from "vue-router";
+import { toast } from "vue3-toastify";
 
 const projects = ref([]);
 const headers = ref([
-  {title: 'Nombre del proyecto', value: 'name'},
-  //{title: 'Web', value: 'web'},
-  {title: 'Acciones', value: 'actions', sortable: false}
+  { title: 'Nombre del proyecto', value: 'name', sortable: true},
+  { title: 'Acciones', value: 'actions', sortable: false }
 ]);
 
 const selectedProject = ref(null);
-const dialogDelete = ref(false);
+const dialogDisable = ref(false);
 
 const router = useRouter();
 
@@ -24,17 +23,17 @@ const editProject = (project) => {
   router.push(`/admin/project/${project._id}`);
 };
 
-const confirmDelete = (project) => {
+const confirmDisable = (project) => {
   selectedProject.value = project;
-  dialogDelete.value = true;
+  dialogDisable.value = true;
 };
 
-const deleteProject = async () => {
-  console.log('Eliminando', selectedProject.value.name);
-  ProjectsService.delete(selectedProject.value._id)
+const disableProject = async () => {
+  selectedProject.value.available = false;
+  await ProjectsService.toggleAvailability(selectedProject.value._id)
       .then(async () => {
-        toast.success('Proyecto eliminado :)');
-        dialogDelete.value = false;
+        toast.success('Proyecto actualizado :)');
+        dialogDisable.value = false;
         projects.value = await ProjectsService.getProjects();
       });
 };
@@ -48,29 +47,30 @@ const deleteProject = async () => {
           :headers="headers"
           :items="projects"
           class="elevation-1"
+          item-class="getRowClass"
       >
         <template v-slot:item.actions="{ item }">
           <div style="display: flex">
             <v-btn icon variant="text" @click="editProject(item)">
               <v-icon>mdi-pencil</v-icon>
             </v-btn>
-            <v-btn icon variant="text" @click="confirmDelete(item)">
-              <v-icon>mdi-delete</v-icon>
+            <v-btn variant="text" size="xxs" :color="item.available ? 'orange': 'green'" @click="confirmDisable(item)">
+              {{item.available ? "Esconder": "Mostrar"}}
             </v-btn>
           </div>
         </template>
       </v-data-table>
 
-      <v-dialog v-model="dialogDelete" max-width="400px">
+      <v-dialog v-model="dialogDisable" max-width="400px">
         <v-card>
           <v-card-title class="headline">¿Estás seguro?</v-card-title>
           <v-card-text>
-            ¿Estás seguro que quieres eliminar el proyecto <strong>{{ selectedProject?.name }}</strong>?
+            ¿Estás seguro que quieres {{selectedProject.available ? "esconder": "mostrar"}} el proyecto <strong>{{ selectedProject?.name }}</strong>?
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="primary" text @click="dialogDelete = false">Cancelar</v-btn>
-            <v-btn color="error" text @click="deleteProject">Eliminar</v-btn>
+            <v-btn color="primary" text @click="dialogDisable = false">Cancelar</v-btn>
+            <v-btn color="warning" text @click="disableProject">{{selectedProject.available ? "esconder": "mostrar"}}</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>

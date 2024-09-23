@@ -12,8 +12,8 @@ class ProjectsService extends RayuelaService{
             .then(res => res.data)
     }
 
-    async delete(projectId) {
-        return axios.delete(this.baseUrl + `/projects/${projectId}`, this.getHeaders())
+    async toggleAvailability(projectId) {
+        return axios.post(this.baseUrl + `/projects/availability/${projectId}`,null, this.getHeaders())
             .then(res => res.data)
     }
 
