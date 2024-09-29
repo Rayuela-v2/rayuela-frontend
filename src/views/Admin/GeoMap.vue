@@ -50,7 +50,7 @@ const initializeMap = () => {
     });
 
     features.forEach((feature,) => {
-      feature.setId(feature.getProperties().id);
+      feature.setId(`A${feature.getProperties().id}`);
       feature.setStyle(createAreaStyle(feature));
     });
 
@@ -95,7 +95,7 @@ watch(area, (newArea) => {
 
     // Asignar un id numerado a cada área y actualizar el estilo
     features.forEach((feature, index) => {
-      feature.setId(`A${index + 1}`);  // Asigna el id A1, A2, etc.
+      feature.setId(`A${feature.getProperties().id}`);  // Asigna el id A1, A2, etc.
       feature.setStyle(createAreaStyle(feature)); // Asigna el estilo con el texto
     });
 
@@ -108,9 +108,6 @@ watch(area, (newArea) => {
     });
 
     map.value.setLayers([new TileLayer({ source: new OSM() }), vectorLayer]);
-
-    const extent = vectorSource.getExtent();
-    map.value.getView().fit(extent, { padding: [20, 20, 20, 20] });
   }
 });
 
