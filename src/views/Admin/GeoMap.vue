@@ -6,6 +6,7 @@ import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer';
 import {OSM, Vector as VectorSource} from 'ol/source';
 import GeoJSON from 'ol/format/GeoJSON';
 import {fromLonLat} from 'ol/proj';
+import {Style, Fill, Stroke, Text} from 'ol/style';
 
 const props = defineProps({
   area: {
@@ -19,12 +20,42 @@ const tab = ref('map');
 const map = ref(null);
 const areaJSON = ref(JSON.stringify(area.value, null, 2));
 
+const createAreaStyle = (feature) => {
+  return new Style({
+    stroke: new Stroke({
+      color: '#319FD3',
+      width: 2
+    }),
+    fill: new Fill({
+      color: 'rgba(0, 0, 255, 0.1)'
+    }),
+    text: new Text({
+      font: '12px Calibri,sans-serif',
+      text: feature.getId(), // Mostrar el id como texto
+      fill: new Fill({
+        color: '#000'
+      }),
+      stroke: new Stroke({
+        color: '#fff',
+        width: 3
+      })
+    })
+  });
+};
+
 const initializeMap = () => {
   if (!map.value && tab.value === 'map') {
+    const features = new GeoJSON().readFeatures(area.value, {
+      featureProjection: 'EPSG:3857'
+    });
+
+    features.forEach((feature,) => {
+      feature.setId(feature.getProperties().id);
+      feature.setStyle(createAreaStyle(feature));
+    });
+
     const vectorSource = new VectorSource({
-      features: new GeoJSON().readFeatures(area.value, {
-        featureProjection: 'EPSG:3857'
-      })
+      features: features
     });
 
     const vectorLayer = new VectorLayer({
@@ -54,14 +85,22 @@ onMounted(() => {
   initializeMap();
 });
 
-// Watch para actualizar el textarea cuando el área cambie
+// Watch para actualizar el mapa cuando el área cambie
 watch(area, (newArea) => {
   areaJSON.value = JSON.stringify(newArea, null, 2);
   if (map.value) {
+    const features = new GeoJSON().readFeatures(newArea, {
+      featureProjection: 'EPSG:3857'
+    });
+
+    // Asignar un id numerado a cada área y actualizar el estilo
+    features.forEach((feature, index) => {
+      feature.setId(`A${index + 1}`);  // Asigna el id A1, A2, etc.
+      feature.setStyle(createAreaStyle(feature)); // Asigna el estilo con el texto
+    });
+
     const vectorSource = new VectorSource({
-      features: new GeoJSON().readFeatures(newArea, {
-        featureProjection: 'EPSG:3857'
-      })
+      features: features
     });
 
     const vectorLayer = new VectorLayer({
