@@ -94,7 +94,7 @@ watch(area, (newArea) => {
     });
 
     // Asignar un id numerado a cada área y actualizar el estilo
-    features.forEach((feature, index) => {
+    features.forEach((feature) => {
       feature.setId(`A${feature.getProperties().id}`);  // Asigna el id A1, A2, etc.
       feature.setStyle(createAreaStyle(feature)); // Asigna el estilo con el texto
     });

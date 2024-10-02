@@ -1,5 +1,6 @@
 import axios from "axios";
 import RayuelaService from "@/services/RayuelaService";
+import router from "@/router";
 
 class AuthService extends RayuelaService {
     loginWithPw(user) {
@@ -19,10 +20,14 @@ class AuthService extends RayuelaService {
     getUser() {
         return axios.get(this.baseUrl + "/user", this.getHeaders())
             .then(res => {
+                localStorage.setItem("user_id", res.data._id)
                 localStorage.setItem("complete_name", res.data.complete_name)
                 localStorage.setItem("profile_image", res.data.profile_image)
                 localStorage.setItem("role", res.data.role)
                 return res.data
+            }).catch( () => {
+                localStorage.clear();
+                router.push("/")
             })
     }
 }

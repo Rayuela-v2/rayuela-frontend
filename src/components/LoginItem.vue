@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 import authService from "@/services/AuthService";
+import AuthService from "@/services/AuthService";
 
 const router = useRouter()
 const username = ref("")
@@ -19,8 +20,18 @@ async function login() {
   const user = {"username": username.value, "password": password.value}
   authService.loginWithPw(user)
       .then( () => {
-        router.push({ path: '/dashboard' })
-        //location.reload();
+        AuthService.getUser()
+            .then(() => {
+              AuthService.getUser().then(userResponse => {
+                if (userResponse.role === 'Admin') {
+                  router.push("/admin");
+                  location.reload();
+                }
+              })
+            })
+            .catch(error => {
+              console.log(error)
+            })
       })
       .catch ( () => {
         toast.error("Credenciales de acceso incorrectas", {autoClose: 3000});

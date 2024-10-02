@@ -5,12 +5,9 @@ import {toast} from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 import ProjectCard from "@/components/ProjectCard.vue";
 import ViewMoreButton from "@/components/ViewMoreButton.vue";
-import AuthService from "@/services/AuthService";
 import ProjectsService from "@/services/ProjectsService";
 
 const router = useRouter()
-const complete_name = ref("")
-const profile_image = ref("")
 const projects_user = ref([])
 // TODO: pasar mensajes a locale
 onMounted(async () => {
@@ -22,23 +19,9 @@ onMounted(async () => {
     toast.success("Sesión iniciada correctamente", {autoClose: 3000});
     localStorage.removeItem("msg_login")
   }
-  if (localStorage.getItem("token")) {
-    user_data()
-  }
   const projects = await ProjectsService.getProjects();
   projects_user.value = projects.slice(0, 3);
 })
-
-async function user_data() {
-  AuthService.getUser()
-      .then(response => {
-        complete_name.value = response.complete_name
-        profile_image.value = response.profile_image
-      })
-      .catch(error => {
-        console.log("AXIOS CATCH: " + error)
-      })
-}
 
 </script>
 

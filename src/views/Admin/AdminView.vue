@@ -16,7 +16,7 @@ const dialogDisable = ref(false);
 const router = useRouter();
 
 onMounted(async () => {
-  projects.value = await ProjectsService.getProjects();
+  projects.value = await ProjectsService.getAdminProjects();
 });
 
 const editProject = (project) => {
@@ -34,7 +34,7 @@ const disableProject = async () => {
       .then(async () => {
         toast.success('Proyecto actualizado :)');
         dialogDisable.value = false;
-        projects.value = await ProjectsService.getProjects();
+        projects.value = await ProjectsService.getAdminProjects();
       });
 };
 </script>
