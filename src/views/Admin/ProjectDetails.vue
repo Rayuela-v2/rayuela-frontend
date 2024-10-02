@@ -4,6 +4,7 @@ import {useRoute} from 'vue-router';
 import ProjectsService from '@/services/ProjectsService';
 import {toast} from 'vue3-toastify';
 import GeoMap from "@/views/Admin/GeoMap.vue";
+import CollapsableSection from "@/components/utils/CollapsableSection.vue";
 
 const route = useRoute();
 const project = ref({
@@ -17,7 +18,7 @@ const project = ref({
   timeIntervals: []
 });
 
-const areas = ref(null)
+const areas = ref(null);
 const isNew = ref(false);
 
 const daysOfWeek = [
@@ -65,22 +66,28 @@ const saveProject = async () => {
 
 <template>
   <v-container>
-    <h1>{{ isNew ? 'Crear nuevo proyecto' : 'Editar proyecto' }}</h1>
+    <h1 class="mb-6">{{ isNew ? 'Crear nuevo proyecto' : 'Editar proyecto' }}</h1>
 
     <v-form @submit.prevent="saveProject">
-      <v-text-field label="Nombre del proyecto" v-model="project.name" required/>
-      <v-textarea label="Descripción del proyecto" v-model="project.description" required/>
-      <v-text-field label="URL de la imagen" v-model="project.image"/>
-      <v-text-field label="Sitio web del proyecto" v-model="project.web"/>
-      <v-switch label="Disponible" v-model="project.available" color="black"/>
-
-      <v-card class="pa-4 mb-4">
-        <h3>Áreas</h3>
-        <GeoMap v-if="project.areas" :area="project.areas" />
+      <!-- Información del proyecto -->
+      <v-card class="pa-4 mb-6">
+        <h2>Información del Proyecto</h2>
+        <v-text-field label="Nombre del proyecto" v-model="project.name" required/>
+        <v-textarea label="Descripción del proyecto" v-model="project.description" required/>
+        <v-text-field label="URL de la imagen" v-model="project.image"/>
+        <v-text-field label="Sitio web del proyecto" v-model="project.web"/>
+        <v-switch label="Disponible" v-model="project.available" color="green"/>
       </v-card>
 
-      <v-card class="pa-4 mb-4">
-        <h3>Tipos de tareas</h3>
+      <!-- Áreas -->
+      <CollapsableSection title="Áreas">
+        <p class="text-subtitle-1 mb-3">Define las áreas geográficas del proyecto</p>
+        <GeoMap v-if="project.areas" :area="project.areas"/>
+      </CollapsableSection>
+
+      <!-- Tipos de Tareas -->
+      <CollapsableSection title="Tipos de Tareas">
+        <p class="text-subtitle-1 mb-3">Selecciona los tipos de tareas disponibles</p>
         <v-select
             v-model="project.taskTypes"
             :items="['Sacar fotos', 'Llenar formularios']"
@@ -88,11 +95,12 @@ const saveProject = async () => {
             multiple
             chips
         />
-      </v-card>
+      </CollapsableSection>
 
-      <v-card class="pa-4 mb-4">
-        <h3>Intervalos de tiempo</h3>
-        <div v-for="(interval, index) in project.timeIntervals" :key="index">
+      <!-- Intervalos de Tiempo -->
+      <CollapsableSection title="Intervalos de Tiempo">
+        <p class="text-subtitle-1 mb-3">Define los intervalos de tiempo y los días aplicables</p>
+        <div v-for="(interval, index) in project.timeIntervals" :key="index" class="mb-4">
           <v-text-field label="Nombre del intervalo" v-model="interval.name"/>
           <v-range-slider
               :model-value="[interval.time.start,interval.time.end]"
@@ -105,17 +113,18 @@ const saveProject = async () => {
               thumb-label="always"
           />
           <h4>Días de la semana</h4>
-            <v-checkbox
-                v-for="day in daysOfWeek" :key="day.value"
-                v-model="interval.days"
-                :label="day.text"
-                :value="day.value"
-                hide-details
-            />
+          <v-checkbox
+              v-for="day in daysOfWeek" :key="day.value"
+              v-model="interval.days"
+              :label="day.text"
+              :value="day.value"
+              hide-details
+          />
         </div>
-      </v-card>
+      </CollapsableSection>
 
-      <v-btn type="submit" variant="elevated" color="black" width="100%">{{ isNew ? 'Crear' : 'Actualizar' }}</v-btn>
+      <!-- Botón de acción -->
+      <v-btn type="submit" variant="elevated" color="primary" width="100%">{{ isNew ? 'Crear' : 'Actualizar' }}</v-btn>
     </v-form>
   </v-container>
 </template>
