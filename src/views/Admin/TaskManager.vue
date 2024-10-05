@@ -1,7 +1,11 @@
 <template>
   <v-container>
     <h1 class="mb-6">Gestión de Tareas</h1>
-    <div style="display: flex; margin:1em 0; justify-content: end;">
+    <div style="display: flex; margin:1em 0; justify-content: space-between;">
+      <!-- Botón para generación automática de tareas -->
+      <v-btn color="secondary" @click="generateTasks" class="mt-4">
+        Generar tareas automáticas
+      </v-btn>
       <!-- Botón para agregar tarea nueva -->
       <v-btn color="primary" @click="addNewTask" class="mt-4">
         Nueva tarea
@@ -57,7 +61,7 @@ import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const projectId = route.params.id;
-import {toast} from 'vue3-toastify';
+import { toast } from 'vue3-toastify';
 import ProjectsService from "@/services/ProjectsService";
 import TaskService from "@/services/TaskService";
 
@@ -140,5 +144,24 @@ const saveTask = () => {
 
 const closeDialog = () => {
   taskDialog.value = false;
+};
+
+const generateTasks = () => {
+  taskTypes.value.forEach(type => {
+    timeIntervals.value.forEach(timeInterval => {
+      areas.value.forEach(area => {
+        const newTask = {
+          name: `Tarea ${type} - ${timeInterval} - Área ${area}`,
+          description: `Automáticamente generada para ${type}, ${timeInterval}, área ${area}`,
+          projectId: projectId,
+          timeIntervalId: timeInterval,
+          areaId: area,
+          type: type
+        };
+        tasks.value = tasks.value.concat([newTask]);
+      });
+    });
+  });
+  toast.success('Tareas generadas automáticamente');
 };
 </script>
