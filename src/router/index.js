@@ -34,15 +34,21 @@ const router = createRouter({
       component: () => import('../views/DashboardView.vue')
     },
     {
-      path: '/admin/project/:id',
-      name: 'ProjectDetails',
-      component: () => import('../views/Admin/ProjectDetails.vue'),
-      props: true // Permite pasar el parámetro 'id' como prop
-    },
-    {
       path: '/admin',
       name: 'admin',
       component: () => import('../views/Admin/AdminView.vue')
+    },
+    {
+      path: '/admin/project/:id',
+      name: 'ProjectDetails',
+      component: () => import('../views/Admin/ProjectDetails.vue'),
+      props: true
+    },
+    {
+      path: '/admin/project/:id/tasks',
+      name: 'TaskManager',
+      component: () => import('../views/Admin/TaskManager.vue'),
+      props: true
     },
   ]
 })
