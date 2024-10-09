@@ -24,7 +24,7 @@ export default class RayuelaService {
     }
 
     patch(url, body) {
-        return axios.patch(this.baseUrl + url, body)
+        return axios.patch(this.baseUrl + url, body, this.getHeaders())
             .then( res => {
                 if(res.status === 401) {
                     localStorage.clear();

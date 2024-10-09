@@ -84,7 +84,9 @@
           />
         </div>
       </CollapsableSection>
-      <router-link :to="{ name: 'TaskManager', params: { id: projectId }}">Gestionar Tareas</router-link>
+      <!-- Tareas -->
+      <CollapsableSection title="Tareas" @click="taskSectionClick">
+      </CollapsableSection>
 
       <!-- Botón de acción -->
       <v-btn type="submit" variant="elevated" color="primary" width="100%">
@@ -101,6 +103,7 @@ import ProjectsService from '@/services/ProjectsService';
 import { toast } from 'vue3-toastify';
 import GeoMap from "@/views/Admin/GeoMap.vue";
 import CollapsableSection from "@/components/utils/CollapsableSection.vue";
+import router from "@/router";
 
 const route = useRoute();
 const project = ref({
@@ -127,17 +130,21 @@ const daysOfWeek = [
   { value: 7, text: 'Domingo' }
 ];
 
-// Función para agregar un nuevo tipo de tarea
+const taskSectionClick = () => {
+  saveProject().then((project) => {
+    router.push(`/admin/project/${project._id}/tasks`)
+  })
+}
+
 const addNewTaskType = () => {
   const taskType = newTaskType.value.trim();
   if (taskType && !project.value.taskTypes.includes(taskType)) {
     project.value.taskTypes.push(taskType);
     toast.success(`Tarea "${taskType}" añadida`);
-    newTaskType.value = ''; // Limpiar campo
+    newTaskType.value = '';
   }
 };
 
-// Función para eliminar un tipo de tarea
 const removeTaskType = (index) => {
   project.value.taskTypes.splice(index, 1);
   toast.info('Tarea eliminada');
@@ -167,11 +174,15 @@ onMounted(async () => {
 
 const saveProject = async () => {
   if (isNew.value) {
-    await ProjectsService.createProject(project.value);
-    toast.success('Proyecto creado exitosamente');
+    return ProjectsService.createProject(project.value).then((r) => {
+      toast.success('Proyecto creado exitosamente')
+      return r;
+    });
   } else {
-    await ProjectsService.updateProject(project.value);
-    toast.success('Proyecto actualizado exitosamente');
+    return ProjectsService.updateProject(project.value).then((r) => {
+      toast.success('Proyecto actualizado exitosamente')
+      return r
+    });
   }
 };
 </script>

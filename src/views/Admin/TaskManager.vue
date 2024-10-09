@@ -19,6 +19,10 @@
         item-value="name"
         class="elevation-1"
     >
+      <template #item.index="{ index }">
+        {{ index + 1 }}
+      </template>
+
       <template #item.actions="{ item }">
         <v-btn icon variant="text" @click="editTask(item)">
           <v-icon>mdi-pencil</v-icon>
@@ -68,12 +72,12 @@
 </template>
 
 <script setup>
-import {ref, onMounted} from 'vue';
-import {useRoute} from 'vue-router';
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const projectId = route.params.id;
-import {toast} from 'vue3-toastify';
+import { toast } from 'vue3-toastify';
 import ProjectsService from "@/services/ProjectsService";
 import TaskService from "@/services/TaskService";
 
@@ -104,12 +108,13 @@ const taskForm = ref({
 const editingTask = ref(false);
 
 const headers = [
-  {text: 'Nombre', value: 'name'},
-  {text: 'Descripción', value: 'description'},
-  {text: 'Tipo', value: 'type'},
-  {text: 'Área', value: 'areaId'},
-  {text: 'Intervalo de Tiempo', value: 'timeIntervalId'},
-  {text: 'Acciones', value: 'actions', sortable: false}
+  { text: 'Orden', value: 'index' }, // Nueva columna para el índice
+  { text: 'Nombre', value: 'name' },
+  { text: 'Descripción', value: 'description' },
+  { text: 'Tipo', value: 'type' },
+  { text: 'Área', value: 'areaId' },
+  { text: 'Intervalo de Tiempo', value: 'timeIntervalId' },
+  { text: 'Acciones', value: 'actions', sortable: false }
 ];
 
 const addNewTask = () => {
@@ -129,13 +134,13 @@ const addNewTask = () => {
 
 const editTask = (task) => {
   editingIndex.value = tasks.value.indexOf(task);
-  taskForm.value = {...task};
+  taskForm.value = { ...task };
   editingTask.value = true;
   taskDialog.value = true;
 };
 
 const duplicateTask = (task) => {
-  const newTask = {...task, name: `${task.name} (Duplicado)`, _id: null};
+  const newTask = { ...task, name: `${task.name} (Duplicado)`, _id: null };
   tasks.value.push(newTask);
   toast.success(`Tarea duplicada: ${newTask.name}`);
 };
@@ -150,10 +155,10 @@ const deleteTask = (task) => {
 
 const saveTask = () => {
   if (editingTask.value) {
-    tasks.value.splice(editingIndex.value, 1, {...taskForm.value});
+    tasks.value.splice(editingIndex.value, 1, { ...taskForm.value });
     toast.success('Tarea actualizada');
   } else {
-    tasks.value.push({...taskForm.value});
+    tasks.value.push({ ...taskForm.value });
     toast.success('Tarea añadida');
   }
   taskDialog.value = false;
@@ -185,7 +190,7 @@ const generateTasks = () => {
 
 const saveAllTasks = async () => {
   try {
-    await TaskService.bulkSave(tasks.value.map(t => ({...t, projectId: project.value._id})), project.value._id);
+    await TaskService.bulkSave(tasks.value.map(t => ({ ...t, projectId: project.value._id })), project.value._id);
     toast.success('Tareas guardadas con éxito');
   } catch (error) {
     toast.error('Error al guardar las tareas');
@@ -199,7 +204,6 @@ const moveItem = (item, direction) => {
   if (targetIndex >= 0 && targetIndex < tasks.value.length) {
     const movedItem = tasks.value.splice(index, 1)[0];
     tasks.value.splice(targetIndex, 0, movedItem);
-    toast.info(`Tarea movida ${direction === -1 ? 'hacia arriba' : 'hacia abajo'}`);
   }
 };
 

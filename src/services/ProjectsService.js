@@ -25,6 +25,14 @@ class ProjectsService extends RayuelaService {
         return this.get(`/projects/`)
             .then((data) => data.filter(p => p.ownerId === localStorage.getItem("user_id")));
     }
+
+    async createProject(project) {
+        return this.post('/projects', project);
+    }
+
+    async updateProject(project) {
+        return this.patch(`/projects/${project._id}`, project);
+    }
 }
 
 export default new ProjectsService(); // Sinleton pattern

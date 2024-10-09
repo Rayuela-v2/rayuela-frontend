@@ -23,6 +23,54 @@ const editProject = (project) => {
   router.push(`/admin/project/${project._id}`);
 };
 
+const addProject = async () => {
+  const newP = await ProjectsService.createProject({
+    "name": "Nuevo proyecto",
+    "description": "Descripcion del proyecto",
+    "image": "https://example.com/image.jpg",
+    "web": "https://example.com",
+    "available": true,
+    "areas": {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "properties": {},
+          "geometry": {
+            "coordinates": [
+              [
+                [
+                  -69.72427193222924,
+                  -36.6544904309133
+                ],
+                [
+                  -69.72437839185329,
+                  -36.6544904309133
+                ],
+                [
+                  -69.72437839185329,
+                  -36.65452925237721
+                ],
+                [
+                  -69.72427193222924,
+                  -36.65452925237721
+                ],
+                [
+                  -69.72427193222924,
+                  -36.6544904309133
+                ]
+              ]
+            ],
+            "type": "Polygon"
+          }
+        }
+      ]
+    },
+    "ownerId": localStorage.getItem("user_id")
+  });
+  router.push(`/admin/project/${newP._id}`);
+};
+
 const confirmDisable = (project) => {
   selectedProject.value = project;
   dialogDisable.value = true;
@@ -42,6 +90,9 @@ const disableProject = async () => {
 <template>
   <main>
     <h1>Mis proyectos</h1>
+    <div style="display: flex; justify-content: flex-end;">
+      <v-btn color="black" @click="addProject">Agregar proyecto</v-btn>
+    </div>
     <v-container>
       <v-data-table
           :headers="headers"
