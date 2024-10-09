@@ -1,12 +1,13 @@
-import axios from "axios";
 import RayuelaService from "@/services/RayuelaService";
 
 class TaskService extends RayuelaService {
     getTaskForProject(projectId) {
-        return axios.get(this.baseUrl + `/task/project/${projectId}`, this.getHeaders())
-            .then((response) => response.data);
+        return this.get(`/task/project/${projectId}`);
     }
 
+    async bulkSave(tasks, projectId) {
+        return this.post(`/task/project/${projectId}/bulk`, tasks);
+    }
 }
 
 export default new TaskService(); // Sinleton pattern

@@ -3,7 +3,7 @@
     <h1 class="mb-6">Gestión de Tareas</h1>
     <div style="display: flex; margin:1em 0; justify-content: space-between;">
       <!-- Botón para generación automática de tareas -->
-      <v-btn color="secondary" @click="generateTasks" class="mt-4">
+      <v-btn color="secondary" @click="generateTasks" :disabled="tasks.length !== 0" class="mt-4">
         Generar tareas automáticas
       </v-btn>
       <!-- Botón para agregar tarea nueva -->
@@ -11,6 +11,7 @@
         Nueva tarea
       </v-btn>
     </div>
+
     <!-- Tabla de Tareas -->
     <v-data-table
         :headers="headers"
@@ -52,16 +53,21 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <!-- Botón grande para guardar todas las tareas -->
+    <v-btn color="success" large block class="mt-6" @click="saveAllTasks">
+      Guardar todas las tareas
+    </v-btn>
   </v-container>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import {ref, onMounted} from 'vue';
+import {useRoute} from 'vue-router';
 
 const route = useRoute();
 const projectId = route.params.id;
-import { toast } from 'vue3-toastify';
+import {toast} from 'vue3-toastify';
 import ProjectsService from "@/services/ProjectsService";
 import TaskService from "@/services/TaskService";
 
@@ -91,19 +97,19 @@ const taskForm = ref({
 const editingTask = ref(false);
 
 const headers = [
-  { text: 'Nombre', value: 'name' },
-  { text: 'Descripción', value: 'description' },
-  { text: 'Tipo', value: 'type' },
-  { text: 'Área', value: 'areaId' },
-  { text: 'Intervalo de Tiempo', value: 'timeIntervalId' },
-  { text: 'Acciones', value: 'actions', sortable: false }
+  {text: 'Nombre', value: 'name'},
+  {text: 'Descripción', value: 'description'},
+  {text: 'Tipo', value: 'type'},
+  {text: 'Área', value: 'areaId'},
+  {text: 'Intervalo de Tiempo', value: 'timeIntervalId'},
+  {text: 'Acciones', value: 'actions', sortable: false}
 ];
 
 const addNewTask = () => {
   taskForm.value = {
     name: '',
     description: '',
-    projectId: '123',
+    projectId: '',
     timeIntervalId: '',
     areaId: '',
     type: ''
@@ -113,13 +119,13 @@ const addNewTask = () => {
 };
 
 const editTask = (task) => {
-  taskForm.value = { ...task };
+  taskForm.value = {...task};
   editingTask.value = true;
   taskDialog.value = true;
 };
 
 const duplicateTask = (task) => {
-  const newTask = { ...task, name: `${task.name} (Duplicado)` };
+  const newTask = {...task, name: `${task.name} (Duplicado)`};
   tasks.value.push(newTask);
   toast.success(`Tarea duplicada: ${newTask.name}`);
 };
@@ -136,7 +142,7 @@ const saveTask = () => {
   if (editingTask.value) {
     toast.success('Tarea actualizada');
   } else {
-    tasks.value.push({ ...taskForm.value });
+    tasks.value.push({...taskForm.value});
     toast.success('Tarea añadida');
   }
   taskDialog.value = false;
@@ -163,5 +169,15 @@ const generateTasks = () => {
     });
   });
   toast.success('Tareas generadas automáticamente');
+};
+
+// Función para guardar todas las tareas
+const saveAllTasks = async () => {
+  try {
+    await TaskService.bulkSave(tasks.value.map( t => ({...t, projectId: project.value._id})), project.value._id);
+    toast.success('Tareas guardadas con éxito');
+  } catch (error) {
+    toast.error('Error al guardar las tareas');
+  }
 };
 </script>
