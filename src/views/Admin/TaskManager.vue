@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <h1 class="mb-6">Gestión de Tareas</h1>
-    <div style="display: flex; margin:1em 0; justify-content: space-between;">
+    <div style="display: flex; margin: 1em 0; justify-content: space-between;">
       <!-- Botón para generación automática de tareas -->
       <v-btn color="secondary" @click="generateTasks" :disabled="tasks.length !== 0" class="mt-4">
         Generar tareas automáticas
@@ -28,6 +28,12 @@
         </v-btn>
         <v-btn icon variant="text" @click="deleteTask(item)">
           <v-icon>mdi-delete</v-icon>
+        </v-btn>
+        <v-btn icon variant="text" @click="moveItem(item, -1)" :disabled="isFirst(item)">
+          <v-icon>mdi-arrow-up</v-icon>
+        </v-btn>
+        <v-btn icon variant="text" @click="moveItem(item, 1)" :disabled="isLast(item)">
+          <v-icon>mdi-arrow-down</v-icon>
         </v-btn>
       </template>
     </v-data-table>
@@ -76,10 +82,11 @@ const project = ref(null);
 const taskTypes = ref([]);
 const timeIntervals = ref([]);
 const areas = ref([]);
+const editingIndex = ref(null);
 
 onMounted(async () => {
   project.value = await ProjectsService.getProjectById(projectId);
-  tasks.value = await TaskService.getTaskForProject(projectId);
+  tasks.value = (await TaskService.getTaskForProject(projectId));
   taskTypes.value = project.value.taskTypes;
   timeIntervals.value = project.value.timeIntervals.map(ti => ti.name);
   areas.value = project.value.areas.features.map(f => f.properties.id);
@@ -107,6 +114,7 @@ const headers = [
 
 const addNewTask = () => {
   taskForm.value = {
+    index: '',
     name: '',
     description: '',
     projectId: '',
@@ -115,17 +123,19 @@ const addNewTask = () => {
     type: ''
   };
   editingTask.value = false;
+  editingIndex.value = null;
   taskDialog.value = true;
 };
 
 const editTask = (task) => {
+  editingIndex.value = tasks.value.indexOf(task);
   taskForm.value = {...task};
   editingTask.value = true;
   taskDialog.value = true;
 };
 
 const duplicateTask = (task) => {
-  const newTask = {...task, name: `${task.name} (Duplicado)`};
+  const newTask = {...task, name: `${task.name} (Duplicado)`, _id: null};
   tasks.value.push(newTask);
   toast.success(`Tarea duplicada: ${newTask.name}`);
 };
@@ -140,12 +150,14 @@ const deleteTask = (task) => {
 
 const saveTask = () => {
   if (editingTask.value) {
+    tasks.value.splice(editingIndex.value, 1, {...taskForm.value});
     toast.success('Tarea actualizada');
   } else {
     tasks.value.push({...taskForm.value});
     toast.success('Tarea añadida');
   }
   taskDialog.value = false;
+  editingIndex.value = null;
 };
 
 const closeDialog = () => {
@@ -171,13 +183,31 @@ const generateTasks = () => {
   toast.success('Tareas generadas automáticamente');
 };
 
-// Función para guardar todas las tareas
 const saveAllTasks = async () => {
   try {
-    await TaskService.bulkSave(tasks.value.map( t => ({...t, projectId: project.value._id})), project.value._id);
+    await TaskService.bulkSave(tasks.value.map(t => ({...t, projectId: project.value._id})), project.value._id);
     toast.success('Tareas guardadas con éxito');
   } catch (error) {
     toast.error('Error al guardar las tareas');
   }
+};
+
+const moveItem = (item, direction) => {
+  const index = tasks.value.indexOf(item);
+  const targetIndex = index + direction;
+
+  if (targetIndex >= 0 && targetIndex < tasks.value.length) {
+    const movedItem = tasks.value.splice(index, 1)[0];
+    tasks.value.splice(targetIndex, 0, movedItem);
+    toast.info(`Tarea movida ${direction === -1 ? 'hacia arriba' : 'hacia abajo'}`);
+  }
+};
+
+const isFirst = (item) => {
+  return tasks.value.indexOf(item) === 0;
+};
+
+const isLast = (item) => {
+  return tasks.value.indexOf(item) === tasks.value.length - 1;
 };
 </script>
