@@ -1,12 +1,12 @@
 <script setup>
-import {onMounted, ref, watch} from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import 'ol/ol.css';
-import {Map, View} from 'ol';
-import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer';
-import {OSM, Vector as VectorSource} from 'ol/source';
+import { Map, View } from 'ol';
+import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer';
+import { OSM, Vector as VectorSource } from 'ol/source';
 import GeoJSON from 'ol/format/GeoJSON';
-import {fromLonLat} from 'ol/proj';
-import {Style, Fill, Stroke, Text} from 'ol/style';
+import { fromLonLat } from 'ol/proj';
+import { Style, Fill, Stroke, Text } from 'ol/style';
 
 const props = defineProps({
   area: {
@@ -31,7 +31,7 @@ const createAreaStyle = (feature) => {
     }),
     text: new Text({
       font: '12px Calibri,sans-serif',
-      text: feature.getId(), // Mostrar el id como texto
+      text: feature.getId(),
       fill: new Fill({
         color: '#000'
       }),
@@ -49,7 +49,7 @@ const initializeMap = () => {
       featureProjection: 'EPSG:3857'
     });
 
-    features.forEach((feature,) => {
+    features.forEach((feature) => {
       feature.setId(`A${feature.getProperties().id}`);
       feature.setStyle(createAreaStyle(feature));
     });
@@ -72,12 +72,12 @@ const initializeMap = () => {
       ],
       view: new View({
         center: fromLonLat([0, 0]),
-        zoom: 10
+        zoom: 2 // Zoom inicial bajo para evitar zoom excesivo
       })
     });
 
     const extent = vectorSource.getExtent();
-    map.value.getView().fit(extent, { padding: [20, 20, 20, 20] });
+    map.value.getView().fit(extent, {padding: [20, 20, 20, 20], maxZoom: 18}); // Ajuste de zoom máximo para evitar exceso
   }
 };
 
@@ -93,10 +93,9 @@ watch(area, (newArea) => {
       featureProjection: 'EPSG:3857'
     });
 
-    // Asignar un id numerado a cada área y actualizar el estilo
     features.forEach((feature) => {
-      feature.setId(`A${feature.getProperties().id}`);  // Asigna el id A1, A2, etc.
-      feature.setStyle(createAreaStyle(feature)); // Asigna el estilo con el texto
+      feature.setId(`A${feature.getProperties().id}`);
+      feature.setStyle(createAreaStyle(feature));
     });
 
     const vectorSource = new VectorSource({
@@ -107,7 +106,10 @@ watch(area, (newArea) => {
       source: vectorSource
     });
 
-    map.value.setLayers([new TileLayer({ source: new OSM() }), vectorLayer]);
+    map.value.setLayers([new TileLayer({source: new OSM()}), vectorLayer]);
+
+    const extent = vectorSource.getExtent();
+    map.value.getView().fit(extent, {padding: [20, 20, 20, 20], maxZoom: 18}); // Ajuste de zoom al cambiar el área
   }
 });
 
@@ -120,7 +122,16 @@ const updateAreaFromJSON = (json) => {
 };
 </script>
 
-<template >
+<template>
+  <v-alert
+      title="Importante"
+      type="info"
+      color="black"
+      variant="tonal"
+  >
+    Las areas deben estar en formato geoJSON, el JSON debe ser una featureCollection,
+    y cada feature interiormente debe tener una property id. Puedes generar las areas manualmente en <a href="https://geojson.io/" target="_blank">https://geojson.io/</a>
+  </v-alert>
   <v-card>
     <v-tabs v-model="tab" bg-color="black">
       <v-tab value="map">Mapa</v-tab>

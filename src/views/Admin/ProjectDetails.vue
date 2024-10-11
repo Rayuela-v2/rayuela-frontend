@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <h1 class="mb-6">{{ isNew ? 'Crear nuevo proyecto' : 'Editar proyecto' }}</h1>
+    <h1 class="mb-6">Detalle del proyecto</h1>
 
     <v-form @submit.prevent="saveProject">
       <!-- Información del proyecto -->
@@ -61,18 +61,40 @@
       <!-- Intervalos de Tiempo -->
       <CollapsableSection title="Intervalos de Tiempo">
         <p class="text-subtitle-1 mb-3">Define los intervalos de tiempo y los días aplicables</p>
+
+        <!-- Botón para agregar nuevo intervalo -->
+        <v-btn color="primary" class="mb-4" @click="addNewTimeInterval">
+          Añadir nuevo intervalo de tiempo
+        </v-btn>
+
+        <!-- Lista de intervalos de tiempo con inputs numéricos -->
         <div v-for="(interval, index) in project.timeIntervals" :key="index" class="mb-4">
           <v-text-field label="Nombre del intervalo" v-model="interval.name" />
-          <v-range-slider
-              :model-value="[interval.time.start, interval.time.end]"
-              label="Intervalo de tiempo"
-              :max="24"
-              :min="0"
-              ticks
-              step="1"
-              tick-size="2"
-              thumb-label="always"
-          />
+
+          <!-- Inputs numéricos para el rango de tiempo -->
+          <v-row>
+            <v-col cols="6">
+              <v-text-field
+                  label="Hora de inicio"
+                  type="number"
+                  v-model="interval.time.start"
+                  :min="0"
+                  :max="24"
+                  step="1"
+              />
+            </v-col>
+            <v-col cols="6">
+              <v-text-field
+                  label="Hora de finalización"
+                  type="number"
+                  v-model="interval.time.end"
+                  :min="0"
+                  :max="24"
+                  step="1"
+              />
+            </v-col>
+          </v-row>
+
           <h4>Días de la semana</h4>
           <v-checkbox
               v-for="day in daysOfWeek"
@@ -82,8 +104,12 @@
               :value="day.value"
               hide-details
           />
+
+          <!-- Botón para eliminar intervalo -->
+          <v-btn color="red" @click="removeTimeInterval(index)">Eliminar intervalo</v-btn>
         </div>
       </CollapsableSection>
+
       <!-- Tareas -->
       <CollapsableSection title="Tareas" @click="taskSectionClick">
       </CollapsableSection>
@@ -101,9 +127,9 @@ import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import ProjectsService from '@/services/ProjectsService';
 import { toast } from 'vue3-toastify';
-import GeoMap from "@/views/Admin/GeoMap.vue";
-import CollapsableSection from "@/components/utils/CollapsableSection.vue";
+import CollapsableSection from '@/components/utils/CollapsableSection.vue';
 import router from "@/router";
+import GeoMap from "@/views/Admin/GeoMap.vue";
 
 const route = useRoute();
 const project = ref({
@@ -172,16 +198,29 @@ onMounted(async () => {
   }
 });
 
+const addNewTimeInterval = () => {
+  project.value.timeIntervals.push({
+    name: '',
+    time: { start: 0, end: 0 },
+    days: []
+  });
+};
+
+const removeTimeInterval = (index) => {
+  project.value.timeIntervals.splice(index, 1);
+  toast.info('Intervalo eliminado');
+};
+
 const saveProject = async () => {
   if (isNew.value) {
     return ProjectsService.createProject(project.value).then((r) => {
-      toast.success('Proyecto creado exitosamente')
+      toast.success('Proyecto creado exitosamente');
       return r;
     });
   } else {
     return ProjectsService.updateProject(project.value).then((r) => {
-      toast.success('Proyecto actualizado exitosamente')
-      return r
+      toast.success('Proyecto actualizado exitosamente');
+      return r;
     });
   }
 };

@@ -2,17 +2,14 @@
   <v-container>
     <h1 class="mb-6">Gestión de Tareas</h1>
     <div style="display: flex; margin: 1em 0; justify-content: space-between;">
-      <!-- Botón para generación automática de tareas -->
       <v-btn color="secondary" @click="generateTasks" :disabled="tasks.length !== 0" class="mt-4">
         Generar tareas automáticas
       </v-btn>
-      <!-- Botón para agregar tarea nueva -->
       <v-btn color="primary" @click="addNewTask" class="mt-4">
         Nueva tarea
       </v-btn>
     </div>
 
-    <!-- Tabla de Tareas -->
     <v-data-table
         :headers="headers"
         :items="tasks"
@@ -49,11 +46,41 @@
         </v-card-title>
 
         <v-card-text>
-          <v-text-field v-model="taskForm.name" label="Nombre de la tarea" required />
-          <v-text-field v-model="taskForm.description" label="Descripción de la tarea" required />
-          <v-select v-model="taskForm.type" :items="taskTypes" label="Tipo de tarea" required />
-          <v-select v-model="taskForm.timeIntervalId" :items="timeIntervals" label="Intervalo de tiempo" required />
-          <v-select v-model="taskForm.areaId" :items="areas" label="Área" required />
+          <v-form :ref="taskFormRef">
+            <v-text-field
+                v-model="taskForm.name"
+                label="Nombre de la tarea"
+                :rules="[v => !!v || 'Este campo es obligatorio']"
+                required
+            />
+            <v-text-field
+                v-model="taskForm.description"
+                label="Descripción de la tarea"
+                :rules="[v => !!v || 'Este campo es obligatorio']"
+                required
+            />
+            <v-select
+                v-model="taskForm.type"
+                :items="taskTypes"
+                label="Tipo de tarea"
+                :rules="[v => !!v || 'Este campo es obligatorio']"
+                required
+            />
+            <v-select
+                v-model="taskForm.timeIntervalId"
+                :items="timeIntervals"
+                label="Intervalo de tiempo"
+                :rules="[v => !!v || 'Este campo es obligatorio']"
+                required
+            />
+            <v-select
+                v-model="taskForm.areaId"
+                :items="areas"
+                label="Área"
+                :rules="[v => !!v || 'Este campo es obligatorio']"
+                required
+            />
+          </v-form>
         </v-card-text>
 
         <v-card-actions>
@@ -64,7 +91,6 @@
       </v-card>
     </v-dialog>
 
-    <!-- Botón grande para guardar todas las tareas -->
     <v-btn color="success" large block class="mt-6" @click="saveAllTasks">
       Guardar todas las tareas
     </v-btn>
@@ -72,12 +98,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import {ref, onMounted} from 'vue';
+import {useRoute} from 'vue-router';
 
 const route = useRoute();
 const projectId = route.params.id;
-import { toast } from 'vue3-toastify';
+import {toast} from 'vue3-toastify';
 import ProjectsService from "@/services/ProjectsService";
 import TaskService from "@/services/TaskService";
 
@@ -106,20 +132,19 @@ const taskForm = ref({
   type: ''
 });
 const editingTask = ref(false);
+const taskFormRef = ref(null);
 
 const headers = [
-  { text: 'Orden', value: 'index' }, // Nueva columna para el índice
-  { text: 'Nombre', value: 'name' },
-  { text: 'Descripción', value: 'description' },
-  { text: 'Tipo', value: 'type' },
-  { text: 'Área', value: 'areaId' },
-  { text: 'Intervalo de Tiempo', value: 'timeIntervalId' },
-  { text: 'Acciones', value: 'actions', sortable: false }
+  {title: 'Orden', value: 'index'},
+  {title: 'Nombre', value: 'name'},
+  {title: 'Tipo', value: 'type'},
+  {title: 'Área', value: 'areaId'},
+  {title: 'Int. de tiempo', value: 'timeIntervalId'},
+  {title: 'Acciones', value: 'actions', sortable: false}
 ];
 
 const addNewTask = () => {
   taskForm.value = {
-    index: '',
     name: '',
     description: '',
     projectId: '',
@@ -134,35 +159,28 @@ const addNewTask = () => {
 
 const editTask = (task) => {
   editingIndex.value = tasks.value.indexOf(task);
-  taskForm.value = { ...task };
+  taskForm.value = {...task};
   editingTask.value = true;
   taskDialog.value = true;
 };
 
-const duplicateTask = (task) => {
-  const newTask = { ...task, name: `${task.name} (Duplicado)`, _id: null };
-  tasks.value.push(newTask);
-  toast.success(`Tarea duplicada: ${newTask.name}`);
-};
-
-const deleteTask = (task) => {
-  const index = tasks.value.indexOf(task);
-  if (index > -1) {
-    tasks.value.splice(index, 1);
-    toast.info('Tarea eliminada');
-  }
-};
-
+const isValidForm = () => {
+  return taskForm.value.name && taskForm.value.projectId && taskForm.value.timeIntervalId && taskForm.value.areaId && taskForm.value.type;
+}
 const saveTask = () => {
-  if (editingTask.value) {
-    tasks.value.splice(editingIndex.value, 1, { ...taskForm.value });
-    toast.success('Tarea actualizada');
+  if (isValidForm()) {
+    if (editingTask.value) {
+      tasks.value.splice(editingIndex.value, 1, {...taskForm.value});
+      toast.success('Tarea actualizada');
+    } else {
+      tasks.value.push({...taskForm.value});
+      toast.success('Tarea añadida');
+    }
+    taskDialog.value = false;
+    editingIndex.value = null;
   } else {
-    tasks.value.push({ ...taskForm.value });
-    toast.success('Tarea añadida');
+    toast.error('Por favor, completa todos los campos obligatorios.');
   }
-  taskDialog.value = false;
-  editingIndex.value = null;
 };
 
 const closeDialog = () => {
@@ -190,7 +208,7 @@ const generateTasks = () => {
 
 const saveAllTasks = async () => {
   try {
-    await TaskService.bulkSave(tasks.value.map(t => ({ ...t, projectId: project.value._id })), project.value._id);
+    await TaskService.bulkSave(tasks.value.map(t => ({...t, projectId: project.value._id})), project.value._id);
     toast.success('Tareas guardadas con éxito');
   } catch (error) {
     toast.error('Error al guardar las tareas');

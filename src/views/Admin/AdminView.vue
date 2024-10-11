@@ -35,7 +35,9 @@ const addProject = async () => {
       "features": [
         {
           "type": "Feature",
-          "properties": {},
+          "properties": {
+            "id": 1
+          },
           "geometry": {
             "coordinates": [
               [
