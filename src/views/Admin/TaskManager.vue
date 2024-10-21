@@ -102,6 +102,7 @@ const projectId = route.params.id;
 import {toast} from 'vue3-toastify';
 import ProjectsService from "@/services/ProjectsService";
 import TaskService from "@/services/TaskService";
+import router from "@/router";
 
 const tasks = ref([]);
 const project = ref(null);
@@ -203,7 +204,7 @@ const generateTasks = () => {
 };
 
 const duplicateTask = (task) => {
-  const newTask = { ...task, name: `${task.name} (Duplicado)` };
+  const newTask = {...task, name: `${task.name} (Duplicado)`};
   tasks.value.push(newTask);
   toast.success(`Tarea duplicada: ${newTask.name}`);
 };
@@ -221,6 +222,9 @@ const saveAllTasks = async () => {
   try {
     await TaskService.bulkSave(tasks.value.map(t => ({...t, projectId: project.value._id})), project.value._id);
     toast.success('Tareas guardadas con éxito');
+    setTimeout(() => {
+      router.back()
+    }, 1500)
   } catch (error) {
     toast.error('Error al guardar las tareas');
   }
