@@ -31,6 +31,7 @@ class ProjectsService extends RayuelaService {
     }
 
     async updateProject(project) {
+        console.warn(project)
         return this.patch(`/projects/${project._id}`, project);
     }
 }

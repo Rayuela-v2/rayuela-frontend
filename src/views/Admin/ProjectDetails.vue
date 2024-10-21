@@ -58,20 +58,16 @@
         </v-simple-table>
       </CollapsableSection>
 
-      <!-- Intervalos de Tiempo -->
       <CollapsableSection title="Intervalos de Tiempo">
         <p class="text-subtitle-1 mb-3">Define los intervalos de tiempo y los días aplicables</p>
 
-        <!-- Botón para agregar nuevo intervalo -->
         <v-btn color="primary" class="mb-4" @click="addNewTimeInterval">
           Añadir nuevo intervalo de tiempo
         </v-btn>
 
-        <!-- Lista de intervalos de tiempo con inputs numéricos -->
-        <div v-for="(interval, index) in project.timeIntervals" :key="index" class="mb-4">
+        <v-card style="background: whitesmoke; padding: 2em" v-for="(interval, index) in project.timeIntervals" :key="index" class="mb-4">
           <v-text-field label="Nombre del intervalo" v-model="interval.name" />
 
-          <!-- Inputs numéricos para el rango de tiempo -->
           <v-row>
             <v-col cols="6">
               <v-text-field
@@ -105,16 +101,13 @@
               hide-details
           />
 
-          <!-- Botón para eliminar intervalo -->
           <v-btn color="red" @click="removeTimeInterval(index)">Eliminar intervalo</v-btn>
-        </div>
+        </v-card>
       </CollapsableSection>
 
-      <!-- Tareas -->
       <CollapsableSection title="Tareas" @click="taskSectionClick">
       </CollapsableSection>
 
-      <!-- Botón de acción -->
       <v-btn type="submit" variant="elevated" color="primary" width="100%">
         {{ isNew ? 'Crear' : 'Actualizar' }}
       </v-btn>
@@ -133,6 +126,7 @@ import GeoMap from "@/views/Admin/GeoMap.vue";
 
 const route = useRoute();
 const project = ref({
+  _id: '',
   name: '',
   description: '',
   image: '',
@@ -165,7 +159,7 @@ const taskSectionClick = () => {
 const addNewTaskType = () => {
   const taskType = newTaskType.value.trim();
   if (taskType && !project.value.taskTypes.includes(taskType)) {
-    project.value.taskTypes.push(taskType);
+    project.value = {...project.value, taskTypes: project.value.taskTypes.concat([taskType])};
     toast.success(`Tarea "${taskType}" añadida`);
     newTaskType.value = '';
   }
@@ -182,6 +176,7 @@ onMounted(async () => {
   if (projectId === 'new') {
     isNew.value = true;
     project.value = {
+      _id: '',
       name: '',
       description: '',
       image: '',
@@ -211,7 +206,7 @@ const removeTimeInterval = (index) => {
   toast.info('Intervalo eliminado');
 };
 
-const saveProject = async () => {
+const saveProject = () => {
   if (isNew.value) {
     return ProjectsService.createProject(project.value).then((r) => {
       toast.success('Proyecto creado exitosamente');

@@ -1,12 +1,13 @@
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import {onMounted, ref, watch} from 'vue';
 import 'ol/ol.css';
-import { Map, View } from 'ol';
-import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer';
-import { OSM, Vector as VectorSource } from 'ol/source';
+import {Map, View} from 'ol';
+import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer';
+import {OSM, Vector as VectorSource} from 'ol/source';
 import GeoJSON from 'ol/format/GeoJSON';
-import { fromLonLat } from 'ol/proj';
-import { Style, Fill, Stroke, Text } from 'ol/style';
+import {fromLonLat} from 'ol/proj';
+import {Style, Fill, Stroke, Text} from 'ol/style';
+import {toast} from "vue3-toastify";
 
 const props = defineProps({
   area: {
@@ -19,6 +20,7 @@ const area = ref(props.area);
 const tab = ref('map');
 const map = ref(null);
 const areaJSON = ref(JSON.stringify(area.value, null, 2));
+const error = ref(''); // Nueva variable para mostrar errores
 
 const createAreaStyle = (feature) => {
   return new Style({
@@ -72,12 +74,12 @@ const initializeMap = () => {
       ],
       view: new View({
         center: fromLonLat([0, 0]),
-        zoom: 2 // Zoom inicial bajo para evitar zoom excesivo
+        zoom: 2
       })
     });
 
     const extent = vectorSource.getExtent();
-    map.value.getView().fit(extent, {padding: [20, 20, 20, 20], maxZoom: 18}); // Ajuste de zoom máximo para evitar exceso
+    map.value.getView().fit(extent, {padding: [20, 20, 20, 20], maxZoom: 18});
   }
 };
 
@@ -85,7 +87,6 @@ onMounted(() => {
   initializeMap();
 });
 
-// Watch para actualizar el mapa cuando el área cambie
 watch(area, (newArea) => {
   areaJSON.value = JSON.stringify(newArea, null, 2);
   if (map.value) {
@@ -109,16 +110,41 @@ watch(area, (newArea) => {
     map.value.setLayers([new TileLayer({source: new OSM()}), vectorLayer]);
 
     const extent = vectorSource.getExtent();
-    map.value.getView().fit(extent, {padding: [20, 20, 20, 20], maxZoom: 18}); // Ajuste de zoom al cambiar el área
+    map.value.getView().fit(extent, {padding: [20, 20, 20, 20], maxZoom: 18});
   }
 });
 
 const updateAreaFromJSON = (json) => {
   try {
-    area.value = JSON.parse(json);
+    const parsedJSON = JSON.parse(json);
+    if (isValidGeoJSON(parsedJSON)) {
+      area.value = parsedJSON;
+      error.value = ''; // Limpia el error si el JSON es válido
+    } else {
+      throw new Error('GeoJSON inválido');
+    }
   } catch (e) {
-    console.error('Error parsing JSON:', e);
+    error.value = 'El formato no corresponde a un GeoJSON válido.';
   }
+};
+
+const isValidGeoJSON = (geojson) => {
+  // Verifica si el objeto tiene las propiedades esperadas de un GeoJSON
+  if(geojson.type !== 'FeatureCollection') {
+    toast.warning("El campo type del geoJSON debe ser FeatureCollection");
+  }
+  if(!Array.isArray(geojson.features)) {
+    toast.warning("El campo features del geoJSON debe ser un array");
+  }
+  if(!geojson.features.every((feature) => feature.properties && feature.properties.id)) {
+    toast.warning("Algun campo feature del geoJSON no tiene id");
+  }
+
+  return (
+      geojson.type === 'FeatureCollection' &&
+      Array.isArray(geojson.features) &&
+      geojson.features.every((feature) => feature.properties && feature.properties.id)
+  );
 };
 </script>
 
@@ -129,9 +155,11 @@ const updateAreaFromJSON = (json) => {
       color="black"
       variant="tonal"
   >
-    Las areas deben estar en formato geoJSON, el JSON debe ser una featureCollection,
-    y cada feature interiormente debe tener una property id. Puedes generar las areas manualmente en <a href="https://geojson.io/" target="_blank">https://geojson.io/</a>
+    Las áreas deben estar en formato geoJSON. El JSON debe ser una FeatureCollection, y cada feature interiormente debe
+    tener una propiedad <strong>id</strong>. Puedes generar las áreas manualmente en <a href="https://geojson.io/"
+                                                                                        target="_blank">https://geojson.io/</a>.
   </v-alert>
+  <br/>
   <v-card>
     <v-tabs v-model="tab" bg-color="black">
       <v-tab value="map">Mapa</v-tab>
@@ -153,7 +181,9 @@ const updateAreaFromJSON = (json) => {
                 v-model="areaJSON"
                 rows="20"
                 @input="updateAreaFromJSON($event.target.value)"
+                :error="error !== ''"
             />
+            <p v-if="error" class="error-message">{{ error }}</p>
           </v-container>
         </v-tabs-window-item>
       </v-tabs-window>
@@ -162,6 +192,11 @@ const updateAreaFromJSON = (json) => {
 </template>
 
 <style scoped>
+#error {
+  color: red;
+  font-weight: bold;
+}
+
 #map {
   height: 400px;
   width: 100%;

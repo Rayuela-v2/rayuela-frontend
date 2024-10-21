@@ -50,14 +50,10 @@
             <v-text-field
                 v-model="taskForm.name"
                 label="Nombre de la tarea"
-                :rules="[v => !!v || 'Este campo es obligatorio']"
-                required
             />
             <v-text-field
                 v-model="taskForm.description"
                 label="Descripción de la tarea"
-                :rules="[v => !!v || 'Este campo es obligatorio']"
-                required
             />
             <v-select
                 v-model="taskForm.type"
@@ -165,7 +161,7 @@ const editTask = (task) => {
 };
 
 const isValidForm = () => {
-  return taskForm.value.name && taskForm.value.projectId && taskForm.value.timeIntervalId && taskForm.value.areaId && taskForm.value.type;
+  return taskForm.value.timeIntervalId && taskForm.value.areaId && taskForm.value.type;
 }
 const saveTask = () => {
   if (isValidForm()) {
@@ -205,6 +201,21 @@ const generateTasks = () => {
   });
   toast.success('Tareas generadas automáticamente');
 };
+
+const duplicateTask = (task) => {
+  const newTask = { ...task, name: `${task.name} (Duplicado)` };
+  tasks.value.push(newTask);
+  toast.success(`Tarea duplicada: ${newTask.name}`);
+};
+
+const deleteTask = (task) => {
+  const index = tasks.value.indexOf(task);
+  if (index > -1) {
+    tasks.value.splice(index, 1);
+    toast.info('Tarea eliminada');
+  }
+};
+
 
 const saveAllTasks = async () => {
   try {
