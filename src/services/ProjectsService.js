@@ -1,14 +1,13 @@
 import RayuelaService from "@/services/RayuelaService";
 
 class ProjectsService extends RayuelaService {
-    getProjects() {
-        return this.get(`/projects/`)
-            .then((response) => response.data);
+    async getProjects() {
+        return this.get(`/volunteer/projects/`)
     }
 
     async getDiffProjects() {
         return this.get(`/projects/`)
-            .then(data => data)
+            .then(response => response.data)
     }
 
     async toggleAvailability(projectId) {
@@ -31,8 +30,11 @@ class ProjectsService extends RayuelaService {
     }
 
     async updateProject(project) {
-        console.warn(project)
         return this.patch(`/projects/${project._id}`, project);
+    }
+
+    async subscribe(projectId) {
+        return this.post('/volunteer/subscription/' + projectId);
     }
 }
 

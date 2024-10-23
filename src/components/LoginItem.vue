@@ -18,16 +18,12 @@ onMounted( () =>{
 
 async function login() {
   const user = {"username": username.value, "password": password.value}
-  authService.loginWithPw(user)
+  AuthService.loginWithPw(user)
       .then( () => {
         AuthService.getUser()
-            .then(() => {
-              AuthService.getUser().then(userResponse => {
-                if (userResponse.role === 'Admin') {
-                  router.push("/admin");
-                  location.reload();
-                }
-              })
+            .then( () => {
+                router.push("/dashboard");
+                location.reload();
             })
             .catch(error => {
               console.log(error)
