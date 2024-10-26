@@ -33,7 +33,7 @@ class ProjectsService extends RayuelaService {
         return this.patch(`/projects/${project._id}`, project);
     }
 
-    async subscribe(projectId) {
+    async toggleSubscription(projectId) {
         return this.post('/volunteer/subscription/' + projectId);
     }
 }

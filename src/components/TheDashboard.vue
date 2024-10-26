@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import ProjectsService from "@/services/ProjectsService";
+import {toast} from "vue3-toastify";
 
 const projects_user = ref([]);
 
@@ -17,6 +18,13 @@ const headers = [
   { text: 'Web', value: 'web' },
   { text: 'Actions', value: 'actions', sortable: false },
 ];
+
+function subscribe(project) {
+  ProjectsService.toggleSubscription(project._id)
+      .then(() => toast.success("Inscripcion exitosa"))
+      .then( async () => projects_user.value = await ProjectsService.getProjects())
+      .catch(() => toast.error('Hubo un error al inscribirse'));
+}
 </script>
 
 <template>
@@ -39,20 +47,11 @@ const headers = [
       </template>
       <!-- Columna personalizada para acciones (ejemplo de un botón de ver más) -->
       <template v-slot:item.actions="{ item }">
-        <v-btn color="primary" @click="subscribe(item)">Inscribirse</v-btn>
+        <v-btn color="primary" @click="subscribe(item)">{{ item.subscribed ? 'Darse de baja': 'Inscribirse' }}</v-btn>
       </template>
     </v-data-table>
   </div>
 </template>
-
-<script>
-import ProjectsService from "@/services/ProjectsService";
-import {toast} from "vue3-toastify";
-
-function subscribe(project) {
-  ProjectsService.subscribe(project._id).then(response => toast.success("Inscripcion exitosa")).catch( err => toast.error('Hubo un error al inscribirse'));
-}
-</script>
 
 <style>
 .container {
