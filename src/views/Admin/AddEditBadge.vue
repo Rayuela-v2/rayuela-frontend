@@ -54,6 +54,7 @@ import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import BadgesService from '@/services/BadgesService';
 import { toast } from 'vue3-toastify';
+import ProjectsService from "@/services/ProjectsService";
 
 const route = useRoute();
 const router = useRouter();
@@ -74,10 +75,10 @@ const defaultBadge = {
 
 const badge = ref({ ...defaultBadge });
 
-const badgeOptions = ['Badge1', 'Badge2', 'Badge3'];
-const taskTypeOptions = ['Cualquiera', 'Sacar fotos con cámara', 'Sacar fotos con celular'];
-const areaOptions = ['Cualquiera', 'Área 1', 'Área 2', 'Área 3'];
-const intervalOptions = ['Cualquiera', 'A la mañana', 'A la tarde'];
+const badgeOptions = ref([]);
+const taskTypeOptions = ref([]);
+const areaOptions = ref([]);
+const intervalOptions = ref([]);
 
 const saveBadge = async () => {
   try {
@@ -88,7 +89,7 @@ const saveBadge = async () => {
       await BadgesService.updateBadge(badge.value);
       toast.success('Insignia actualizada exitosamente');
     }
-    router.push(`/admin`);
+    router.push(`/admin/project/${route.params.projectId}/gamification`);
   } catch (error) {
     console.error("Error al guardar la insignia:", error);
     toast.error('Error al guardar la insignia');
@@ -103,8 +104,13 @@ onMounted(async () => {
   } else {
     isNew.value = false;
     try {
+      const project = await ProjectsService.getProjectById(route.params.projectId)
       const loadedBadge = await BadgesService.getBadgeById(badgeId);
       badge.value = { ...defaultBadge, ...loadedBadge };
+      taskTypeOptions.value = project.taskTypes.concat(["Cualquiera"]);
+      areaOptions.value = project.areas.features.map(feature => feature.properties.id).concat(["Cualquiera"]);
+      intervalOptions.value = project.timeIntervals.map(ti => ti.name).concat(["Cualquiera"]);
+      badgeOptions.value = project.possibleBadges.filter(b => b._id !== loadedBadge._id).map(b => b.name)
     } catch (error) {
       console.error("Error al cargar la insignia:", error);
       toast.error('Error al cargar la insignia');
