@@ -6,7 +6,7 @@ import { toast } from "vue3-toastify";
 
 const projects = ref([]);
 const headers = ref([
-  { title: 'Nombre del proyecto', value: 'name', sortable: true},
+  { title: 'Nombre del proyecto', value: 'name', sortable: true },
   { title: 'Acciones', value: 'actions', sortable: false }
 ]);
 
@@ -20,26 +20,28 @@ onMounted(async () => {
 });
 
 const editProject = (project) => {
-  router.push(`/admin/project/${project._id}`);
+  router.push(`/admin/project/${project._id}/data`);
+};
+
+const editGamification = (project) => {
+  router.push(`/admin/project/${project._id}/gamification`);
 };
 
 const addProject = async () => {
   const newP = await ProjectsService.createProject({
-    "name": "Nuevo proyecto",
-    "description": "Descripcion del proyecto",
-    "image": "https://example.com/image.jpg",
-    "web": "https://example.com",
-    "available": true,
-    "areas": {
-      "type": "FeatureCollection",
-      "features": [
+    name: "Nuevo proyecto",
+    description: "Descripcion del proyecto",
+    image: "https://example.com/image.jpg",
+    web: "https://example.com",
+    available: true,
+    areas: {
+      type: "FeatureCollection",
+      features: [
         {
-          "type": "Feature",
-          "properties": {
-            "id": 1
-          },
-          "geometry": {
-            "coordinates": [
+          type: "Feature",
+          properties: { id: 1 },
+          geometry: {
+            coordinates: [
               [
                 [
                   -69.72427193222924,
@@ -63,14 +65,14 @@ const addProject = async () => {
                 ]
               ]
             ],
-            "type": "Polygon"
+            type: "Polygon"
           }
         }
       ]
     },
-    "ownerId": localStorage.getItem("user_id")
+    ownerId: localStorage.getItem("user_id")
   });
-  router.push(`/admin/project/${newP._id}`);
+  router.push(`/admin/project/${newP._id}/data`);
 };
 
 const confirmDisable = (project) => {
@@ -79,7 +81,7 @@ const confirmDisable = (project) => {
 };
 
 const disableProject = async () => {
-  selectedProject.value.available = false;
+  selectedProject.value.available = !selectedProject.value.available;
   await ProjectsService.toggleAvailability(selectedProject.value._id)
       .then(async () => {
         toast.success('Proyecto actualizado :)');
@@ -100,17 +102,26 @@ const disableProject = async () => {
           :headers="headers"
           :items="projects"
           class="elevation-1"
-          item-class="getRowClass"
       >
         <template v-slot:item.actions="{ item }">
-          <div style="display: flex">
-            <v-btn icon variant="text" @click="editProject(item)">
-              <v-icon>mdi-pencil</v-icon>
-            </v-btn>
-            <v-btn variant="text" size="xxs" :color="item.available ? 'orange': 'green'" @click="confirmDisable(item)">
-              {{item.available ? "Esconder": "Mostrar"}}
-            </v-btn>
-          </div>
+          <v-menu offset-y>
+            <template #activator="{ props }">
+              <v-btn variant="flat" v-bind="props" icon>
+                <v-icon>mdi-dots-vertical</v-icon>
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item @click="editProject(item)">
+                <v-list-item-title>Editar datos</v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="editGamification(item)">
+                <v-list-item-title>Editar ludificación</v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="confirmDisable(item)">
+                <v-list-item-title>{{ item.available ? "Esconder" : "Mostrar" }}</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
         </template>
       </v-data-table>
 
@@ -118,15 +129,21 @@ const disableProject = async () => {
         <v-card>
           <v-card-title class="headline">¿Estás seguro?</v-card-title>
           <v-card-text>
-            ¿Estás seguro que quieres {{selectedProject.available ? "esconder": "mostrar"}} el proyecto <strong>{{ selectedProject?.name }}</strong>?
+            ¿Estás seguro que quieres {{ selectedProject?.available ? "esconder" : "mostrar" }} el proyecto <strong>{{ selectedProject?.name }}</strong>?
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn color="primary" text @click="dialogDisable = false">Cancelar</v-btn>
-            <v-btn color="warning" text @click="disableProject">{{selectedProject.available ? "esconder": "mostrar"}}</v-btn>
+            <v-btn color="warning" text @click="disableProject">{{ selectedProject?.available ? "Esconder" : "Mostrar" }}</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
     </v-container>
   </main>
 </template>
+
+<style scoped>
+.component-container {
+  display: inline-block;
+}
+</style>

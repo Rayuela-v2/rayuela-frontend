@@ -198,7 +198,7 @@ const removeTaskType = (index) => {
 };
 
 onMounted(async () => {
-  const projectId = route.params.id;
+  const projectId = route.params.projectId;
 
   if (projectId === 'new') {
     isNew.value = true;
@@ -206,7 +206,7 @@ onMounted(async () => {
       _id: '',
       name: '',
       description: '',
-      image: '',
+      imageUrl: '',
       web: '',
       available: false,
       areas: [],

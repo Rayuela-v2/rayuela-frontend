@@ -39,17 +39,29 @@ const router = createRouter({
       component: () => import('../views/Admin/AdminView.vue')
     },
     {
-      path: '/admin/project/:id',
+      path: '/admin/project/:projectId/data',
       name: 'ProjectDetails',
       component: () => import('../views/Admin/ProjectDetails.vue'),
       props: true
     },
     {
-      path: '/admin/project/:id/tasks',
+      path: '/admin/project/:projectId/tasks',
       name: 'TaskManager',
       component: () => import('../views/Admin/TaskManager.vue'),
       props: true
     },
+    {
+      path: '/admin/project/:projectId/gamification/',
+      name: 'GamificationConfig',
+      component: () => import('../views/Admin/GamificationConfig.vue'),
+      props: true
+    },
+    {
+      path: '/admin/project/:projectId/gamification/badge/:id',
+      name: 'BadgeConfig',
+      component: () => import('../views/Admin/AddEditBadge.vue'),
+      props: true
+    }
   ]
 })
 

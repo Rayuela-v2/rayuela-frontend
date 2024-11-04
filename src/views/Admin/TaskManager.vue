@@ -98,7 +98,7 @@ import {ref, onMounted} from 'vue';
 import {useRoute} from 'vue-router';
 
 const route = useRoute();
-const projectId = route.params.id;
+const projectId = route.params.projectId;
 import {toast} from 'vue3-toastify';
 import ProjectsService from "@/services/ProjectsService";
 import TaskService from "@/services/TaskService";
