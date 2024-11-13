@@ -10,6 +10,10 @@
         <v-textarea label="Descripción de la Insignia" v-model="badge.description" required />
         <v-text-field label="URL de la imagen" v-model="badge.imageUrl" />
         <v-text-field label="Cantidad de Check-ins" v-model.number="badge.checkinsAmount" type="number" min="1" required />
+        <v-checkbox
+            label="Los checkins deben ser contribuciones"
+            v-model="badge.mustContribute"
+        />
 
         <v-select
             label="Insignias Anteriores"
@@ -53,13 +57,12 @@
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import BadgesService from '@/services/BadgesService';
-import { toast } from 'vue3-toastify';
+import {toast} from 'vue3-toastify';
 import ProjectsService from "@/services/ProjectsService";
 
 const route = useRoute();
 const router = useRouter();
 const isNew = ref(false);
-
 
 const defaultBadge = {
   projectId: route.params.projectId,
@@ -70,10 +73,11 @@ const defaultBadge = {
   previousBadges: [],
   taskType: 'Cualquiera',
   areaId: 'Cualquiera',
-  timeIntervalId: 'Cualquiera'
+  timeIntervalId: 'Cualquiera',
+  mustContribute: false  // Inicialización del campo mustContribute
 };
 
-const badge = ref({ ...defaultBadge });
+const badge = ref({...defaultBadge});
 
 const badgeOptions = ref([]);
 const taskTypeOptions = ref([]);
@@ -98,19 +102,19 @@ const saveBadge = async () => {
 
 onMounted(async () => {
   const badgeId = route.params.id;
+  const project = await ProjectsService.getProjectById(route.params.projectId);
+  taskTypeOptions.value = project.taskTypes.concat(["Cualquiera"]);
+  areaOptions.value = project.areas.features.map(feature => feature.properties.id).concat(["Cualquiera"]);
+  intervalOptions.value = project.timeIntervals.map(ti => ti.name).concat(["Cualquiera"]);
   if (badgeId === 'new') {
     isNew.value = true;
-    badge.value = { ...defaultBadge };
+    badge.value = {...defaultBadge};
   } else {
     isNew.value = false;
     try {
-      const project = await ProjectsService.getProjectById(route.params.projectId)
       const loadedBadge = await BadgesService.getBadgeById(badgeId);
-      badge.value = { ...defaultBadge, ...loadedBadge };
-      taskTypeOptions.value = project.taskTypes.concat(["Cualquiera"]);
-      areaOptions.value = project.areas.features.map(feature => feature.properties.id).concat(["Cualquiera"]);
-      intervalOptions.value = project.timeIntervals.map(ti => ti.name).concat(["Cualquiera"]);
-      badgeOptions.value = project.possibleBadges.filter(b => b._id !== loadedBadge._id).map(b => b.name)
+      badge.value = {...defaultBadge, ...loadedBadge};
+      badgeOptions.value = project.possibleBadges.filter(b => b._id !== loadedBadge._id).map(b => b.name);
     } catch (error) {
       console.error("Error al cargar la insignia:", error);
       toast.error('Error al cargar la insignia');
