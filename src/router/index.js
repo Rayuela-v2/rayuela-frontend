@@ -61,8 +61,15 @@ const router = createRouter({
       name: 'BadgeConfig',
       component: () => import('../views/Admin/AddEditBadge.vue'),
       props: true
+    },
+    {
+      path: '/admin/project/:projectId/gamification/score-rule/:id',
+      name: 'ScoreRuleConfig',
+      component: () => import('../views/Admin/AddEditScoreRule.vue'),
+      props: true
     }
   ]
 })
+
 
 export default router

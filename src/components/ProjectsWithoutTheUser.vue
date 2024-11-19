@@ -10,7 +10,7 @@ const errors = []
 
 onMounted(async () => {
   try {
-    const response = await ProjectsService.getDiffProjects();
+    const response = []//await ProjectsService.getDiffProjects();
     projects.value = response.slice(0, 3)
   } catch (e) {
     errors.push(e)

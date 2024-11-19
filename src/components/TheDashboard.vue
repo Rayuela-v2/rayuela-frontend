@@ -8,7 +8,6 @@ const projects_user = ref([]);
 // Cargar los proyectos cuando se monta el componente
 onMounted(async () => {
   projects_user.value = await ProjectsService.getProjects();
-  console.log(projects_user.value);
 });
 
 // Definir los encabezados de la tabla

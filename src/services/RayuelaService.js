@@ -23,6 +23,17 @@ export default class RayuelaService {
             })
     }
 
+    delete(url) {
+        return axios.delete(this.baseUrl + url, this.getHeaders())
+            .then( res => {
+                if(res.status === 401) {
+                    localStorage.clear();
+                    router.push("/login")
+                }
+                return res.data;
+            })
+    }
+
     patch(url, body) {
         return axios.patch(this.baseUrl + url, body, this.getHeaders())
             .then( res => {

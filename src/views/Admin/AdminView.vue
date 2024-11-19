@@ -1,13 +1,14 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import {onMounted, ref} from "vue";
 import ProjectsService from "@/services/ProjectsService";
-import { useRouter } from "vue-router";
-import { toast } from "vue3-toastify";
+import {useRouter} from "vue-router";
+import {toast} from "vue3-toastify";
+import {store} from "@/vuex/state";
 
 const projects = ref([]);
 const headers = ref([
-  { title: 'Nombre del proyecto', value: 'name', sortable: true },
-  { title: 'Acciones', value: 'actions', sortable: false }
+  {title: 'Nombre del proyecto', value: 'name', sortable: true},
+  {title: 'Acciones', value: 'actions', sortable: false}
 ]);
 
 const selectedProject = ref(null);
@@ -16,6 +17,8 @@ const dialogDisable = ref(false);
 const router = useRouter();
 
 onMounted(async () => {
+  store.commit('setProject', null)
+  store.commit('setCurrentGamification', null)
   projects.value = await ProjectsService.getAdminProjects();
 });
 
@@ -24,6 +27,7 @@ const editProject = (project) => {
 };
 
 const editGamification = (project) => {
+  store.commit("setProject", project)
   router.push(`/admin/project/${project._id}/gamification`);
 };
 
@@ -39,7 +43,7 @@ const addProject = async () => {
       features: [
         {
           type: "Feature",
-          properties: { id: 1 },
+          properties: {id: 1},
           geometry: {
             coordinates: [
               [
@@ -129,12 +133,16 @@ const disableProject = async () => {
         <v-card>
           <v-card-title class="headline">¿Estás seguro?</v-card-title>
           <v-card-text>
-            ¿Estás seguro que quieres {{ selectedProject?.available ? "esconder" : "mostrar" }} el proyecto <strong>{{ selectedProject?.name }}</strong>?
+            ¿Estás seguro que quieres {{ selectedProject?.available ? "esconder" : "mostrar" }} el proyecto
+            <strong>{{ selectedProject?.name }}</strong>?
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn color="primary" text @click="dialogDisable = false">Cancelar</v-btn>
-            <v-btn color="warning" text @click="disableProject">{{ selectedProject?.available ? "Esconder" : "Mostrar" }}</v-btn>
+            <v-btn color="warning" text @click="disableProject">{{
+                selectedProject?.available ? "Esconder" : "Mostrar"
+              }}
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
