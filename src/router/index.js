@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-import ProjectDetails from "@/views/Admin/ProjectDetails.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -34,9 +33,9 @@ const router = createRouter({
       component: () => import('../views/DashboardView.vue')
     },
     {
-      path: '/admin',
-      name: 'admin',
-      component: () => import('../views/Admin/AdminView.vue')
+      path: '/leaderboard',
+      name: 'leaderboard',
+      component: () => import('../views/Leaderboard.vue')
     },
     {
       path: '/admin/project/:projectId/data',
@@ -67,7 +66,12 @@ const router = createRouter({
       name: 'ScoreRuleConfig',
       component: () => import('../views/Admin/AddEditScoreRule.vue'),
       props: true
-    }
+    },
+    {
+      path: '/admin',
+      name: 'admin',
+      component: () => import('../views/Admin/AdminView.vue')
+    },
   ]
 })
 

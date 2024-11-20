@@ -1,6 +1,5 @@
 <script setup>
 import Dashboard from '../components/TheDashboard.vue'
-import ProjectsWithoutTheUser from '../components/ProjectsWithoutTheUser.vue';
 import {onMounted} from "vue";
 import {useRouter} from "vue-router";
 
@@ -11,11 +10,15 @@ onMounted(() => {
     router.push('/admin');
   }
 })
+
+const goToLeaderboard = () => {
+  router.push('/leaderboard')
+}
 </script>
 
 <template>
   <main>
+    <v-btn @click="goToLeaderboard">Ver leaderboard</v-btn>
     <Dashboard />
-    <ProjectsWithoutTheUser />
   </main>
 </template>

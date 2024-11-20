@@ -34,7 +34,7 @@ function getUsernameInitial() {
   <nav class="navbar is-spaced is-light" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
       <a class="navbar-item">
-        <RouterLink to="/"><img src="@/assets/img/rayuela_logo.jpg" width="112" height="28"></RouterLink>
+        <RouterLink to="/"><img src="@/assets/img/logoRayuelaHorizontal.png" alt="log"></RouterLink>
       </a>
 
       <a role="button" class="navbar-burger" @click="showNav = !showNav" :class="{ 'is-active': showNav }" aria-label="menu" aria-expanded="false">

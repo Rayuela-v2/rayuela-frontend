@@ -2,7 +2,7 @@ import RayuelaService from "@/services/RayuelaService";
 
 class ProjectsService extends RayuelaService {
     async getProjects() {
-        if (localStorage.getItem('role' !== 'Admin')) {
+        if (localStorage.getItem('role')!== 'Admin') {
             return this.get(`/volunteer/projects/`)
         }
     }
