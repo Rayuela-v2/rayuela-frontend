@@ -7,7 +7,8 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView
+      component: HomeView,
+      exact: true,
     },
     {
       path: '/about',
@@ -70,10 +71,14 @@ const router = createRouter({
     {
       path: '/admin',
       name: 'admin',
-      component: () => import('../views/Admin/AdminView.vue')
+      component: () => import('../views/Admin/AdminView.vue'),
+      exact: true,
     },
   ]
 })
+router.afterEach((to, from) => {
+  console.log(`Navigated to: ${to.fullPath}`);
+});
 
 
 export default router

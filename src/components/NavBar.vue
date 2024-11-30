@@ -14,7 +14,6 @@ onMounted(async () => {
     token.value = true;
     username.value = localStorage.getItem("username");
     profile_image.value = localStorage.getItem("profile_image");
-    router.push({ path: '/dashboard' });
   }
 });
 

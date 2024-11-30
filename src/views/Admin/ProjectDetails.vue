@@ -1,5 +1,6 @@
 <template>
   <v-container>
+    <BreadCrumb items="projectDetailsPath" />
     <h1 class="mb-6">Detalle del proyecto</h1>
 
     <v-form @submit.prevent="saveProject">
@@ -138,6 +139,7 @@ import {toast} from 'vue3-toastify';
 import CollapsableSection from '@/components/utils/CollapsableSection.vue';
 import router from "@/router";
 import GeoMap from "@/views/Admin/GeoMap.vue";
+import BreadCrumb from "@/components/utils/BreadCrumb.vue";
 
 const route = useRoute();
 const project = ref({

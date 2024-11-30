@@ -5,6 +5,7 @@ import {useStore} from 'vuex';
 import {toast} from 'vue3-toastify';
 import GamificationService from "@/services/GamificationService";
 import router from "@/router";
+import BreadCrumb from "@/components/utils/BreadCrumb.vue";
 
 const store = useStore();
 const route = useRoute();
@@ -97,6 +98,7 @@ onMounted(() => {
 
 <template>
   <v-container>
+    <BreadCrumb items="badgePath"/>
     <h1 class="mb-6">{{ isNew ? 'Crear Insignia' : 'Editar Insignia' }}</h1>
 
     <v-form @submit.prevent="saveBadge">

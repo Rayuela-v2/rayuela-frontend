@@ -5,6 +5,7 @@ import {useRoute, useRouter} from "vue-router";
 import {toast} from "vue3-toastify";
 import {store} from "@/vuex/state";
 import GamificationService from "@/services/GamificationService";
+import BreadCrumb from "@/components/utils/BreadCrumb.vue";
 
 const badges = ref([]);
 const scoreRules = ref([]);
@@ -87,6 +88,7 @@ const deleteScoreRule = async () => {
 <template>
   <main>
     <!-- Sección de Insignias -->
+    <BreadCrumb items="gamificationPath" />
     <h1>Insignias</h1>
     <div style="display: flex; justify-content: flex-end;">
       <v-btn color="black" @click="addBadge">Agregar Insignia</v-btn>

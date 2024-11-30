@@ -1,12 +1,13 @@
 <template>
   <v-container>
+    <BreadCrumb :items="'pointRulesPaths'" />
     <h1 class="mb-6">{{ isNew ? 'Crear Regla de Puntaje' : 'Editar Regla de Puntaje' }}</h1>
 
     <v-form @submit.prevent="saveScoreRule">
       <!-- Información de la Regla de Puntaje -->
       <v-card class="pa-4 mb-6">
         <h2>Información de la Regla</h2>
-        <v-text-field label="Puntaje" v-model.number="scoreRule.score" type="number" min="1" required />
+        <v-text-field label="Puntaje" v-model.number="scoreRule.score" type="number" required/>
 
         <v-select
             label="Tipo de Tarea"
@@ -44,12 +45,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { toast } from 'vue3-toastify';
-import ProjectsService from "@/services/ProjectsService";
+import {ref, onMounted} from 'vue';
+import {toast} from 'vue3-toastify';
 import GamificationService from "@/services/GamificationService";
 import {useRoute, useRouter} from "vue-router";
 import {store} from "@/vuex/state";
+import BreadCrumb from "@/components/utils/BreadCrumb.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -64,7 +65,7 @@ const defaultScoreRule = {
   mustContribute: false,
 };
 
-const scoreRule = ref({ ...defaultScoreRule });
+const scoreRule = ref({...defaultScoreRule});
 
 const taskTypeOptions = ref([]);
 const areaOptions = ref([]);
