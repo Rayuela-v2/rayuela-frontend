@@ -28,6 +28,11 @@
             :items="intervalOptions"
             required
         />
+
+        <v-checkbox
+            label="Debe Contribuir"
+            v-model="scoreRule.mustContribute"
+        />
       </v-card>
 
       <!-- Botón de guardar -->
@@ -56,6 +61,7 @@ const defaultScoreRule = {
   taskType: 'Cualquiera',
   areaId: 'Cualquiera',
   timeIntervalId: 'Cualquiera',
+  mustContribute: false,
 };
 
 const scoreRule = ref({ ...defaultScoreRule });
@@ -89,12 +95,12 @@ onMounted(async () => {
 
   if (ruleId === 'new') {
     isNew.value = true;
-    scoreRule.value = { ...defaultScoreRule };
+    scoreRule.value = {...defaultScoreRule};
   } else {
     isNew.value = false;
     try {
       const stateRule = store.state.currentScoreRule;
-      scoreRule.value = { ...defaultScoreRule, ...stateRule };
+      scoreRule.value = {...defaultScoreRule, ...stateRule};
     } catch (error) {
       console.error("Error al cargar la regla de puntaje:", error);
       toast.error('Error al cargar la regla de puntaje');
