@@ -20,11 +20,11 @@
         {{ index + 1 }}
       </template>
 
-      <template #item.actions="{ item }">
+      <template #item.actions="{ item, index }">
         <v-btn icon variant="text" @click="editTask(item)">
           <v-icon>mdi-pencil</v-icon>
         </v-btn>
-        <v-btn icon variant="text" @click="duplicateTask(item)">
+        <v-btn icon variant="text" @click="duplicateTask(item, index)">
           <v-icon>mdi-content-duplicate</v-icon>
         </v-btn>
         <v-btn icon variant="text" @click="deleteTask(item)">
@@ -203,9 +203,9 @@ const generateTasks = () => {
   toast.success('Tareas generadas automáticamente');
 };
 
-const duplicateTask = (task) => {
-  const newTask = {...task, name: `${task.name} (Duplicado)`};
-  tasks.value.push(newTask);
+const duplicateTask = (task, i) => {
+  const newTask = {...task, name: `${task.name} (Duplicado)`, _id: null};
+  tasks.value.splice(i,0,newTask);
   toast.success(`Tarea duplicada: ${newTask.name}`);
 };
 
