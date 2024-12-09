@@ -13,7 +13,8 @@ const props = defineProps({
   area: {
     type: Object,
     required: true
-  }
+  },
+  visualization: Boolean
 });
 
 const area = ref(props.area);
@@ -47,48 +48,57 @@ const createAreaStyle = (feature) => {
 
 const initializeMap = () => {
   if (!map.value && tab.value === 'map') {
-    const features = new GeoJSON().readFeatures(area.value, {
-      featureProjection: 'EPSG:3857'
-    });
+    try {
+      if (!isValidGeoJSON(area.value)) {
+        throw new Error('GeoJSON inválido');
+      }
 
-    features.forEach((feature) => {
-      feature.setId(`A${feature.getProperties().id}`);
-      feature.setStyle(createAreaStyle(feature));
-    });
+      const features = new GeoJSON().readFeatures(area.value, {
+        featureProjection: 'EPSG:3857'
+      });
 
-    const vectorSource = new VectorSource({
-      features: features
-    });
+      features.forEach((feature) => {
+        feature.setId(`A${feature.getProperties().id}`);
+        feature.setStyle(createAreaStyle(feature));
+      });
 
-    const vectorLayer = new VectorLayer({
-      source: vectorSource
-    });
+      const vectorSource = new VectorSource({
+        features: features
+      });
 
-    map.value = new Map({
-      target: 'map',
-      layers: [
-        new TileLayer({
-          source: new OSM()
-        }),
-        vectorLayer
-      ],
-      view: new View({
-        center: fromLonLat([0, 0]),
-        zoom: 2
-      })
-    });
+      const vectorLayer = new VectorLayer({
+        source: vectorSource
+      });
 
-    const extent = vectorSource.getExtent();
-    map.value.getView().fit(extent, {padding: [20, 20, 20, 20], maxZoom: 18});
+      map.value = new Map({
+        target: 'map',
+        layers: [
+          new TileLayer({
+            source: new OSM()
+          }),
+          vectorLayer
+        ],
+        view: new View({
+          center: fromLonLat([0, 0]),
+          zoom: 2
+        })
+      });
+
+      const extent = vectorSource.getExtent();
+      map.value.getView().fit(extent, {padding: [20, 20, 20, 20], maxZoom: 18});
+    } catch (error) {
+      console.error('Error inicializando el mapa:', error.message);
+      toast.error(error.message);
+    }
   }
 };
-
 onMounted(() => {
-  initializeMap();
+   initializeMap();
 });
 
 watch(area, (newArea) => {
   areaJSON.value = JSON.stringify(newArea, null, 2);
+  //initializeMap()
   if (map.value) {
     const features = new GeoJSON().readFeatures(newArea, {
       featureProjection: 'EPSG:3857'
@@ -130,13 +140,13 @@ const updateAreaFromJSON = (json) => {
 
 const isValidGeoJSON = (geojson) => {
   // Verifica si el objeto tiene las propiedades esperadas de un GeoJSON
-  if(geojson.type !== 'FeatureCollection') {
+  if (geojson.type !== 'FeatureCollection') {
     toast.warning("El campo type del geoJSON debe ser FeatureCollection");
   }
-  if(!Array.isArray(geojson.features)) {
+  if (!Array.isArray(geojson.features)) {
     toast.warning("El campo features del geoJSON debe ser un array");
   }
-  if(!geojson.features.every((feature) => feature.properties && feature.properties.id)) {
+  if (!geojson.features.every((feature) => feature.properties && feature.properties.id)) {
     toast.warning("Algun campo feature del geoJSON no tiene id");
   }
 
@@ -154,6 +164,7 @@ const isValidGeoJSON = (geojson) => {
       type="info"
       color="black"
       variant="tonal"
+      v-if="!visualization"
   >
     Las áreas deben estar en formato geoJSON. El JSON debe ser una FeatureCollection, y cada feature interiormente debe
     tener una propiedad <strong>id</strong>. Puedes generar las áreas manualmente en <a href="https://geojson.io/"
@@ -163,7 +174,7 @@ const isValidGeoJSON = (geojson) => {
   <v-card>
     <v-tabs v-model="tab" bg-color="black">
       <v-tab value="map">Mapa</v-tab>
-      <v-tab value="mapJSON">GeoJSON</v-tab>
+      <v-tab value="mapJSON" v-if="!visualization">GeoJSON</v-tab>
     </v-tabs>
 
     <v-card-text>

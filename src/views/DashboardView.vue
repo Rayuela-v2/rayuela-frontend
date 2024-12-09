@@ -10,15 +10,10 @@ onMounted(() => {
     router.push('/admin');
   }
 })
-
-const goToLeaderboard = () => {
-  router.push('/leaderboard')
-}
 </script>
 
 <template>
   <main>
-    <v-btn @click="goToLeaderboard">Ver leaderboard</v-btn>
     <Dashboard />
   </main>
 </template>

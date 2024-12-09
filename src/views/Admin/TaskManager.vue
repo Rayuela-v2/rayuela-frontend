@@ -1,5 +1,6 @@
 <template>
   <v-container>
+    <BreadCrumb items="taskManagerPath" />
     <h1 class="mb-6">Gestión de Tareas</h1>
     <div style="display: flex; margin: 1em 0; justify-content: space-between;">
       <v-btn color="secondary" @click="generateTasks" :disabled="tasks.length !== 0" class="mt-4">
@@ -103,6 +104,7 @@ import {toast} from 'vue3-toastify';
 import ProjectsService from "@/services/ProjectsService";
 import TaskService from "@/services/TaskService";
 import router from "@/router";
+import BreadCrumb from "@/components/utils/BreadCrumb.vue";
 
 const tasks = ref([]);
 const project = ref(null);

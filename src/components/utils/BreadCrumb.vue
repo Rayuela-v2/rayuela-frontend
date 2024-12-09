@@ -1,5 +1,5 @@
 <template>
-  <v-breadcrumbs density="compact" :items="rules[props.items]">
+  <v-breadcrumbs density="compact" :items="addDisabledToLast(rules[props.items])">
     <template v-slot:divider>
       <v-icon icon="mdi-chevron-right"></v-icon>
     </template>
@@ -11,6 +11,13 @@ import { useRoute } from 'vue-router';
 
 const route = useRoute();
 
+function addDisabledToLast(arr) {
+  if (Array.isArray(arr) && arr.length > 0) {
+    arr[arr.length - 1].disabled = true;
+  }
+  return arr;
+}
+
 const admin = {
   title: 'Administracion',
   href: '/admin',
@@ -18,23 +25,25 @@ const admin = {
 
 const gamification = {
   title: 'Ludificacion',
-  disabled: false,
   href: `/admin/project/${route.params.projectId}/gamification`,
 };
 
 const pointRule = {
   title: 'Regla de puntaje',
-  disabled: true,
 };
 
 const badgeRule = {
   title: 'Insignia',
-  disabled: true,
 };
 
 const projectDetails = {
   title: 'Datos del proyecto',
-  disabled: true,
+  href: `/admin/project/${route.params.projectId}/data`,
+};
+
+const taskManager = {
+  title: 'Gestión de tareas',
+  href: `/admin/project/${route.params.projectId}/data`,
 };
 
 const pointRulesPaths = [
@@ -53,8 +62,16 @@ const projectDetailsPath = [
     admin, projectDetails,
 ];
 
+const taskManagerPath = [
+    admin, projectDetails, taskManager
+];
+
 const rules = {
-  pointRulesPaths, badgePath, gamificationPath, projectDetailsPath
+  pointRulesPaths,
+  badgePath,
+  gamificationPath,
+  projectDetailsPath,
+  taskManagerPath,
 }
 
 const props = defineProps({

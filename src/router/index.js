@@ -34,6 +34,11 @@ const router = createRouter({
       component: () => import('../views/DashboardView.vue')
     },
     {
+      path: '/project/:projectId/view',
+      name: 'ProjectView',
+      component: () => import('../views/ProjectView.vue')
+    },
+    {
       path: '/leaderboard',
       name: 'leaderboard',
       component: () => import('../views/Leaderboard.vue')
@@ -76,9 +81,6 @@ const router = createRouter({
     },
   ]
 })
-router.afterEach((to, from) => {
-  console.log(`Navigated to: ${to.fullPath}`);
-});
 
 
 export default router
