@@ -1,4 +1,15 @@
 <template>
+  <v-container v-if="project.userIsSubscribed">
+    <h1 class="mb-6">Mi actividad</h1>
+
+    <div class="pa-4 mb-6 badges-container">
+      <div v-for="(badge, index) in badges" :key="index" class="badge-item">
+        <img :src="badge.image" alt="Imagen de la insignia"/>
+        <h6>{{ badge.name }}</h6>
+      </div>
+    </div>
+
+  </v-container>
   <v-container>
     <h1 class="mb-6">Detalle del Proyecto</h1>
 
@@ -14,24 +25,12 @@
           <v-btn :href="project.web" target="_blank" color="primary" class="mb-2">
             Visitar Sitio Web
           </v-btn>
-          <v-switch label="Disponible" v-model="project.available" color="green" disabled/>
         </v-col>
       </v-row>
     </v-card>
 
     <!-- Áreas del Proyecto -->
-    <GeoMap :visualization="true" v-if="project.areas" :area="project.areas"/>
-
-  </v-container>
-  <v-container>
-    <h1 class="mb-6">Mi actividad</h1>
-
-    <div class="pa-4 mb-6 badges-container">
-      <div v-for="(badge, index) in badges" :key="index" class="badge-item">
-        <img :src="badge.image" alt="Imagen de la insignia"/>
-        <h6>{{ badge.name }}</h6>
-      </div>
-    </div>
+    <GeoMap :visualization="true" v-if="project.areas && tasks.length" :tasks="tasks" :area="project.areas" />
 
   </v-container>
 </template>
@@ -41,6 +40,7 @@ import {ref, onMounted} from 'vue';
 import {useRoute} from 'vue-router';
 import GeoMap from '@/views/Admin/GeoMap.vue';
 import ProjectsService from "@/services/ProjectsService";
+import TaskService from "@/services/TaskService";
 
 const badges = [
   {
@@ -60,6 +60,7 @@ const badges = [
   },
 ]
 const route = useRoute();
+const tasks = ref([])
 const project = ref({
   name: '',
   description: '',
@@ -72,6 +73,7 @@ const project = ref({
 
 onMounted(async () => {
   project.value = await ProjectsService.getProjectById(route.params.projectId);
+  tasks.value = await TaskService.getTaskForProject(route.params.projectId);
 });
 </script>
 

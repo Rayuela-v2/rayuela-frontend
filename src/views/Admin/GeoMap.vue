@@ -1,7 +1,7 @@
 <script setup>
 import {onMounted, ref, watch} from 'vue';
 import 'ol/ol.css';
-import {Map, View} from 'ol';
+import {Map, Overlay, View} from 'ol';
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer';
 import {OSM, Vector as VectorSource} from 'ol/source';
 import GeoJSON from 'ol/format/GeoJSON';
@@ -14,6 +14,9 @@ const props = defineProps({
     type: Object,
     required: true
   },
+  tasks: {
+    type: Array,
+  },
   visualization: Boolean
 });
 
@@ -21,20 +24,20 @@ const area = ref(props.area);
 const tab = ref('map');
 const map = ref(null);
 const areaJSON = ref(JSON.stringify(area.value, null, 2));
-const error = ref(''); // Nueva variable para mostrar errores
+const error = ref('');
 
 const createAreaStyle = (feature) => {
   return new Style({
     stroke: new Stroke({
-      color: '#319FD3',
+      color: getTaskArrayFromFeature(feature).length > 0 ? '#319FD3' : 'lightgray',
       width: 2
     }),
     fill: new Fill({
-      color: 'rgba(0, 0, 255, 0.1)'
+      color: getTaskArrayFromFeature(feature).length > 0 ? 'rgba(0, 0, 255, 0.1)': 'rgba(0, 0, 255, 0.06)',
     }),
     text: new Text({
       font: '12px Calibri,sans-serif',
-      text: feature.getId(),
+      text: `A${feature.getId()}`,
       fill: new Fill({
         color: '#000'
       }),
@@ -46,6 +49,53 @@ const createAreaStyle = (feature) => {
   });
 };
 
+function getTaskArrayFromFeature(feature) {
+  return props.tasks.filter(task => task.areaId === feature.getId());
+}
+
+function tasksForFeature(feature) {
+  const ts = getTaskArrayFromFeature(feature);
+  if (ts.length === 0) return "No hay tareas en esta area";
+  return `<ol>
+  ${ts.map(task => `<li>-${task.type} ${task.timeIntervalId}
+                    </li>`)}
+<ol/>`;
+}
+
+const setTooltipContentToAreas = (map, vectorSource) => {
+  // Crear el elemento HTML para el tooltip
+  const tooltip = document.createElement('div');
+  tooltip.className = 'tooltip';
+  tooltip.style.position = 'absolute';
+  tooltip.style.backgroundColor = 'white';
+  tooltip.style.border = '1px solid black';
+  tooltip.style.padding = '5px';
+  tooltip.style.display = 'none';
+  tooltip.style.pointerEvents = 'none';
+
+  const overlay = new Overlay({
+    source: vectorSource,
+    element: tooltip,
+    offset: [10, 0], // Ajuste para que no esté justo bajo el cursor
+    positioning: 'bottom-left',
+  })
+  map.value.addOverlay(overlay);
+  map.value.on('pointermove', (event) => {
+    if (!overlay) {
+      console.error('El overlay no está definido');
+      return;
+    }
+    const feature = map.value.forEachFeatureAtPixel(event.pixel, (f) => f);
+    if (feature) {
+      tooltip.innerHTML = tasksForFeature(feature);
+      tooltip.style.display = 'block';
+      overlay.setPosition(event.coordinate);
+    } else {
+      tooltip.style.display = 'none';
+      overlay.setPosition(undefined);
+    }
+  });
+};
 const initializeMap = () => {
   if (!map.value && tab.value === 'map') {
     try {
@@ -58,7 +108,7 @@ const initializeMap = () => {
       });
 
       features.forEach((feature) => {
-        feature.setId(`A${feature.getProperties().id}`);
+        feature.setId(feature.getProperties().id);
         feature.setStyle(createAreaStyle(feature));
       });
 
@@ -83,7 +133,7 @@ const initializeMap = () => {
           zoom: 2
         })
       });
-
+      setTooltipContentToAreas(map, vectorSource);
       const extent = vectorSource.getExtent();
       map.value.getView().fit(extent, {padding: [20, 20, 20, 20], maxZoom: 18});
     } catch (error) {
@@ -93,7 +143,7 @@ const initializeMap = () => {
   }
 };
 onMounted(() => {
-   initializeMap();
+  initializeMap();
 });
 
 watch(area, (newArea) => {
@@ -182,6 +232,8 @@ const isValidGeoJSON = (geojson) => {
         <v-tabs-window-item value="map">
           <v-container>
             <div id="map" style="width: 100%; height: 400px;"></div>
+            <div id="tooltip"
+                 style="position: absolute; background: white; border: 1px solid black; padding: 5px; display: none; pointer-events: none; font-size: 12px;"></div>
           </v-container>
         </v-tabs-window-item>
 
