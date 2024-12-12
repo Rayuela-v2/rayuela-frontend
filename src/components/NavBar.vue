@@ -1,6 +1,7 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import { ref, onMounted } from 'vue';
+import UserPFP from "@/components/utils/UserPFP.vue";
 
 const showNav = ref(false);
 const langs = ['ES', 'EN', 'PT'];
@@ -22,10 +23,6 @@ function logout() {
   localStorage.setItem("msg_logout", "1");
   token.value = false;
   router.push({ path: '/' });
-}
-
-function getUsernameInitial() {
-  return username.value ? username.value.charAt(0).toUpperCase() : '';
 }
 </script>
 
@@ -60,9 +57,7 @@ function getUsernameInitial() {
           <div v-if="token" class="navbar-container">
             <div class="user-info">
               <span>{{ username }}</span>
-              <div class="profile-initial">
-                {{ getUsernameInitial() }}
-              </div>
+              <UserPFP :username="username" />
             </div>
             <button class="button is-danger" @click="logout()" value="logout">{{ $t("navBar.button_logout") }}</button>
           </div>
@@ -101,19 +96,6 @@ function getUsernameInitial() {
 
 .profile-pic img {
   border-radius: 50%;
-}
-
-.profile-initial {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #00c4cc;
-  color: white;
-  font-weight: bold;
-  border-radius: 50%;
-  font-size: 1rem;
 }
 
 @media (max-width: 768px) {

@@ -20,6 +20,8 @@ const props = defineProps({
   visualization: Boolean
 });
 
+const emit = defineEmits(['update-area']);
+
 const area = ref(props.area);
 const tab = ref('map');
 const map = ref(null);
@@ -50,7 +52,7 @@ const createAreaStyle = (feature) => {
 };
 
 function getTaskArrayFromFeature(feature) {
-  return props.tasks.filter(task => task.areaId === feature.getId());
+  return props.tasks  ? props.tasks.filter(task => task.areaId === feature.getId()): [""];
 }
 
 function tasksForFeature(feature) {
@@ -133,7 +135,7 @@ const initializeMap = () => {
           zoom: 2
         })
       });
-      setTooltipContentToAreas(map, vectorSource);
+      props.tasks && setTooltipContentToAreas(map, vectorSource);
       const extent = vectorSource.getExtent();
       map.value.getView().fit(extent, {padding: [20, 20, 20, 20], maxZoom: 18});
     } catch (error) {
@@ -148,7 +150,6 @@ onMounted(() => {
 
 watch(area, (newArea) => {
   areaJSON.value = JSON.stringify(newArea, null, 2);
-  //initializeMap()
   if (map.value) {
     const features = new GeoJSON().readFeatures(newArea, {
       featureProjection: 'EPSG:3857'
@@ -179,6 +180,7 @@ const updateAreaFromJSON = (json) => {
     const parsedJSON = JSON.parse(json);
     if (isValidGeoJSON(parsedJSON)) {
       area.value = parsedJSON;
+      emit('update-area', parsedJSON); // Emitir el evento
       error.value = ''; // Limpia el error si el JSON es válido
     } else {
       throw new Error('GeoJSON inválido');

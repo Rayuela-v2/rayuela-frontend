@@ -17,8 +17,11 @@
       <!-- Áreas -->
       <CollapsableSection title="Áreas">
         <p class="text-subtitle-1 mb-3">Define las áreas geográficas del proyecto</p>
-        <GeoMap v-if="project.areas" :area="project.areas" />
-      </CollapsableSection>
+        <GeoMap
+            v-if="project.areas"
+            :area="project.areas"
+            @update-area="updateProjectAreas"
+        />      </CollapsableSection>
 
       <!-- Tipos de Tareas -->
       <CollapsableSection title="Tipos de Tareas">
@@ -183,6 +186,11 @@ const taskSectionClick = () => {
   saveProject().then((project) => {
     router.push(`/admin/project/${project._id}/tasks`)
   });
+};
+
+const updateProjectAreas = (newAreas) => {
+  project.value.areas = newAreas;
+  toast.success('Áreas actualizadas correctamente');
 };
 
 const addNewTaskType = () => {

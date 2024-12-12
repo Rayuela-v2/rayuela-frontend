@@ -1,15 +1,16 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useStore } from 'vuex';
+import {ref, onMounted} from 'vue';
+import {useRoute} from 'vue-router';
 
-const store = useStore();
+import GamificationService from "@/services/GamificationService";
+import UserPFP from "@/components/utils/UserPFP.vue";
 
 const leaderboardData = ref([]);
+const route = useRoute();
 
 const fetchLeaderboard = async () => {
   try {
-    const response = await store.dispatch('getLeaderboard');
-    leaderboardData.value = response.sort((a, b) => b.score - a.score);
+    leaderboardData.value = await GamificationService.getLeaderboardFor(route.params.projectId);
   } catch (error) {
     console.error('Error al cargar el leaderboard:', error);
   }
@@ -45,17 +46,15 @@ onMounted(() => {
       </template>
 
       <template #item.name="{ item }">
-        <v-avatar size="36" class="me-3">
-          <img :src="item.avatarUrl" alt="Avatar" />
-        </v-avatar>
+        <UserPFP :username="item.user.complete_name"/>
         <span>
-          {{ item.name }}
+          {{ item.user.complete_name }}
         </span>
       </template>
 
       <!-- Columna de Puntuación -->
       <template #item.score="{ item }">
-        <span>{{ item.score }}</span>
+        <span>{{ item.points }}</span>
       </template>
     </v-data-table>
   </v-container>

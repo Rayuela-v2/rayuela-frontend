@@ -8,7 +8,7 @@
         <h6>{{ badge.name }}</h6>
       </div>
     </div>
-
+    <Leaderboard />
   </v-container>
   <v-container>
     <h1 class="mb-6">Detalle del Proyecto</h1>
@@ -41,6 +41,7 @@ import {useRoute} from 'vue-router';
 import GeoMap from '@/views/Admin/GeoMap.vue';
 import ProjectsService from "@/services/ProjectsService";
 import TaskService from "@/services/TaskService";
+import Leaderboard from "@/views/Leaderboard.vue";
 
 const badges = [
   {

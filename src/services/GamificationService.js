@@ -34,6 +34,10 @@ class GamificationService extends RayuelaService {
     async deleteScoreRule(id) {
         return this.delete(`/gamification/${store.state.project._id}/score-rule/${id}`);
     }
+
+    getLeaderboardFor(projectId) {
+        return this.get(`/leaderboard/${projectId}`);
+    }
 }
 
 export default new GamificationService(); // Sinleton pattern
