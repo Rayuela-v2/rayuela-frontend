@@ -1,4 +1,5 @@
 <template>
+  <RegisterCheckin :task-types="project.taskTypes" />
   <v-container v-if="project.userIsSubscribed">
     <h1 class="mb-6">Mi actividad</h1>
 
@@ -42,6 +43,7 @@ import GeoMap from '@/views/Admin/GeoMap.vue';
 import ProjectsService from "@/services/ProjectsService";
 import TaskService from "@/services/TaskService";
 import Leaderboard from "@/views/Leaderboard.vue";
+import RegisterCheckin from "@/components/RegisterCheckin.vue";
 
 const badges = [
   {

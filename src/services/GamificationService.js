@@ -38,6 +38,10 @@ class GamificationService extends RayuelaService {
     getLeaderboardFor(projectId) {
         return this.get(`/leaderboard/${projectId}`);
     }
+
+    registerCheckin(body) {
+        return this.post('/checkin', body);
+    }
 }
 
 export default new GamificationService(); // Sinleton pattern
