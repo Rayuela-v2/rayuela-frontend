@@ -6,14 +6,15 @@ import router from "@/router";
 
 const projects_user = ref([]);
 
-// Cargar los proyectos cuando se monta el componente
 onMounted(async () => {
   projects_user.value = await ProjectsService.getProjects();
 });
 
 function subscribe(project) {
   ProjectsService.toggleSubscription(project._id)
-      .then(() => toast.success("Inscripción exitosa"))
+      .then(() => {
+        toast.success("Perfecto!");
+      })
       .then(async () => projects_user.value = await ProjectsService.getProjects())
       .catch(() => toast.error('Hubo un error al inscribirse'));
 }
@@ -34,35 +35,35 @@ const seeProjectDetails = (id) => {
             sm="6"
             md="4"
         >
-          <v-card class="mx-auto cursor-pointer" max-width="400" @click="seeProjectDetails(project._id)">
-            <div class="image-container">
-              <v-img
-                  class="project-image"
-                  height="200"
-                  :src="project.image || 'https://via.placeholder.com/400'"
-                  cover
-              />
-              <!-- Fondo degradado para mejorar el contraste -->
-              <div class="image-overlay">
-                <v-card-title class="overlay-title">{{ project.name }}</v-card-title>
+          <v-card class="mx-auto cursor-pointer" max-width="400">
+            <div @click="seeProjectDetails(project._id)">
+              <div class="image-container">
+                <v-img
+                    class="project-image"
+                    height="200"
+                    :src="project.image || 'https://via.placeholder.com/400'"
+                    cover
+                />
+                <div class="image-overlay">
+                  <v-card-title class="overlay-title">{{ project.name }}</v-card-title>
+                </div>
               </div>
+
+              <v-card-subtitle class="pt-2">
+                {{ project.available ? 'Disponible' : 'No disponible' }}
+              </v-card-subtitle>
+
+              <v-card-text>
+                <div>{{ (project.description?.slice(0, 50) || 'Sin descripción disponible') + '...' }}</div>
+                <div v-if="project.web">
+                  <a :href="project.web" target="_blank" class="text-decoration-none">Visitar sitio web</a>
+                </div>
+              </v-card-text>
+
             </div>
-
-            <v-card-subtitle class="pt-2">
-              {{ project.available ? 'Disponible' : 'No disponible' }}
-            </v-card-subtitle>
-
-            <v-card-text>
-              <div>{{ (project.description?.slice(0,50) || 'Sin descripción disponible') + '...'}}</div>
-              <div v-if="project.web">
-                <a :href="project.web" target="_blank" class="text-decoration-none">Visitar sitio web</a>
-              </div>
-            </v-card-text>
-
             <v-card-actions>
               <v-btn
                   :color="project.subscribed ? 'red' : 'green'"
-                  text
                   @click="subscribe(project)"
               >
                 {{ project.subscribed ? 'Darse de baja' : 'Inscribirse' }}

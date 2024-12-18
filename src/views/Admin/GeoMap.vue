@@ -58,10 +58,7 @@ function getTaskArrayFromFeature(feature) {
 function tasksForFeature(feature) {
   const ts = getTaskArrayFromFeature(feature);
   if (ts.length === 0) return "No hay tareas en esta area";
-  return `<ol>
-  ${ts.map(task => `<li>-${task.type} ${task.timeIntervalId}
-                    </li>`)}
-<ol/>`;
+  return `<h3>Área ${feature.getId()}<h3/> <br> <h4>${ts.length} tareas disponibles</h4>`;
 }
 
 const setTooltipContentToAreas = (map, vectorSource) => {
@@ -82,7 +79,7 @@ const setTooltipContentToAreas = (map, vectorSource) => {
     positioning: 'bottom-left',
   })
   map.value.addOverlay(overlay);
-  map.value.on('pointermove', (event) => {
+  map.value.on('click', (event) => {
     if (!overlay) {
       console.error('El overlay no está definido');
       return;

@@ -71,8 +71,18 @@
 
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn text @click="closeModal">Cancelar</v-btn>
-          <v-btn color="primary" @click="submitForm">Guardar</v-btn>
+          <v-btn text @click="closeModal" :disabled="loadingCheckin">Cancelar</v-btn>
+          <v-btn
+              color="primary"
+              @click="submitForm"
+              :disabled="loadingCheckin"
+          >
+            <template v-if="loadingCheckin">
+              <v-progress-circular indeterminate color="white" size="20" class="mr-2"></v-progress-circular>
+              Guardando...
+            </template>
+            <template v-else>Guardar</template>
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -80,9 +90,9 @@
 </template>
 
 <script setup>
-import {ref, watch} from 'vue';
-import {useRoute} from 'vue-router';
-import {toast} from "vue3-toastify";
+import { ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import { toast } from "vue3-toastify";
 import GamificationService from "@/services/GamificationService";
 
 const route = useRoute();
@@ -90,9 +100,10 @@ const route = useRoute();
 const showModal = ref(false);
 const manualLocation = ref(false);
 const loadingLocation = ref(false);
+const loadingCheckin = ref(false); // Spinner para el registro de check-in
 const props = defineProps({
   taskTypes: Array,
-})
+});
 
 const form = ref({
   latitude: '',
@@ -149,6 +160,7 @@ const resetForm = () => {
 
 const closeModal = () => {
   showModal.value = false;
+  loadingCheckin.value = false;
 };
 
 const submitForm = () => {
@@ -157,10 +169,15 @@ const submitForm = () => {
     return;
   }
 
-  GamificationService.registerCheckin({...form.value, projectId: route.params.projectId})
+  loadingCheckin.value = true; // Inicia el spinner
+
+  GamificationService.registerCheckin({ ...form.value, projectId: route.params.projectId })
       .then(() => toast.success('Checkin registrado correctamente'))
       .catch(() => toast.error('Ha ocurrido un error en el registro.'))
-      .then(closeModal)
+      .finally(() => {
+        loadingCheckin.value = false; // Detiene el spinner
+        closeModal();
+      });
 };
 
 watch(showModal, (isVisible) => {
@@ -180,5 +197,9 @@ watch(showModal, (isVisible) => {
 
 .mt-4 {
   margin-top: 16px;
+}
+
+.mr-2 {
+  margin-right: 8px;
 }
 </style>
