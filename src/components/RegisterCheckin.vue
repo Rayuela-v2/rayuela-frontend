@@ -6,6 +6,7 @@
       Registrar Check-in
     </v-btn>
 
+    <!-- Modal principal para registrar el check-in -->
     <v-dialog v-model="showModal" persistent max-width="600px">
       <v-card>
         <v-card-title>
@@ -86,18 +87,41 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <!-- Modal de confirmación -->
+    <v-dialog v-model="serviceResponse" persistent max-width="400px">
+      <v-card>
+        <v-card-text class="text-center">
+          <v-icon color="green" size="48">mdi-check-circle-outline</v-icon>
+          <h3>¡Checkin registrado!</h3>
+          <p v-if="serviceResponse?._gameStatus?.newBadges?.length">Nuevas insignias: {{
+              serviceResponse.newBadges
+            }}</p>
+          <p v-if="serviceResponse?._gameStatus?.newPoints">
+            Sumaste {{ serviceResponse._gameStatus.newPoints }}
+            puntos!</p>
+          <p v-if="serviceResponse?.contributesTo">Contribuiste a {{ serviceResponse.contributesTo?.name }}</p>
+          <p v-else>No contribuiste a ninguna tarea</p>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" @click="closeConfirmationModal">Aceptar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
-import { toast } from "vue3-toastify";
+import {ref, watch} from 'vue';
+import {useRoute} from 'vue-router';
+import {toast} from "vue3-toastify";
 import GamificationService from "@/services/GamificationService";
 
 const route = useRoute();
 
 const showModal = ref(false);
+const serviceResponse = ref(null);
 const manualLocation = ref(false);
 const loadingLocation = ref(false);
 const loadingCheckin = ref(false); // Spinner para el registro de check-in
@@ -163,6 +187,10 @@ const closeModal = () => {
   loadingCheckin.value = false;
 };
 
+const closeConfirmationModal = () => {
+  serviceResponse.value = null;
+};
+
 const submitForm = () => {
   if (!form.value.latitude || !form.value.longitude || !form.value.taskType) {
     toast.info('Por favor completa todos los campos.');
@@ -171,8 +199,10 @@ const submitForm = () => {
 
   loadingCheckin.value = true; // Inicia el spinner
 
-  GamificationService.registerCheckin({ ...form.value, projectId: route.params.projectId })
-      .then(() => toast.success('Checkin registrado correctamente'))
+  GamificationService.registerCheckin({...form.value, projectId: route.params.projectId})
+      .then((res) => {
+        serviceResponse.value = res;
+      })
       .catch(() => toast.error('Ha ocurrido un error en el registro.'))
       .finally(() => {
         loadingCheckin.value = false; // Detiene el spinner
@@ -182,7 +212,9 @@ const submitForm = () => {
 
 watch(showModal, (isVisible) => {
   if (isVisible) {
-    form.value.datetime = new Date().toISOString().slice(0, 16);
+    const now = new Date();
+    const gmtMinus3 = new Date(now.getTime() - 3 * 60 * 60 * 1000); // GMT-3
+    form.value.datetime = gmtMinus3.toISOString().slice(0, 16);
   }
 });
 </script>

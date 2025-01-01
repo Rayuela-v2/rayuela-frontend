@@ -19,11 +19,11 @@ class AuthService extends RayuelaService {
         return this.get('/user')
             .then(data => {
                 localStorage.setItem("user_id", data._id)
-                localStorage.setItem("complete_name", data.complete_name)
-                localStorage.setItem("profile_image", data.profile_image)
-                localStorage.setItem("role", data.role)
+                localStorage.setItem("complete_name", data._complete_name)
+                localStorage.setItem("profile_image", data._profile_image)
+                localStorage.setItem("role", data._role)
                 return data
-            }).catch( () => {
+            }).catch(() => {
                 console.log('Unable to get user')
             })
     }
