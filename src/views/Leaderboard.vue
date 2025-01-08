@@ -23,7 +23,7 @@ onMounted(() => {
 
 <template>
   <v-container>
-    <h1 class="mb-6">Leaderboard</h1>
+    <h2 class="mb-6">Leaderboard</h2>
     <v-data-table
         :headers="[
         { title: 'Posición', value: 'position' },

@@ -1,15 +1,24 @@
 <template>
-  <v-container v-if="project.userIsSubscribed">
-    <RegisterCheckin :task-types="project.taskTypes"/>
+  <v-container v-if="project.user?.isSubscribed">
+    <RegisterCheckin @modalClosed="handleModalClosed"
+                     :task-types="project.taskTypes"/>
 
     <h1 class="mb-6">Mi actividad</h1>
 
+    <h2>Medallas</h2>
     <div class="pa-4 mb-6 badges-container">
-      <div v-for="(badge, index) in badges" :key="index" class="badge-item">
-        <img :src="badge.image" alt="Imagen de la insignia"/>
+      <v-alert title="Sin medallas"
+               color="gray"
+               variant="tonal"
+               v-if="project.user.badges.length === 0">Aun no tienes medallas, quieres comenzar con un checkin?
+      </v-alert>
+      <div v-for="(badge, index) in project.user.badges" :key="index" class="badge-item">
+        <img :src="badge.imageUrl" alt="Imagen de la insignia"/>
         <h6>{{ badge.name }}</h6>
       </div>
     </div>
+    <h2>Puntos</h2>
+    <h3>Tienes {{ project.user.points }}pts</h3>
     <Leaderboard/>
   </v-container>
   <v-container>
@@ -30,7 +39,7 @@
         </v-col>
       </v-row>
     </v-card>
-    <v-btn v-if="!project.userIsSubscribed" color="green" block large @click="subscribe">
+    <v-btn v-if="!project.user?.isSubscribed" color="green" block large @click="subscribe">
       <v-icon left size="large">mdi-account-plus</v-icon>
       Inscribirse
     </v-btn>
@@ -78,24 +87,6 @@ import Leaderboard from '@/views/Leaderboard.vue';
 import RegisterCheckin from '@/components/RegisterCheckin.vue';
 import {toast} from "vue3-toastify";
 
-const badges = [
-  {
-    name: "Sheriff",
-    description: "Saca fotos cerca de la comisaria",
-    image: "https://m.media-amazon.com/images/I/81EyITtF8jL._AC_UY1000_.jpg"
-  },
-  {
-    name: "Explorador",
-    description: "Realiza 10 tareas lejanas entre sí",
-    image: "https://cdn5.vectorstock.com/i/1000x1000/65/29/explorer-adventure-outdoors-concept-badge-vector-28486529.jpg"
-  },
-  {
-    name: "Formula 1",
-    description: "Completa 3 formularios",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQDbSpK8LgqhRSBtHki-YxnzThpo4t4H975kA&s"
-  }
-];
-
 const route = useRoute();
 const tasks = ref([]);
 const filterAreaId = ref(null);
@@ -114,7 +105,7 @@ const subscribe = () => {
   ProjectsService.toggleSubscription(route.params.projectId)
       .then(() => {
         toast.success("Inscripción exitosa");
-        project.value.userIsSubscribed = true;
+        project.value.user.isSubscribed = true;
       });
 }
 
@@ -130,6 +121,10 @@ const areaOptions = computed(() => {
   if (!project.value.areas) return [];
   return tasks.value.map(t => t.areaId)
 });
+
+const handleModalClosed = async () => {
+  project.value = await ProjectsService.getProjectById(route.params.projectId);
+};
 
 const filteredTasks = computed(() => {
   if (!filterAreaId.value) return tasks.value;

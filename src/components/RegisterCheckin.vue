@@ -94,9 +94,11 @@
         <v-card-text class="text-center">
           <v-icon color="green" size="48">mdi-check-circle-outline</v-icon>
           <h3>¡Checkin registrado!</h3>
-          <p v-if="serviceResponse?._gameStatus?.newBadges?.length">Nuevas insignias: {{
-              serviceResponse.newBadges
-            }}</p>
+          <div style="border: 2px dashed lightblue; border-radius: 18px"
+               v-for="(badge, index) in serviceResponse?._gameStatus?.newBadges" :key="index" class="badge-item">
+            <img :src="badge.imageUrl" alt="Imagen de la insignia"/>
+            <h6>{{ badge.name }}</h6>
+          </div>
           <p v-if="serviceResponse?._gameStatus?.newPoints">
             Sumaste {{ serviceResponse._gameStatus.newPoints }}
             puntos!</p>
@@ -118,6 +120,8 @@ import {useRoute} from 'vue-router';
 import {toast} from "vue3-toastify";
 import GamificationService from "@/services/GamificationService";
 
+
+const emit = defineEmits(['modalClosed']);
 const route = useRoute();
 
 const showModal = ref(false);
@@ -189,6 +193,7 @@ const closeModal = () => {
 
 const closeConfirmationModal = () => {
   serviceResponse.value = null;
+  emit('modalClosed');
 };
 
 const submitForm = () => {
