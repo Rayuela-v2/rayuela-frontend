@@ -19,7 +19,7 @@
         "password": "Contraseña",
         "password_placeholder": "Ingrese contraseña",
         "button_login": "Ingresar",
-        "button_signup": "No tengo cuenta"
+        "button_signup": "Registrarse"
     },
 
     "register": {
@@ -32,7 +32,7 @@
         "password2": "Repetir contraseña",
         "password1_placeholder": "Ingrese contraseña",
         "password2_placeholder": "Repita contraseña",
-        "checkbox": "Acepto los ",
+        "checkbox": "Acepto los terminos y condiciones",
         "terms": "términos y condiciones",
         "button_signup": "Registrarse",
         "button_login": "Ya tengo cuenta"

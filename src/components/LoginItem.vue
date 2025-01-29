@@ -1,89 +1,88 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
-import authService from "@/services/AuthService";
 import AuthService from "@/services/AuthService";
 
-const router = useRouter()
-const username = ref("")
-const password = ref("")
+const router = useRouter();
+const username = ref("");
+const password = ref("");
+const showPassword = ref(false);
 
-onMounted( () =>{
-  if(localStorage.getItem("token")){
-    router.push({ path: '/dashboard' })
+onMounted(() => {
+  if (localStorage.getItem("token")) {
+    router.push({ path: '/dashboard' });
   }
-})
+});
 
 async function login() {
-  const user = {"username": username.value, "password": password.value}
+  const user = { username: username.value, password: password.value };
   AuthService.loginWithPw(user)
-      .then( () => {
+      .then(() => {
         AuthService.getUser()
-            .then( () => {
-                router.push("/dashboard");
-                location.reload();
+            .then(() => {
+              router.push("/dashboard");
+              location.reload();
             })
             .catch(error => {
-              console.log(error)
-            })
+              console.log(error);
+            });
       })
-      .catch ( () => {
-        toast.error("Credenciales de acceso incorrectas", {autoClose: 3000});
-      })
+      .catch(() => {
+        toast.error("Credenciales de acceso incorrectas", { autoClose: 3000 });
+      });
 }
-
 </script>
 
 <template>
-  <div class="container">
+  <v-container class="container">
     <h1 class="title">{{ $t("login.title") }}</h1>
-    <br>
-    <form action class="form" @submit.prevent="login">
-      <div class="field">
-        <label class="label">{{ $t("login.username_field") }}</label>
-        <div class="control">
-          <input class="input" type="text" v-model="username" :placeholder="$t('login.username_placeholder')">
-        </div>
-      </div>
+    <br />
+    <v-form @submit.prevent="login">
+      <v-text-field
+          v-model="username"
+          :label="$t('login.username_field')"
+          :placeholder="$t('login.username_placeholder')"
+          outlined
+      />
 
-      <div class="field">
-        <label class="label">{{ $t("login.password") }}</label>
-        <div class="control">
-          <input class="input" type="password" v-model="password" :placeholder="$t('login.password_placeholder')">
-        </div>
-      </div>
+      <v-text-field
+          v-model="password"
+          :label="$t('login.password')"
+          :placeholder="$t('login.password_placeholder')"
+          :type="showPassword ? 'text' : 'password'"
+          outlined
+          :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+          @click:append-inner="showPassword = !showPassword"
+      />
 
-      <div class="field is-grouped buttons">
-        <div class="control left">
-          <button class="button is-success" type="submit" value="login">{{ $t("login.button_login") }}</button>
-        </div>
-        <div class="right">
-          <RouterLink to="/register"><button class="button is-link is-light">{{ $t("login.button_signup") }}</button></RouterLink>
-        </div>
-      </div>
-    </form>
-  </div>
+      <v-row class="buttons">
+        <v-col cols="6">
+          <v-btn color="success" type="submit">{{ $t("login.button_login") }}</v-btn>
+        </v-col>
+        <v-col cols="6">
+          <RouterLink to="/register">
+            <v-btn color="primary" outlined>{{ $t("login.button_signup") }}</v-btn>
+          </RouterLink>
+        </v-col>
+      </v-row>
+    </v-form>
+  </v-container>
 </template>
 
 <style scoped>
-.container{
+.container {
   max-width: 360px;
+  margin: auto;
 }
 
-.title{
+.title {
   text-align: center;
 }
 
-.buttons{
+.buttons {
   display: flex;
   justify-content: space-between;
 }
-
-.left, .right{
-  display: flex;
-  flex-direction: column;
-}
-
 </style>
