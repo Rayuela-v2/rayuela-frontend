@@ -57,7 +57,9 @@ const validateBadge = () => {
       return false;
     }
   }
-  if(store.state.currentGamification.badgesRules.find(b => b.name === badge.value.name)) {
+  console.log(isNew.value)
+
+  if (isNew.value && store.state.currentGamification.badgesRules.find(b => b.name === badge.value.name)) {
     toast.error('Ya existe otra insignia con ese nombre');
     return false
   }
@@ -68,13 +70,16 @@ const saveBadge = async () => {
   if (!validateBadge()) return;
 
   try {
-    await GamificationService.createBadge(badge.value);
+    if (isNew.value) {
+      await GamificationService.createBadge(badge.value, route.params.projectId);
+    } else {
+      await GamificationService.update(badge.value, route.params.projectId);
+    }
     toast.success(isNew.value ? 'Insignia creada exitosamente' : 'Insignia actualizada exitosamente');
-    router.push(`/admin/project/${route.params.projectId}/gamification`);
+    await router.push(`/admin/project/${route.params.projectId}/gamification`);
   } catch (error) {
     console.error('Error al guardar la insignia:', error);
-    toast.error('Completa todos los campos, son obligatorios');
-  }
+    toast.error('Error al guardar la insignia');}
 };
 
 // Cargar datos al montar
@@ -105,7 +110,7 @@ onMounted(() => {
       <!-- Información de la Insignia -->
       <v-card class="pa-4 mb-6">
         <h2>Información de la Insignia</h2>
-        <v-text-field label="Nombre de la Insignia" v-model="badge.name" required/>
+        <v-text-field label="Nombre de la Insignia" v-model="badge.name" :disabled="!isNew" required/>
         <v-textarea label="Descripción de la Insignia" v-model="badge.description" required/>
         <v-text-field label="URL de la imagen" v-model="badge.imageUrl" required/>
         <v-text-field

@@ -15,8 +15,8 @@ class GamificationService extends RayuelaService {
         return this.patch('/gamification/badge/' + badge._id, badge);
     }
 
-    async createBadge(badge) {
-        return this.post('/gamification/badge', { projectId: store.state.project._id, ...badge });
+    async createBadge(badge, projectId) {
+        return this.post('/gamification/badge', {projectId, ...badge});
     }
 
     async getBadgeById(badgeId) {
@@ -37,6 +37,10 @@ class GamificationService extends RayuelaService {
 
     getLeaderboardFor(projectId) {
         return this.get(`/leaderboard/${projectId}`);
+    }
+
+    getCheckins(projectId) {
+        return this.get(`/checkin/user/${projectId}`);
     }
 
     registerCheckin(body) {

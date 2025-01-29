@@ -20,7 +20,7 @@ const props = defineProps({
   visualization: Boolean
 });
 
-const emit = defineEmits(['update-area']);
+const emit = defineEmits(['update-area', 'selected-area']);
 
 const area = ref(props.area);
 const tab = ref('map');
@@ -86,6 +86,7 @@ const setTooltipContentToAreas = (map, vectorSource) => {
     }
     const feature = map.value.forEachFeatureAtPixel(event.pixel, (f) => f);
     if (feature) {
+      emit('selected-area', feature.getId());
       tooltip.innerHTML = tasksForFeature(feature);
       tooltip.style.display = 'block';
       overlay.setPosition(event.coordinate);

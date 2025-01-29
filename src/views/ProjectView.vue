@@ -1,9 +1,35 @@
 <template>
   <v-container v-if="project.user?.isSubscribed">
+    <h1 class="mb-6">{{ project.name }}</h1>
+    <hr>
+    <!-- Áreas del Proyecto -->
+    <GeoMap :visualization="true" v-if="project.areas" :tasks="tasks" :area="project.areas"
+            @selected-area="updateSelectedArea"/>
+    <!-- Tabla de Tareas -->
+    <div class="mt-6">
+      <v-data-table
+          :items="formattedTasks"
+          :headers="taskHeaders"
+          item-value="formatted"
+          dense
+          class="elevation-1"
+      >
+        <template v-slot:top>
+          <v-toolbar flat>
+            <v-toolbar-title>
+              <div style="display: flex; justify-content: space-between; margin-right: 8px">
+                Tareas {{ filterAreaId && ` del area ${filterAreaId}` }}
+                <v-btn v-if="filterAreaId" variant="outlined" @click="clearFilter">Limpiar filtro</v-btn>
+              </div>
+            </v-toolbar-title>
+          </v-toolbar>
+        </template>
+      </v-data-table>
+    </div>
     <RegisterCheckin @modalClosed="handleModalClosed"
-                     :task-types="project.taskTypes"/>
-
-    <h1 class="mb-6">Mi actividad</h1>
+                     :task-types="project.taskTypes"
+                     class="floating-button"
+    />
 
     <h2>Medallas</h2>
     <div class="pa-4 mb-6 badges-container">
@@ -19,7 +45,7 @@
     </div>
     <h2>Puntos</h2>
     <h3>Tienes {{ project.user.points }}pts</h3>
-    <Leaderboard/>
+    <Leaderboard :leaderboard="leaderboard"/>
   </v-container>
   <v-container>
     <h1 class="mb-6">Detalle del Proyecto</h1>
@@ -43,37 +69,6 @@
       <v-icon left size="large">mdi-account-plus</v-icon>
       Inscribirse
     </v-btn>
-
-    <!-- Áreas del Proyecto -->
-    <GeoMap :visualization="true" v-if="project.areas && tasks.length" :tasks="tasks" :area="project.areas"/>
-
-    <!-- Tabla de Tareas -->
-    <div class="mt-6">
-      <h2 class="mb-4">Tareas del Proyecto</h2>
-      <v-select
-          label="Filtrar por ID de Área"
-          v-model="filterAreaId"
-          :items="areaOptions"
-          item-text="text"
-          item-value="value"
-          class="mb-4"
-          clearable
-      />
-      <v-data-table
-          :items="filteredTasks"
-          :headers="taskHeaders"
-          item-value="_id"
-          dense
-          class="elevation-1"
-      >
-        <template v-slot:top>
-          <v-toolbar flat>
-            <v-toolbar-title>Tareas</v-toolbar-title>
-            <v-spacer></v-spacer>
-          </v-toolbar>
-        </template>
-      </v-data-table>
-    </div>
   </v-container>
 </template>
 
@@ -86,9 +81,11 @@ import TaskService from '@/services/TaskService';
 import Leaderboard from '@/views/Leaderboard.vue';
 import RegisterCheckin from '@/components/RegisterCheckin.vue';
 import {toast} from "vue3-toastify";
+import GamificationService from "@/services/GamificationService";
 
 const route = useRoute();
 const tasks = ref([]);
+const leaderboard = ref([]);
 const filterAreaId = ref(null);
 
 const project = ref({
@@ -101,6 +98,10 @@ const project = ref({
   areas: null
 });
 
+const clearFilter = () => {
+  filterAreaId.value = null;
+};
+
 const subscribe = () => {
   ProjectsService.toggleSubscription(route.params.projectId)
       .then(() => {
@@ -110,20 +111,16 @@ const subscribe = () => {
 }
 
 const taskHeaders = [
-  {title: 'Nombre', value: 'name'},
-  {title: 'Descripción', value: 'description'},
-  {title: 'ID de Área', value: 'areaId'},
-  {title: 'Tipo', value: 'type'},
+  {title: 'Detalle de la Tarea', value: 'formatted'},
 ];
-
-// Opciones para el desplegable de áreas
-const areaOptions = computed(() => {
-  if (!project.value.areas) return [];
-  return tasks.value.map(t => t.areaId)
-});
 
 const handleModalClosed = async () => {
   project.value = await ProjectsService.getProjectById(route.params.projectId);
+  leaderboard.value = (await GamificationService.getLeaderboardFor(route.params.projectId))?.users;
+};
+
+const updateSelectedArea = (areaId) => {
+  filterAreaId.value = areaId;
 };
 
 const filteredTasks = computed(() => {
@@ -131,9 +128,16 @@ const filteredTasks = computed(() => {
   return tasks.value.filter(task => task.areaId === filterAreaId.value);
 });
 
+const formattedTasks = computed(() => {
+  return filteredTasks.value.map(task => ({
+    formatted: `${task.points}pts - ${task.timeIntervalId} - ${task.type}`
+  }));
+});
+
 onMounted(async () => {
   project.value = await ProjectsService.getProjectById(route.params.projectId);
   tasks.value = await TaskService.getTaskForProject(route.params.projectId);
+  leaderboard.value = (await GamificationService.getLeaderboardFor(route.params.projectId))?.users;
 });
 </script>
 
@@ -174,5 +178,12 @@ onMounted(async () => {
   object-fit: cover;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.floating-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
 }
 </style>

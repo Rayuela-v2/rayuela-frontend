@@ -1,24 +1,22 @@
 <script setup>
-import {ref, onMounted} from 'vue';
-import {useRoute} from 'vue-router';
-
-import GamificationService from "@/services/GamificationService";
+import {computed} from 'vue';
 import UserPFP from "@/components/utils/UserPFP.vue";
 
-const leaderboardData = ref([]);
-const route = useRoute();
-
-const fetchLeaderboard = async () => {
-  try {
-    leaderboardData.value = await GamificationService.getLeaderboardFor(route.params.projectId);
-  } catch (error) {
-    console.error('Error al cargar el leaderboard:', error);
-  }
-};
-
-onMounted(() => {
-  fetchLeaderboard();
+const props = defineProps({
+  leaderboard: {
+    type: Array,
+    required: true,
+    default: () => [],
+  },
 });
+
+// Computed para mapear el leaderboard con la posición
+const leaderboardData = computed(() =>
+    props.leaderboard.map((user, index) => ({
+      position: index + 1,
+      ...user,
+    }))
+);
 </script>
 
 <template>
@@ -30,14 +28,12 @@ onMounted(() => {
         { title: 'Nombre', value: 'name' },
         { title: 'Puntuación', value: 'score' }
       ]"
-        :items="leaderboardData.map((user, index) => ({
-        position: index + 1,
-        ...user,
-      }))"
+        :items="leaderboardData"
         class="elevation-2"
         dense
         hide-default-footer
     >
+      <!-- Columna de Posición -->
       <template #item.position="{ item }">
         <span v-if="item.position === 1">1🥇</span>
         <span v-else-if="item.position === 2">2🥈</span>
@@ -45,10 +41,11 @@ onMounted(() => {
         <span v-else>{{ item.position }}</span>
       </template>
 
+      <!-- Columna de Nombre -->
       <template #item.name="{ item }">
-        <UserPFP :username="item.user.complete_name"/>
+        <!--        <UserPFP :username="item.completeName"/>-->
         <span>
-          {{ item.user.complete_name }}
+          {{ item.completeName }}
         </span>
       </template>
 

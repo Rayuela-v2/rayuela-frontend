@@ -1,8 +1,8 @@
 <template>
   <div>
     <!-- Botón para abrir el modal -->
-    <v-btn color="black" block large @click="openModal">
-      <v-icon left size="large">mdi-map-marker-plus</v-icon>
+    <v-btn color="blue" variant="elevated" block size='large' @click="openModal">
+      <v-icon style="margin-right: 8px" left size="large">mdi-map-marker-plus</v-icon>
       Registrar Check-in
     </v-btn>
 
