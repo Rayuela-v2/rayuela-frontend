@@ -11,6 +11,12 @@
         <v-textarea label="Descripción del proyecto" v-model="project.description" required />
         <v-text-field label="URL de la imagen" v-model="project.image" />
         <v-text-field label="Sitio web del proyecto" v-model="project.web" />
+        <v-select
+            label="Tipo de adaptación"
+            v-model="project.gamificationStrategy"
+            :items="['ELASTICA', 'BASICA']"
+            required
+        />
         <v-switch label="Disponible" v-model="project.available" color="green" />
       </v-card>
 
@@ -154,7 +160,8 @@ const project = ref({
   available: false,
   areas: null,
   taskTypes: [],
-  timeIntervals: []
+  timeIntervals: [],
+  gamificationStrategy: 'BASICA'
 });
 
 const newTaskType = ref('');
@@ -221,7 +228,8 @@ onMounted(async () => {
       available: false,
       areas: [],
       taskTypes: [],
-      timeIntervals: []
+      timeIntervals: [],
+      gamificationStrategy: 'BASICA'
     };
   } else {
     const p = await ProjectsService.getProjectById(projectId);

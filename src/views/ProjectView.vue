@@ -18,11 +18,23 @@
           <v-toolbar flat>
             <v-toolbar-title>
               <div style="display: flex; justify-content: space-between; margin-right: 8px">
-                Tareas {{ filterAreaId && ` del area ${filterAreaId}` }}
+                Tareas {{ filterAreaId && ` del área ${filterAreaId}` }}
                 <v-btn v-if="filterAreaId" variant="outlined" @click="clearFilter">Limpiar filtro</v-btn>
               </div>
             </v-toolbar-title>
           </v-toolbar>
+        </template>
+
+        <!-- Slot para modificar la visualización de las filas -->
+        <template v-slot:item="{ item }">
+          <tr :class="{ 'resolved-task': item.solved }">
+            <td>
+              <span :class="{ 'text-decoration-line-through': item.solved }">
+              {{ item.formatted }}
+              <v-badge v-if="item.solved" color="green" content="Resuelta" inline></v-badge>
+        </span>
+            </td>
+          </tr>
         </template>
       </v-data-table>
     </div>
@@ -130,7 +142,8 @@ const filteredTasks = computed(() => {
 
 const formattedTasks = computed(() => {
   return filteredTasks.value.map(task => ({
-    formatted: `${task.points}pts - ${task.timeIntervalId} - ${task.type}`
+    formatted: `${task.points}pts - ${task.timeIntervalId} - ${task.type}`,
+    solved: task.solved
   }));
 });
 
@@ -185,5 +198,14 @@ onMounted(async () => {
   bottom: 20px;
   right: 20px;
   z-index: 1000;
+}
+
+.resolved-task {
+  background-color: #e0e0e0 !important;
+}
+
+.text-decoration-line-through {
+  text-decoration: line-through;
+  color: #757575;
 }
 </style>
