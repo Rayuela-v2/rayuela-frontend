@@ -51,7 +51,17 @@
                v-if="project.user.badges.length === 0">Aun no tienes medallas, quieres comenzar con un checkin?
       </v-alert>
       <div v-for="(badge, index) in project.user.badges" :key="index" class="badge-item">
-        <img :src="badge.imageUrl" alt="Imagen de la insignia"/>
+        <img
+            :src="badge.imageUrl"
+            alt="Imagen de la insignia"
+            :class="{ 'grayscale': !badge.active }"
+            @click="toggleTooltip(index)"
+        />
+        <v-tooltip :v-model="badgeTooltip === index" activator="parent">
+    <span>
+      {{ badge.checkinsAmount }} checkins en área {{ badge.areaId }} tipo de tarea {{ badge.taskType }} intervalo {{ badge.timeIntervalId }}
+    </span>
+        </v-tooltip>
         <h6>{{ badge.name }}</h6>
       </div>
     </div>
@@ -100,6 +110,12 @@ const tasks = ref([]);
 const leaderboard = ref([]);
 const filterAreaId = ref(null);
 
+const badgeTooltip = ref(-1);
+
+const toggleTooltip = (index) => {
+  badgeTooltip.value = index;
+};
+
 const project = ref({
   name: '',
   description: '',
@@ -118,7 +134,7 @@ const subscribe = () => {
   ProjectsService.toggleSubscription(route.params.projectId)
       .then(() => {
         toast.success("Inscripción exitosa");
-        project.value.user.isSubscribed = true;
+        project.value = {...project, user: {...project.value.user, isSubscribed: true}};
       });
 }
 
@@ -207,5 +223,10 @@ onMounted(async () => {
 .text-decoration-line-through {
   text-decoration: line-through;
   color: #757575;
+}
+
+.grayscale {
+  filter: grayscale(70%) brightness(85%);
+  opacity: 0.2;
 }
 </style>
