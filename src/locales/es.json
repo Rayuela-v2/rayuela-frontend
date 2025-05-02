@@ -19,7 +19,8 @@
         "password": "Contraseña",
         "password_placeholder": "Ingrese contraseña",
         "button_login": "Ingresar",
-        "button_signup": "Registrarse"
+        "button_signup": "Registrarse",
+        "forgot_password": "Olvidé mi contraseña"
     },
 
     "register": {

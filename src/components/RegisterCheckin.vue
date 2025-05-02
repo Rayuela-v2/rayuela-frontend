@@ -104,6 +104,16 @@
             puntos!</p>
           <p v-if="serviceResponse?.contributesTo">Contribuiste a {{ serviceResponse.contributesTo?.name }}</p>
           <p v-else>No contribuiste a ninguna tarea</p>
+          <v-alert v-if="serviceResponse?.contributesTo"
+                   width="100%"
+          >
+            <h4>Como sentiste la tarea?</h4>
+            <hr>
+            <v-rating v-model="form.rating" background-color="grey lighten-2" color="orange"
+                      :item-labels="['Aburrida', '', '', '', 'Divertida']"
+                      item-label-position="bottom" large></v-rating>
+          </v-alert>
+
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -138,6 +148,7 @@ const form = ref({
   longitude: '',
   datetime: '',
   taskType: '',
+  rating: 0,
 });
 
 const openModal = () => {
@@ -191,7 +202,10 @@ const closeModal = () => {
   loadingCheckin.value = false;
 };
 
-const closeConfirmationModal = () => {
+const closeConfirmationModal = async () => {
+  if (serviceResponse.value.contributesTo) {
+    await GamificationService.rate(form.value.rating, serviceResponse.value.id);
+  }
   serviceResponse.value = null;
   emit('modalClosed');
 };

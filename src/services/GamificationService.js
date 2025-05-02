@@ -46,6 +46,10 @@ class GamificationService extends RayuelaService {
     registerCheckin(body) {
         return this.post('/checkin', body);
     }
+
+    rate(rate, checkinId) {
+        return this.post('/checkin/rate', {rate, checkinId});
+    }
 }
 
 export default new GamificationService(); // Sinleton pattern

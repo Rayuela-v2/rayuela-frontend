@@ -158,7 +158,7 @@ const filteredTasks = computed(() => {
 
 const formattedTasks = computed(() => {
   return filteredTasks.value.map(task => ({
-    formatted: `${task.points}pts - ${task.timeIntervalId} - ${task.type}`,
+    formatted: `${task.points}pts - ${task.timeInterval.name} - ${task.type}`,
     solved: task.solved
   }));
 });

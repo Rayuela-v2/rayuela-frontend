@@ -29,6 +29,14 @@ class AuthService extends RayuelaService {
                 console.log('Unable to get user')
             })
     }
+
+    async sendResetPasswordEmail(email) {
+        return this.post("/auth/forgot-password", {email})
+    }
+
+    async recoverPassword(token, newPassword) {
+        return this.post("/auth/recover-password", {token, newPassword})
+    }
 }
 
 export default new AuthService(); // Sinleton pattern

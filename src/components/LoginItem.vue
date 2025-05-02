@@ -37,52 +37,89 @@ async function login() {
 
 <template>
   <v-container class="container">
-    <h1 class="title">{{ $t("login.title") }}</h1>
-    <br />
-    <v-form @submit.prevent="login">
-      <v-text-field
-          v-model="username"
-          :label="$t('login.username_field')"
-          :placeholder="$t('login.username_placeholder')"
-          outlined
-      />
-
-      <v-text-field
-          v-model="password"
-          :label="$t('login.password')"
-          :placeholder="$t('login.password_placeholder')"
-          :type="showPassword ? 'text' : 'password'"
-          outlined
-          :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-          @click:append-inner="showPassword = !showPassword"
-      />
-
-      <v-row class="buttons">
-        <v-col cols="6">
-          <v-btn color="success" type="submit">{{ $t("login.button_login") }}</v-btn>
-        </v-col>
-        <v-col cols="6">
-          <RouterLink to="/register">
-            <v-btn color="primary" outlined>{{ $t("login.button_signup") }}</v-btn>
-          </RouterLink>
-        </v-col>
-      </v-row>
-    </v-form>
+    <v-card class="login-card" elevation="2">
+      <v-card-title class="title">
+        {{ $t("login.title") }}
+      </v-card-title>
+      <v-card-text>
+        <v-form @submit.prevent="login">
+          <v-text-field
+              v-model="username"
+              :label="$t('login.username_field')"
+              :placeholder="$t('login.username_placeholder')"
+              outlined
+              dense
+              clearable
+              required
+          />
+          <v-text-field
+              v-model="password"
+              :label="$t('login.password')"
+              :placeholder="$t('login.password_placeholder')"
+              :type="showPassword ? 'text' : 'password'"
+              outlined
+              dense
+              clearable
+              required
+              :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+              @click:append-inner="showPassword = !showPassword"
+          />
+          <v-btn
+              color="success"
+              type="submit"
+              block
+              class="login-button"
+          >
+            {{ $t("login.button_login") }}
+          </v-btn>
+        </v-form>
+      </v-card-text>
+      <v-divider></v-divider>
+      <v-card-actions class="actions">
+        <RouterLink to="/forgot-password" class="forgot-password-link">
+          {{ $t("login.forgot_password") }}
+        </RouterLink>
+        <RouterLink to="/register">
+          <v-btn color="primary" outlined>
+            {{ $t("login.button_signup") }}
+          </v-btn>
+        </RouterLink>
+      </v-card-actions>
+    </v-card>
   </v-container>
 </template>
 
 <style scoped>
 .container {
-  max-width: 360px;
+  max-width: 400px;
   margin: auto;
+  padding: 20px;
+}
+
+.login-card {
+  padding: 20px;
+  border-radius: 8px;
 }
 
 .title {
   text-align: center;
+  font-size: 24px;
+  font-weight: bold;
 }
 
-.buttons {
+.login-button {
+  margin-top: 20px;
+}
+
+.actions {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.forgot-password-link {
+  font-size: 14px;
+  text-decoration: none;
 }
 </style>
