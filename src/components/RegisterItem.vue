@@ -13,6 +13,7 @@ const readAgreement = ref(false);
 const showPassword1 = ref(false);
 const showPassword2 = ref(false);
 const errors = ref({});
+const showSuccessScreen = ref(false);
 
 function isValidEmail(email) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -40,8 +41,8 @@ async function signup() {
     };
     AuthService.register(user)
         .then(() => {
-          toast.success('¡Registro exitoso!', { autoClose: 2000 });
-          setTimeout(() => router.push('/login'), 2000);
+          toast.success('Registro exitoso, por favor revise su casilla de correo para verificarlo antes de iniciar sesión', { autoClose: 3000 });
+          showSuccessScreen.value = true;
         })
         .catch(err => {
           Object.keys(err?.response?.data).forEach(k => {
@@ -54,33 +55,37 @@ async function signup() {
 
 <template>
   <v-container max-width="400px">
-    <h1 class="text-center mb-4">{{ $t("register.title") }}</h1>
-    <v-form @submit.prevent="signup">
-      <v-text-field v-model="username" :label="$t('register.username_field')" :error-messages="errors.username" />
-      <v-text-field v-model="email" :label="$t('register.email_field')" :error-messages="errors.email" />
-
-      <v-text-field
-          v-model="password1"
-          :label="$t('register.password1')"
-          :type="showPassword1 ? 'text' : 'password'"
-          :error-messages="errors.password1"
-          :append-inner-icon="showPassword1 ? 'mdi-eye' : 'mdi-eye-off'"
-          @click:append-inner="showPassword1 = !showPassword1"
-      />
-
-      <v-text-field
-          v-model="password2"
-          :label="$t('register.password2')"
-          :type="showPassword2 ? 'text' : 'password'"
-          :error-messages="errors.password2"
-          :append-inner-icon="showPassword2 ? 'mdi-eye' : 'mdi-eye-off'"
-          @click:append-inner="showPassword2 = !showPassword2"
-      />
-
-      <v-checkbox v-model="readAgreement" :label="$t('register.checkbox')" :error-messages="errors.readAgreement" />
-
-      <v-btn block color="primary" type="submit">{{ $t("register.button_signup") }}</v-btn>
-      <v-btn block color="secondary" to="/login" variant="text">{{ $t("register.button_login") }}</v-btn>
-    </v-form>
+    <template v-if="showSuccessScreen">
+      <h1 class="text-center mb-4">{{ $t("register.success_title") }}</h1>
+      <p class="text-center">{{ $t("register.success_message") }}</p>
+      <hr>
+      <v-btn block color="primary" @click="router.push('/login')">{{ $t("register.go_home") }}</v-btn>
+    </template>
+    <template v-else>
+      <h1 class="text-center mb-4">{{ $t("register.title") }}</h1>
+      <v-form @submit.prevent="signup">
+        <v-text-field v-model="username" :label="$t('register.username_field')" :error-messages="errors.username" />
+        <v-text-field v-model="email" :label="$t('register.email_field')" :error-messages="errors.email" />
+        <v-text-field
+            v-model="password1"
+            :label="$t('register.password1')"
+            :type="showPassword1 ? 'text' : 'password'"
+            :error-messages="errors.password1"
+            :append-inner-icon="showPassword1 ? 'mdi-eye' : 'mdi-eye-off'"
+            @click:append-inner="showPassword1 = !showPassword1"
+        />
+        <v-text-field
+            v-model="password2"
+            :label="$t('register.password2')"
+            :type="showPassword2 ? 'text' : 'password'"
+            :error-messages="errors.password2"
+            :append-inner-icon="showPassword2 ? 'mdi-eye' : 'mdi-eye-off'"
+            @click:append-inner="showPassword2 = !showPassword2"
+        />
+        <v-checkbox v-model="readAgreement" :label="$t('register.checkbox')" :error-messages="errors.readAgreement" />
+        <v-btn block color="primary" type="submit">{{ $t("register.button_signup") }}</v-btn>
+        <v-btn block color="secondary" to="/login" variant="text">{{ $t("register.button_login") }}</v-btn>
+      </v-form>
+    </template>
   </v-container>
 </template>

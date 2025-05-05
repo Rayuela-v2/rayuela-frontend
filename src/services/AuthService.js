@@ -37,6 +37,10 @@ class AuthService extends RayuelaService {
     async recoverPassword(token, newPassword) {
         return this.post("/auth/recover-password", {token, newPassword})
     }
+
+    async verifyUser(token) {
+        return this.post("/auth/verify-email", {token})
+    }
 }
 
 export default new AuthService(); // Sinleton pattern

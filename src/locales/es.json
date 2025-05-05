@@ -36,7 +36,10 @@
         "checkbox": "Acepto los terminos y condiciones",
         "terms": "términos y condiciones",
         "button_signup": "Registrarse",
-        "button_login": "Ya tengo cuenta"
+        "button_login": "Ya tengo cuenta",
+        "go_home": "Ir al inicio",
+        "success_title": "¡Registro exitoso!",
+        "success_message": "Bienvenid@, por favor revise su casilla de correo para verificarlo antes de iniciar sesión"
     },
 
     "about": {
