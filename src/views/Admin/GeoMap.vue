@@ -52,7 +52,7 @@ const createAreaStyle = (feature) => {
 };
 
 function getTaskArrayFromFeature(feature) {
-  return props.tasks  ? props.tasks.filter(task => task.areaId === feature.getId()): [""];
+  return props.tasks  ? props.tasks.filter(task => task.areaGeoJSON.properties.id === feature.getId()): [""];
 }
 
 function tasksForFeature(feature) {

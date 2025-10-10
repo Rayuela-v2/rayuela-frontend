@@ -221,8 +221,10 @@ const deleteTask = (task) => {
 
 
 const saveAllTasks = async () => {
+  const projectId = route.params.projectId;
+  console.log('projectid:',route)
   try {
-    await TaskService.bulkSave(tasks.value.map(t => ({...t, projectId: project.value._id})), project.value._id);
+    await TaskService.bulkSave(tasks.value.map(t => ({...t, projectId})),projectId);
     toast.success('Tareas guardadas con éxito');
     setTimeout(() => {
       router.back()

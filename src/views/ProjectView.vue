@@ -153,7 +153,7 @@ const updateSelectedArea = (areaId) => {
 
 const filteredTasks = computed(() => {
   if (!filterAreaId.value) return tasks.value;
-  return tasks.value.filter(task => task.areaId === filterAreaId.value);
+  return tasks.value.filter(task => task.areaGeoJSON.properties.id === filterAreaId.value);
 });
 
 const formattedTasks = computed(() => {

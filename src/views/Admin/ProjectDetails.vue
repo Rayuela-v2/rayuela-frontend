@@ -76,7 +76,8 @@
           </tbody>
         </v-simple-table>
       </CollapsableSection>
-
+      <CollapsableSection title="Tareas" @click="taskSectionClick">
+      </CollapsableSection>
       <v-btn type="submit" variant="elevated" color="primary" width="100%" :disabled="hasInvalidTimeIntervals">
         {{ isNew ? 'Crear' : 'Actualizar' }}
       </v-btn>
@@ -90,9 +91,9 @@ import { useRoute } from 'vue-router';
 import ProjectsService from '@/services/ProjectsService';
 import { toast } from 'vue3-toastify';
 import CollapsableSection from '@/components/utils/CollapsableSection.vue';
-import router from "@/router";
 import GeoMap from "@/views/Admin/GeoMap.vue";
 import BreadCrumb from "@/components/utils/BreadCrumb.vue";
+import router from "@/router";
 
 const route = useRoute();
 const project = ref({
@@ -112,6 +113,19 @@ const newTaskType = ref('');
 const isNew = ref(false);
 const gamificationDialog = ref(false);
 
+const taskSectionClick = () => {
+  saveProject().then((project) => {
+    router.push(`/admin/project/${project._id}/tasks`)
+  })
+}
+// Validar si un intervalo de tiempo es válido
+const isValidInterval = (interval) => {
+  return interval.name.trim() !== '' &&
+      interval.time.start >= 0 && interval.time.end > interval.time.start &&
+      interval.days.length > 0;
+};
+
+// Computed para saber si hay intervalos de tiempo inválidos
 const hasInvalidTimeIntervals = computed(() => {
   return project.value.timeIntervals.some(interval => !isValidInterval(interval));
 });
@@ -133,6 +147,25 @@ const removeTaskType = (index) => {
   project.value.taskTypes.splice(index, 1);
   toast.info('Tarea eliminada');
 };
+
+
+const saveProject = async () => {
+  if (isNew.value) {
+    return ProjectsService.createProject(project.value).then((r) => {
+      toast.success('Proyecto creado exitosamente')
+      toast.success('Proyecto creado exitosamente');
+      return r;
+    });
+  } else {
+    return ProjectsService.updateProject(project.value).then((r) => {
+      toast.success('Proyecto actualizado exitosamente')
+      return r
+      toast.success('Proyecto actualizado exitosamente');
+      return r;
+    });
+  }
+};
+
 
 onMounted(async () => {
   const projectId = route.params.projectId;
