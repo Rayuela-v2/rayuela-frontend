@@ -1,12 +1,20 @@
-# Etapa 1: construir el proyecto
-FROM node:20 AS build
+# Usa una imagen base de Node.js
+FROM node:20
 
+# Establece el directorio de trabajo
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
 
-# Etapa 2: copiar build para servir con Nginx
-FROM nginx:stable-alpine
-COPY --from=build /app/dist /usr/share/nginx/html
+# Copia los archivos de dependencias
+COPY package*.json ./
+
+# Instala las dependencias
+RUN npm install
+
+# Copia el resto del código fuente
+COPY . .
+
+# Expone el puerto 3000
+EXPOSE 5173
+
+# Comando para iniciar la app
+CMD ["npm", "run", "dev"]
