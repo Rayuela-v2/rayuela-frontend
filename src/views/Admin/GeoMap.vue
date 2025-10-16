@@ -183,7 +183,8 @@ const initializeMap = () => {
       props.tasks && setTooltipContentToAreas(map, vectorSource);
       const extent = vectorSource.getExtent();
       map.value.getView().fit(extent, {padding: [20, 20, 20, 20], maxZoom: 18});
-      addCurrentLocationToMap();
+      console.log(props)
+      props.visualization && addCurrentLocationToMap();
     } catch (error) {
       console.error('Error inicializando el mapa:', error.message);
       toast.error(error.message);
