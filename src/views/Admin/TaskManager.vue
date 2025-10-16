@@ -115,7 +115,7 @@ const editingIndex = ref(null);
 
 onMounted(async () => {
   project.value = await ProjectsService.getProjectById(projectId);
-  tasks.value = (await TaskService.getTaskForProject(projectId));
+  tasks.value = (await TaskService.getTaskForProject(projectId) || []);
   taskTypes.value = project.value.taskTypes;
   timeIntervals.value = project.value.timeIntervals.map(ti => ti.name);
   areas.value = project.value.areas.features.map(f => f.properties.id);
@@ -198,6 +198,7 @@ const generateTasks = () => {
           areaId: area,
           type: type
         };
+        console.log(tasks.value)
         tasks.value = tasks.value.concat([newTask]);
       });
     });
