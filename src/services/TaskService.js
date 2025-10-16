@@ -8,6 +8,10 @@ class TaskService extends RayuelaService {
     async bulkSave(tasks, projectId) {
         return this.post(`/task/project/${projectId}/bulk`, tasks);
     }
+
+    removeUselessTasks(projectId) {
+        return this.delete(`/task/project/${projectId}/useless`);
+    }
 }
 
 export default new TaskService(); // Sinleton pattern

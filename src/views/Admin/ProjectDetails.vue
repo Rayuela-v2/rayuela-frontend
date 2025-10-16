@@ -86,8 +86,9 @@
           Añadir nuevo intervalo de tiempo
         </v-btn>
 
-        <CollapsableSection style="background: whitesmoke; padding: 2em" v-for="(interval, index) in project.timeIntervals"
-                :key="index" class="mb-4" :title="interval.name || 'Nuevo Intervalo'">
+        <CollapsableSection style="background: whitesmoke; padding: 2em"
+                            v-for="(interval, index) in project.timeIntervals"
+                            :key="index" class="mb-4" :title="interval.name || 'Nuevo Intervalo'">
           <v-text-field label="Nombre del intervalo" v-model="interval.name" required/>
 
           <v-row>
@@ -151,6 +152,7 @@ import CollapsableSection from '@/components/utils/CollapsableSection.vue';
 import GeoMap from "@/views/Admin/GeoMap.vue";
 import BreadCrumb from "@/components/utils/BreadCrumb.vue";
 import router from "@/router";
+import TaskService from "@/services/TaskService";
 
 const route = useRoute();
 const project = ref({
@@ -209,8 +211,8 @@ const addNewTaskType = () => {
 };
 
 const removeTaskType = (index) => {
+  confirm('Si borras un tipo de tarea se eliminaran todas las tareas que lo contienen, quieres continuar?')
   project.value.taskTypes.splice(index, 1);
-  toast.info('Tarea eliminada');
 };
 
 // Validar si un intervalo de tiempo es válido
@@ -229,6 +231,7 @@ const addNewTimeInterval = () => {
 };
 
 const removeTimeInterval = (index) => {
+  confirm('Si borras un intervalo de tiempo se eliminaran todas las tareas que lo contienen, quieres continuar?')
   project.value.timeIntervals.splice(index, 1);
   toast.info('Intervalo eliminado');
 };
@@ -236,13 +239,19 @@ const removeTimeInterval = (index) => {
 const saveProject = async () => {
   if (isNew.value) {
     return ProjectsService.createProject(project.value).then((r) => {
-      toast.success('Proyecto creado exitosamente')
       toast.success('Proyecto creado exitosamente');
       return r;
     });
   } else {
-    return ProjectsService.updateProject(project.value).then((r) => {
-      toast.success('Proyecto actualizado exitosamente')
+    // Divide the payload to avoid payload too large
+    const {areas, ...projectWithoutAreas} = project.value;
+    return Promise.all([
+      ProjectsService.updateProject(projectWithoutAreas),
+      ProjectsService.updateProject({id: project.value.id, areas}),
+    ]).then(([r]) => {
+      toast.success('Proyecto actualizado exitosamente');
+      TaskService.removeUselessTasks(project.value.id)
+          .then(res => res && toast.info('Se eliminaron ' + res + ' tareas en consecuencia'))
       return r;
     });
   }

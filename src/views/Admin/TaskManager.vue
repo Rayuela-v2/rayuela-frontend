@@ -1,8 +1,11 @@
 <template>
   <v-container>
-    <BreadCrumb items="taskManagerPath" />
+    <BreadCrumb items="taskManagerPath"/>
     <h1 class="mb-6">Gestión de Tareas</h1>
     <div style="display: flex; margin: 1em 0; justify-content: space-between;">
+      <v-btn color="error" @click="deleteAll" variant="text" :disabled="tasks.length === 0" class="mt-4">
+        Eliminar todas
+      </v-btn>
       <v-btn color="secondary" @click="generateTasks" :disabled="tasks.length !== 0" class="mt-4">
         Generar tareas automáticas
       </v-btn>
@@ -208,7 +211,7 @@ const generateTasks = () => {
 
 const duplicateTask = (task, i) => {
   const newTask = {...task, name: `${task.name} (Duplicado)`, _id: null};
-  tasks.value.splice(i,0,newTask);
+  tasks.value.splice(i, 0, newTask);
   toast.success(`Tarea duplicada: ${newTask.name}`);
 };
 
@@ -216,16 +219,24 @@ const deleteTask = (task) => {
   const index = tasks.value.indexOf(task);
   if (index > -1) {
     tasks.value.splice(index, 1);
-    toast.info('Tarea eliminada');
+    toast.info('Tarea eliminada', { autoClose: 200 } );
+  }
+};
+
+const deleteAll = async () => {
+  if (confirm('¿Estás seguro de que deseas eliminar todas las tareas?')) {
+    tasks.value = [];
+    await TaskService.bulkSave([], projectId);
+    toast.info('Todas las tareas han sido eliminadas');
   }
 };
 
 
 const saveAllTasks = async () => {
   const projectId = route.params.projectId;
-  console.log('projectid:',route)
+  console.log('projectid:', route)
   try {
-    await TaskService.bulkSave(tasks.value.map(t => ({...t, projectId})),projectId);
+    await TaskService.bulkSave(tasks.value.map(t => ({...t, projectId})), projectId);
     toast.success('Tareas guardadas con éxito');
     setTimeout(() => {
       router.back()
