@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, ref, watch} from 'vue';
+import {onMounted, onUnmounted, ref, watch} from 'vue';
 import 'ol/ol.css';
 import {Map, Overlay, View} from 'ol';
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer';
@@ -101,48 +101,69 @@ const setTooltipContentToAreas = (map, vectorSource) => {
     }
   });
 };
+
 const addCurrentLocationToMap = () => {
   if (!map.value) return;
   if (!navigator.geolocation) {
     toast.warning("La geolocalización no está disponible en este navegador.");
     return;
   }
-  navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const coords = fromLonLat([position.coords.longitude, position.coords.latitude]);
-        const marker = new VectorLayer({
-          source: new VectorSource({
-            features: [
-              new Feature({
-                geometry: new Point(coords),
-              }),
-            ],
-          }),
-          style: new Style({
-            image: new Circle({
-              radius: 7,
-              fill: new Fill({color: 'lightblue'}),
-              stroke: new Stroke({color: 'white', width: 2}),
-            }),
-            text: new Text({
-              text: 'Tu ubicación',
-              font: '12px Calibri,sans-serif',
-              fill: new Fill({color: '#000'}),
-              stroke: new Stroke({color: '#fff', width: 2}),
-              offsetY: -15
-            })
-          }),
-        });
-        map.value.addLayer(marker);
-        map.value.getView().setCenter(coords);
-        map.value.getView().setZoom(15);
-      },
-      () => {
-        toast.warning("No se pudo obtener la ubicación actual.");
-      }
-  );
-};
 
+  let markerLayer = null;
+
+  const updateLocation = () => {
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const coords = fromLonLat([position.coords.longitude, position.coords.latitude]);
+          const marker = new VectorLayer({
+            source: new VectorSource({
+              features: [
+                new Feature({
+                  geometry: new Point(coords),
+                }),
+              ],
+            }),
+            style: new Style({
+              image: new Circle({
+                radius: 7,
+                fill: new Fill({color: 'lightblue'}),
+                stroke: new Stroke({color: 'white', width: 2}),
+              }),
+              text: new Text({
+                text: 'Tu ubicación',
+                font: '12px Calibri,sans-serif',
+                fill: new Fill({color: '#000'}),
+                stroke: new Stroke({color: '#fff', width: 2}),
+                offsetY: -15
+              })
+            }),
+          });
+
+          // Elimina la capa anterior si existe
+          if (markerLayer) {
+            map.value.removeLayer(markerLayer);
+          }
+          markerLayer = marker;
+          map.value.addLayer(markerLayer);
+          map.value.getView().setCenter(coords);
+          map.value.getView().setZoom(15);
+        },
+        () => {
+          toast.warning("No se pudo obtener la ubicación actual.");
+        }
+    );
+  };
+
+  updateLocation();
+
+  // Actualiza la ubicación cada 15 segundos si está en modo visualización
+  if (props.visualization) {
+    if (addCurrentLocationToMap.intervalId) {
+      clearInterval(addCurrentLocationToMap.intervalId);
+    }
+    addCurrentLocationToMap.intervalId = setInterval(updateLocation, 15000);
+  }
+};
 const initializeMap = () => {
   if (!map.value && tab.value === 'map') {
     try {
@@ -193,6 +214,14 @@ const initializeMap = () => {
 };
 onMounted(() => {
   initializeMap();
+  // Limpia el intervalo al desmontar el componente
+  if (props.visualization) {
+    onUnmounted(() => {
+      if (addCurrentLocationToMap.intervalId) {
+        clearInterval(addCurrentLocationToMap.intervalId);
+      }
+    });
+  }
 });
 
 watch(area, (newArea) => {
