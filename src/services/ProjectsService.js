@@ -3,7 +3,7 @@ import RayuelaService from "@/services/RayuelaService";
 class ProjectsService extends RayuelaService {
     async getProjects() {
         if (localStorage.getItem('role')!== 'Admin') {
-            return this.get(`/volunteer/projects/`)
+            return this.get(`/volunteer/projects/`).then((r) => r.filter(p=>p.available))
         }
     }
 
