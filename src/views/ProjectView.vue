@@ -5,6 +5,7 @@
     <!-- Áreas del Proyecto -->
     <GeoMap :visualization="true" v-if="project.areas" :tasks="tasks" :area="project.areas"
             @selected-area="updateSelectedArea"/>
+    <small>Puedes clickear las areas para filtrar tareas ☝️</small>
     <!-- Tabla de Tareas -->
     <div class="mt-6">
       <v-data-table
@@ -32,6 +33,7 @@
               <span :class="{ 'text-decoration-line-through': item.solved }">
               {{ item.formatted }}
               <v-badge v-if="item.solved" color="green" content="Resuelta" inline></v-badge>
+              <v-badge v-if="!item.solved" color='blue' content="Pendiente" inline></v-badge>
         </span>
             </td>
           </tr>
@@ -59,7 +61,9 @@
         />
         <v-tooltip :v-model="badgeTooltip === index" activator="parent">
     <span>
-      {{ badge.checkinsAmount }} checkins en área {{ badge.areaId }} tipo de tarea {{ badge.taskType }} intervalo {{ badge.timeIntervalId }}
+      {{ badge.checkinsAmount }} checkins en área {{ badge.areaId }} tipo de tarea {{
+        badge.taskType
+      }} intervalo {{ badge.timeIntervalId }}
     </span>
         </v-tooltip>
         <h6>{{ badge.name }}</h6>
@@ -72,6 +76,36 @@
   <v-container>
     <h1 class="mb-6">Detalle del Proyecto</h1>
 
+    <!-- Sección de explicación de intervalos de tiempo -->
+    <h2>Intervalos de tiempo</h2>
+    <v-card class="pa-4 mb-6">
+      <p>
+        Los intervalos de tiempo definen en qué días y horarios se pueden realizar tareas específicas en el proyecto.
+      </p>
+      <ul>
+        <li v-for="interval in project.timeIntervals" :key="interval._id">
+          <strong>{{ interval.name }}</strong>:
+          <span>
+                De {{ interval.time.start }}:00 a {{ interval.time.end }}:00 hs,
+                los días
+                <span v-for="(day, idx) in interval.days" :key="day">
+                  {{
+                    ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][day]
+                  }}<span v-if="idx < interval.days.length - 1">, </span>
+                </span>
+              </span>
+        </li>
+      </ul>
+    </v-card>
+
+    <h2>Tipos de tarea</h2>
+    <v-card class="pa-4 mb-6">
+      <ul>
+        <li v-for="(type, idx) in project.taskTypes" :key="idx">
+          <strong>{{ type }}</strong>
+        </li>
+      </ul>
+    </v-card>
     <!-- Información del Proyecto -->
     <v-card class="pa-4 mb-6">
       <v-row>
