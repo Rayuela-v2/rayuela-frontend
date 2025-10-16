@@ -25,6 +25,7 @@ async function resetPassword() {
     await AuthService.recoverPassword(token, newPassword.value);
     loading.value = false;
     toast.success("Contraseña restablecida con éxito", { autoClose: 3000 });
+    setTimeout(() => window.location.href = "/login", 3000)
   } catch (error) {
     loading.value = false;
     toast.error("Error al restablecer la contraseña", { autoClose: 3000 });

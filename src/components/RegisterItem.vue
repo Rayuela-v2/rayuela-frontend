@@ -1,7 +1,7 @@
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { toast } from "vue3-toastify";
+import {ref} from 'vue';
+import {useRouter} from 'vue-router';
+import {toast} from "vue3-toastify";
 import AuthService from "@/services/AuthService";
 
 const router = useRouter();
@@ -41,12 +41,14 @@ async function signup() {
     };
     AuthService.register(user)
         .then(() => {
-          toast.success('Registro exitoso, por favor revise su casilla de correo para verificarlo antes de iniciar sesión', { autoClose: 3000 });
+          toast.success('Registro exitoso, por favor revise su casilla de correo para verificarlo antes de iniciar sesión', {autoClose: 3000});
           showSuccessScreen.value = true;
+          setTimeout(() =>
+              window.location.href = "/login", 3000)
         })
         .catch(err => {
           Object.keys(err?.response?.data).forEach(k => {
-            toast.error(err.response.data[k], { autoClose: 3000 });
+            toast.error(err.response.data[k], {autoClose: 3000});
           });
         });
   }
@@ -64,8 +66,8 @@ async function signup() {
     <template v-else>
       <h1 class="text-center mb-4">{{ $t("register.title") }}</h1>
       <v-form @submit.prevent="signup">
-        <v-text-field v-model="username" :label="$t('register.username_field')" :error-messages="errors.username" />
-        <v-text-field v-model="email" :label="$t('register.email_field')" :error-messages="errors.email" />
+        <v-text-field v-model="username" :label="$t('register.username_field')" :error-messages="errors.username"/>
+        <v-text-field v-model="email" :label="$t('register.email_field')" :error-messages="errors.email"/>
         <v-text-field
             v-model="password1"
             :label="$t('register.password1')"
@@ -82,7 +84,7 @@ async function signup() {
             :append-inner-icon="showPassword2 ? 'mdi-eye' : 'mdi-eye-off'"
             @click:append-inner="showPassword2 = !showPassword2"
         />
-        <v-checkbox v-model="readAgreement" :label="$t('register.checkbox')" :error-messages="errors.readAgreement" />
+        <v-checkbox v-model="readAgreement" :label="$t('register.checkbox')" :error-messages="errors.readAgreement"/>
         <v-btn block color="primary" type="submit">{{ $t("register.button_signup") }}</v-btn>
         <v-btn block color="secondary" to="/login" variant="text">{{ $t("register.button_login") }}</v-btn>
       </v-form>
