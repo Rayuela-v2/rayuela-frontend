@@ -185,6 +185,10 @@ const taskSectionClick = () => {
     router.push(`/admin/project/${project._id}/tasks`)
   })
 }
+const updateProjectAreas = (newAreas) => {
+  project.value.areas = newAreas;
+  toast.success('Áreas actualizadas correctamente');
+};
 
 // Computed para saber si hay intervalos de tiempo inválidos
 const hasInvalidTimeIntervals = computed(() => {
