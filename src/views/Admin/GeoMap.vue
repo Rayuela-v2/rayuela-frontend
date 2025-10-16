@@ -56,6 +56,24 @@ const createAreaStyle = (feature) => {
   });
 };
 
+function getTextCurrentLocation(features, userCoords) {
+  // userCoords debe ser [x, y] en proyección EPSG:3857
+  if (!userCoords) {
+    return props.visualization ? "Tu ubicación actual (actualiza cada 15s)" : "Tu ubicación actual";
+  }
+  // Verifica si el usuario está dentro de algún área
+  const insideFeature = features.find(feature => {
+    const geom = feature.getGeometry();
+    return geom && typeof geom.intersectsCoordinate === "function"
+      ? geom.intersectsCoordinate(userCoords)
+      : false;
+  });
+  if (insideFeature) {
+    return `Estás dentro del área "${insideFeature.getId()}"`;
+  }
+  return "Tu ubicación actual";
+}
+
 function getTaskArrayFromFeature(feature) {
   return props.tasks ? props.tasks.filter(task => task.areaGeoJSON.properties.id === feature.getId()) : [""];
 }
@@ -102,7 +120,7 @@ const setTooltipContentToAreas = (map, vectorSource) => {
   });
 };
 
-const addCurrentLocationToMap = () => {
+const addCurrentLocationToMap = (features) => {
   if (!map.value) return;
   if (!navigator.geolocation) {
     toast.warning("La geolocalización no está disponible en este navegador.");
@@ -130,7 +148,7 @@ const addCurrentLocationToMap = () => {
                 stroke: new Stroke({color: 'white', width: 2}),
               }),
               text: new Text({
-                text: 'Tu ubicación',
+                text: getTextCurrentLocation(features, coords),
                 font: '12px Calibri,sans-serif',
                 fill: new Fill({color: '#000'}),
                 stroke: new Stroke({color: '#fff', width: 2}),
@@ -205,7 +223,7 @@ const initializeMap = () => {
       const extent = vectorSource.getExtent();
       map.value.getView().fit(extent, {padding: [20, 20, 20, 20], maxZoom: 18});
       console.log(props)
-      props.visualization && addCurrentLocationToMap();
+      props.visualization && addCurrentLocationToMap(features);
     } catch (error) {
       console.error('Error inicializando el mapa:', error.message);
       toast.error(error.message);
