@@ -132,9 +132,9 @@ const clearFilter = () => {
 
 const subscribe = () => {
   ProjectsService.toggleSubscription(route.params.projectId)
-      .then(() => {
+      .then(async () => {
         toast.success("Inscripción exitosa");
-        project.value = {...project, user: {...project.value.user, isSubscribed: true}};
+        project.value = await ProjectsService.getProjectById(route.params.projectId);
       });
 }
 
