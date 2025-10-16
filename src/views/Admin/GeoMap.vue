@@ -5,9 +5,14 @@ import {Map, Overlay, View} from 'ol';
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer';
 import {OSM, Vector as VectorSource} from 'ol/source';
 import GeoJSON from 'ol/format/GeoJSON';
-import {fromLonLat} from 'ol/proj';
 import {Style, Fill, Stroke, Text} from 'ol/style';
 import {toast} from "vue3-toastify";
+import {fromLonLat} from 'ol/proj';
+import 'ol/geom/Point';
+import 'ol/style/Circle';
+import Feature from 'ol/Feature';
+import Point from 'ol/geom/Point';
+import Circle from 'ol/style/Circle';
 
 const props = defineProps({
   area: {
@@ -35,11 +40,11 @@ const createAreaStyle = (feature) => {
       width: 2
     }),
     fill: new Fill({
-      color: getTaskArrayFromFeature(feature).length > 0 ? 'rgba(0, 0, 255, 0.1)': 'rgba(0, 0, 255, 0.06)',
+      color: getTaskArrayFromFeature(feature).length > 0 ? 'rgba(0, 0, 255, 0.1)' : 'rgba(0, 0, 255, 0.06)',
     }),
     text: new Text({
       font: '12px Calibri,sans-serif',
-      text: `A${feature.getId()}`,
+      text: `${feature.getId()}`,
       fill: new Fill({
         color: '#000'
       }),
@@ -52,7 +57,7 @@ const createAreaStyle = (feature) => {
 };
 
 function getTaskArrayFromFeature(feature) {
-  return props.tasks  ? props.tasks.filter(task => task.areaGeoJSON.properties.id === feature.getId()): [""];
+  return props.tasks ? props.tasks.filter(task => task.areaGeoJSON.properties.id === feature.getId()) : [""];
 }
 
 function tasksForFeature(feature) {
@@ -96,6 +101,48 @@ const setTooltipContentToAreas = (map, vectorSource) => {
     }
   });
 };
+const addCurrentLocationToMap = () => {
+  if (!map.value) return;
+  if (!navigator.geolocation) {
+    toast.warning("La geolocalización no está disponible en este navegador.");
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const coords = fromLonLat([position.coords.longitude, position.coords.latitude]);
+        const marker = new VectorLayer({
+          source: new VectorSource({
+            features: [
+              new Feature({
+                geometry: new Point(coords),
+              }),
+            ],
+          }),
+          style: new Style({
+            image: new Circle({
+              radius: 7,
+              fill: new Fill({color: 'lightblue'}),
+              stroke: new Stroke({color: 'white', width: 2}),
+            }),
+            text: new Text({
+              text: 'Tu ubicación',
+              font: '12px Calibri,sans-serif',
+              fill: new Fill({color: '#000'}),
+              stroke: new Stroke({color: '#fff', width: 2}),
+              offsetY: -15
+            })
+          }),
+        });
+        map.value.addLayer(marker);
+        map.value.getView().setCenter(coords);
+        map.value.getView().setZoom(15);
+      },
+      () => {
+        toast.warning("No se pudo obtener la ubicación actual.");
+      }
+  );
+};
+
 const initializeMap = () => {
   if (!map.value && tab.value === 'map') {
     try {
@@ -136,6 +183,7 @@ const initializeMap = () => {
       props.tasks && setTooltipContentToAreas(map, vectorSource);
       const extent = vectorSource.getExtent();
       map.value.getView().fit(extent, {padding: [20, 20, 20, 20], maxZoom: 18});
+      addCurrentLocationToMap();
     } catch (error) {
       console.error('Error inicializando el mapa:', error.message);
       toast.error(error.message);
@@ -154,7 +202,7 @@ watch(area, (newArea) => {
     });
 
     features.forEach((feature) => {
-      feature.setId(`A${feature.getProperties().id}`);
+      feature.setId(`${feature.getProperties().id}`);
       feature.setStyle(createAreaStyle(feature));
     });
 
@@ -198,6 +246,11 @@ const isValidGeoJSON = (geojson) => {
   }
   if (!geojson.features.every((feature) => feature.properties && feature.properties.id)) {
     toast.warning("Algun campo feature del geoJSON no tiene id");
+  }
+
+  const availableTypes = ['Polygon', 'Feature'];
+  if (!geojson.features.some((feature) => availableTypes.includes(feature.geometry.type))) {
+    toast.error("Todas las areas deben ser de tipo Polygon o Feature");
   }
 
   return (
