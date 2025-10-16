@@ -1,6 +1,5 @@
 <script setup>
 import {computed} from 'vue';
-import UserPFP from "@/components/utils/UserPFP.vue";
 
 const props = defineProps({
   leaderboard: {
@@ -29,6 +28,7 @@ const leaderboardData = computed(() =>
         { title: 'Puntuación', value: 'score' }
       ]"
         :items="leaderboardData"
+        :no-data-text="'Aún no hay datos para mostrar.'"
         class="elevation-2"
         dense
         hide-default-footer

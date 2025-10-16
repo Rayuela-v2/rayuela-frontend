@@ -97,6 +97,7 @@ const deleteScoreRule = async () => {
       <v-data-table
           :headers="badgeHeaders"
           :items="badges"
+          :no-data-text="'Aún no hay datos para mostrar.'"
           class="elevation-1"
       >
         <template v-slot:item.actions="{ item }">
@@ -143,6 +144,7 @@ const deleteScoreRule = async () => {
       <v-data-table
           :headers="scoreRuleHeaders"
           :items="scoreRules"
+          :no-data-text="'Aún no hay datos para mostrar.'"
           class="elevation-1"
       >
         <template v-slot:item.label="{ item }">

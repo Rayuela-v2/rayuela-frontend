@@ -8,13 +8,14 @@
         </v-col>
         <v-col cols="12" md="6">
           <h2>{{ project.name }}</h2>
-          <p class="text-subtitle-1 mb-3">{{ project.description }}</p>
+          <p class="text-subtitle-1 mb-3" v-html="project.description.replace(/\n/g, '<br>')"></p>
           <v-btn :href="project.web" target="_blank" color="primary" class="mb-2">
             Visitar Sitio Web
           </v-btn>
         </v-col>
       </v-row>
-    </v-card>    <hr>
+    </v-card>
+    <hr>
     <!-- Áreas del Proyecto -->
     <GeoMap :visualization="true" v-if="project.areas" :tasks="tasks" :area="project.areas"
             @selected-area="updateSelectedArea"/>
@@ -23,6 +24,7 @@
     <div class="mt-6">
       <v-data-table
           :items="formattedTasks"
+          :no-data-text="'Aún no hay datos para mostrar.'"
           :headers="taskHeaders"
           item-value="formatted"
           dense

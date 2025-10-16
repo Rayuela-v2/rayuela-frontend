@@ -104,6 +104,7 @@ const disableProject = async () => {
     <v-container>
       <v-data-table
           :headers="headers"
+          :no-data-text="'Aún no hay datos para mostrar.'"
           :items="projects"
           class="elevation-1"
       >

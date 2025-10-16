@@ -16,6 +16,7 @@
 
     <v-data-table
         :headers="headers"
+        :no-data-text="'Aún no hay tareas para mostrar.'"
         :items="tasks"
         item-value="name"
         class="elevation-1"

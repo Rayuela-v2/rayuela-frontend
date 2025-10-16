@@ -12,6 +12,7 @@
           :items-per-page="5"
           :search="search"
           class="elevation-1"
+          :no-data-text="'Aún no hay datos para mostrar.'"
           :sort-by="sortBy"
           :sort-desc="sortDesc"
           dense
