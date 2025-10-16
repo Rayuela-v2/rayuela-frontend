@@ -44,7 +44,7 @@
                 ></v-text-field>
               </v-col>
               <v-col cols="12" class="text-right">
-                <v-btn variant="plain" @click="toggleManualLocation">
+                <v-btn variant="plain" v-if="props.manualLocationEnabled" @click="toggleManualLocation">
                   {{ manualLocation ? 'Usar ubicación automática' : 'Ingresar ubicación manualmente' }}
                 </v-btn>
               </v-col>
@@ -141,6 +141,7 @@ const loadingLocation = ref(false);
 const loadingCheckin = ref(false); // Spinner para el registro de check-in
 const props = defineProps({
   taskTypes: Array,
+  manualLocationEnabled: Boolean
 });
 
 const form = ref({

@@ -22,6 +22,7 @@
           </template>
         </v-select>
         <v-switch label="Disponible" v-model="project.available" color="green"/>
+        <v-switch label="Checkins con ubicación manual" v-model="project.manualLocation" color="green"/>
       </v-card>
 
       <v-dialog v-model="gamificationDialog" max-width="500px">
@@ -144,7 +145,7 @@
 </template>
 
 <script setup>
-import {onMounted, ref, computed} from 'vue';
+import {computed, onMounted, ref} from 'vue';
 import {useRoute} from 'vue-router';
 import ProjectsService from '@/services/ProjectsService';
 import {toast} from 'vue3-toastify';
@@ -166,6 +167,7 @@ const project = ref({
   taskTypes: [],
   timeIntervals: [],
   gamificationStrategy: null,
+  manualLocation: false,
 });
 
 const daysOfWeek = [
@@ -272,11 +274,11 @@ onMounted(async () => {
       areas: [],
       taskTypes: [],
       timeIntervals: [],
-      gamificationStrategy: 'BASICA'
+      gamificationStrategy: 'BASICA',
+      manualLocation: false,
     };
   } else {
-    const p = await ProjectsService.getProjectById(projectId);
-    project.value = p;
+    project.value = await ProjectsService.getProjectById(projectId);
   }
 });
 </script>

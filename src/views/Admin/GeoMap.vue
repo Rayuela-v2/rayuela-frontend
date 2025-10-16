@@ -40,7 +40,7 @@ const createAreaStyle = (feature) => {
       width: 2
     }),
     fill: new Fill({
-      color: getTaskArrayFromFeature(feature).length > 0 ? 'rgba(0, 0, 255, 0.1)' : 'rgba(0, 0, 255, 0.06)',
+      color: getTaskArrayFromFeature(feature).length > 0 ? 'rgba(0, 0, 255, 0.3)' : 'rgba(0, 0, 255, 0.15)',
     }),
     text: new Text({
       font: '12px Calibri,sans-serif',
