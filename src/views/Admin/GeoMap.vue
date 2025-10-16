@@ -164,7 +164,6 @@ const addCurrentLocationToMap = (features) => {
           markerLayer = marker;
           map.value.addLayer(markerLayer);
           map.value.getView().setCenter(coords);
-          map.value.getView().setZoom(15);
         },
         () => {
           toast.warning("No se pudo obtener la ubicación actual.");
