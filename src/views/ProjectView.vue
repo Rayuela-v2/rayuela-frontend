@@ -1,7 +1,20 @@
 <template>
   <v-container v-if="project.user?.isSubscribed">
-    <h1 class="mb-6">{{ project.name }}</h1>
-    <hr>
+    <!-- Información del Proyecto -->
+    <v-card class="pa-4 mb-6">
+      <v-row>
+        <v-col cols="12" md="6">
+          <v-img :src="project.image" alt="Imagen del proyecto" class="mb-4" contain/>
+        </v-col>
+        <v-col cols="12" md="6">
+          <h2>{{ project.name }}</h2>
+          <p class="text-subtitle-1 mb-3">{{ project.description }}</p>
+          <v-btn :href="project.web" target="_blank" color="primary" class="mb-2">
+            Visitar Sitio Web
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-card>    <hr>
     <!-- Áreas del Proyecto -->
     <GeoMap :visualization="true" v-if="project.areas" :tasks="tasks" :area="project.areas"
             @selected-area="updateSelectedArea"/>
@@ -105,21 +118,6 @@
           <strong>{{ type }}</strong>
         </li>
       </ul>
-    </v-card>
-    <!-- Información del Proyecto -->
-    <v-card class="pa-4 mb-6">
-      <v-row>
-        <v-col cols="12" md="6">
-          <v-img :src="project.image" alt="Imagen del proyecto" class="mb-4" contain/>
-        </v-col>
-        <v-col cols="12" md="6">
-          <h2>{{ project.name }}</h2>
-          <p class="text-subtitle-1 mb-3">{{ project.description }}</p>
-          <v-btn :href="project.web" target="_blank" color="primary" class="mb-2">
-            Visitar Sitio Web
-          </v-btn>
-        </v-col>
-      </v-row>
     </v-card>
     <v-btn v-if="!project.user?.isSubscribed" color="green" block large @click="subscribe">
       <v-icon left size="large">mdi-account-plus</v-icon>
