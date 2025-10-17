@@ -542,29 +542,21 @@ const isValidGeoJSON = (geojson) => {
   width: 100%;
 }
 
-#error {
-  color: red;
-  font-weight: bold;
-}
-
-#map {
-  height: 400px;
-  width: 100%;
-}
-
 /* Fullscreen styles */
 .map-container.fullscreen {
   position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   width: 100% !important;
   height: 100% !important;
-  z-index: 2147483647999999999 !important;
-  background: white;
+  z-index: 10000;
 }
+
 .map-container.fullscreen #map {
   height: 100vh !important;
 }
+
+
 </style>
