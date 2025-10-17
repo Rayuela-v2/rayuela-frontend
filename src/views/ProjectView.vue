@@ -116,6 +116,7 @@
     <h2>Puntos</h2>
     <h3>Tienes {{ project.user.points }}pts</h3>
     <Leaderboard :leaderboard="leaderboard"/>
+    <UserCheckins :checkins="checkins"/>
     <h1 class="mb-6">Detalle del Proyecto</h1>
 
     <!-- Sección de explicación de intervalos de tiempo -->
@@ -167,10 +168,13 @@ import Leaderboard from '@/views/Leaderboard.vue';
 import RegisterCheckin from '@/components/RegisterCheckin.vue';
 import {toast} from "vue3-toastify";
 import GamificationService from "@/services/GamificationService";
+import CheckinService from "@/services/CheckinService";
+import UserCheckins from "@/components/UserCheckins.vue";
 
 const route = useRoute();
 const tasks = ref([]);
 const leaderboard = ref([]);
+const checkins = ref([]);
 const filterAreaId = ref(null);
 
 const badgeTooltip = ref(-1);
@@ -217,6 +221,7 @@ const taskHeaders = [
 const handleModalClosed = async () => {
   project.value = await ProjectsService.getProjectById(route.params.projectId);
   leaderboard.value = (await GamificationService.getLeaderboardFor(route.params.projectId))?.users;
+  checkins.value = await CheckinService.getByProject(route.params.projectId);
   tasks.value = await TaskService.getTaskForProject(route.params.projectId);
 };
 
@@ -252,6 +257,7 @@ const formattedTasks = computed(() => {
 onMounted(async () => {
   project.value = await ProjectsService.getProjectById(route.params.projectId);
   tasks.value = await TaskService.getTaskForProject(route.params.projectId);
+  checkins.value = await CheckinService.getByProject(route.params.projectId);
   leaderboard.value = (await GamificationService.getLeaderboardFor(route.params.projectId))?.users;
 });
 </script>
