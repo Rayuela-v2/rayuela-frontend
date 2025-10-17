@@ -1,5 +1,5 @@
 <template>
-  <v-container v-if="project.user?.isSubscribed">
+  <v-container>
     <!-- Información del Proyecto -->
     <v-card class="pa-4 mb-6">
       <v-row>
@@ -23,6 +23,8 @@
         </v-col>
       </v-row>
     </v-card>
+  </v-container>
+  <v-container v-if="project.user?.isSubscribed">
     <hr>
     <!-- Áreas del Proyecto -->
     <GeoMap :visualization="true" v-if="project.areas" :tasks="tasks" :area="project.areas"
@@ -96,8 +98,6 @@
     <h2>Puntos</h2>
     <h3>Tienes {{ project.user.points }}pts</h3>
     <Leaderboard :leaderboard="leaderboard"/>
-  </v-container>
-  <v-container>
     <h1 class="mb-6">Detalle del Proyecto</h1>
 
     <!-- Sección de explicación de intervalos de tiempo -->
@@ -130,7 +130,9 @@
         </li>
       </ul>
     </v-card>
-    <v-btn v-if="!project.user?.isSubscribed" color="green" block large @click="subscribe">
+  </v-container>
+  <v-container v-if="!project.user?.isSubscribed" >
+    <v-btn color="green" block large @click="subscribe">
       <v-icon left size="large">mdi-account-plus</v-icon>
       Inscribirse
     </v-btn>
