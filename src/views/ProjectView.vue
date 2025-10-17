@@ -190,6 +190,7 @@ const taskHeaders = [
 const handleModalClosed = async () => {
   project.value = await ProjectsService.getProjectById(route.params.projectId);
   leaderboard.value = (await GamificationService.getLeaderboardFor(route.params.projectId))?.users;
+  tasks.value = await TaskService.getTaskForProject(route.params.projectId);
 };
 
 const updateSelectedArea = (areaId) => {
