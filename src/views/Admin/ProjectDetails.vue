@@ -45,7 +45,7 @@
       <!-- Áreas -->
       <CollapsableSection title="Áreas">
         <p class="text-subtitle-1 mb-3">Define las áreas geográficas del proyecto</p>
-        <GeoMap v-if="project.areas" :area="project.areas" @update-area="updateProjectAreas"/>
+        <GeoMap v-if="project.areas" :area="project.areas" @update-area="updateProjectAreas" />
       </CollapsableSection>
 
       <CollapsableSection title="Tipos de Tareas">

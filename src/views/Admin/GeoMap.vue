@@ -22,6 +22,9 @@ const props = defineProps({
   tasks: {
     type: Array,
   },
+  checkins: {
+    type: Array,
+  },
   visualization: Boolean
 });
 
@@ -60,9 +63,6 @@ const createAreaStyle = (feature) => {
 
 function getTextCurrentLocation(features, userCoords) {
   // userCoords debe ser [x, y] en proyección EPSG:3857
-  if (!userCoords) {
-    return props.visualization ? "Tu ubicación actual (actualiza cada 15s)" : "Tu ubicación actual";
-  }
   // Verifica si el usuario está dentro de algún área
   const insideFeature = features.find(feature => {
     const geom = feature.getGeometry();
@@ -73,7 +73,7 @@ function getTextCurrentLocation(features, userCoords) {
   if (insideFeature) {
     return `Estás dentro del área "${insideFeature.getId()}"`;
   }
-  return "Tu ubicación actual";
+  return "";
 }
 
 function getTaskArrayFromFeature(feature) {
@@ -159,7 +159,7 @@ const addCurrentLocationToMap = (features) => {
 
           map.value.addLayer(marker);
           setTimeout(() => {
-            map.value.getLayers().removeAt(map.value.getLayers().getLength()-1);
+            map.value.getLayers().removeAt(map.value.getLayers().getLength() - 1);
           }, UPDATE_LOCATION_TIMEOUT);
         },
         () => {
@@ -178,6 +178,53 @@ const addCurrentLocationToMap = (features) => {
     addCurrentLocationToMap.intervalId = setInterval(updateLocation, UPDATE_LOCATION_TIMEOUT);
   }
 };
+
+function addCheckinsToMap(checkins) {
+  if (!map.value || !Array.isArray(checkins) || checkins.length === 0) return;
+  const features = checkins.map((c) => {
+    const lon = parseFloat(c.longitude);
+    const lat = parseFloat(c.latitude);
+    if (isNaN(lon) || isNaN(lat)) return null;
+    const coords = fromLonLat([lon, lat]);
+    const feature = new Feature({
+      geometry: new Point(coords)
+    });
+    feature.setId(c._id || `${lon}-${lat}`);
+
+    const hasContributes = !!c.contributesTo;
+
+    if (hasContributes) {
+      // Mostrar una tilde (check) cuando tiene contributesTo
+      feature.setStyle(new Style({
+        text: new Text({
+          text: '✔',
+          font: 'bold 18px Calibri, sans-serif',
+          fill: new Fill({ color: 'green' }),
+          stroke: new Stroke({ color: '#ffffff', width: 3 }),
+          offsetY: 0
+        })
+      }));
+    } else {
+      // Mostrar un círculo hueco rojo cuando no tiene contributesTo
+      feature.setStyle(new Style({
+        image: new Circle({
+          radius: 8,
+          fill: new Fill({ color: 'transparent' }),
+          stroke: new Stroke({ color: 'red', width: 2 })
+        })
+      }));
+    }
+
+    return feature;
+  }).filter(Boolean);
+  const source = new VectorSource({features});
+  const layer = new VectorLayer({source});
+  if (addCheckinsToMap.layer) {
+    map.value.removeLayer(addCheckinsToMap.layer);
+  }
+  addCheckinsToMap.layer = layer;
+  map.value.addLayer(layer);
+}
 
 const initializeMap = () => {
   if (!map.value && tab.value === 'map') {
@@ -221,6 +268,7 @@ const initializeMap = () => {
       map.value.getView().fit(extent, {padding: [20, 20, 20, 20], maxZoom: 18});
       console.log(props)
       props.visualization && addCurrentLocationToMap(features);
+      props.checkins && addCheckinsToMap(props.checkins);
     } catch (error) {
       console.error('Error inicializando el mapa:', error.message);
       toast.error(error.message);
@@ -349,9 +397,37 @@ const isValidGeoJSON = (geojson) => {
           title="Centrar en mi ubicación"
       >
         <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" fill="black" viewBox="0 0 24 24">
-          <path d="M12 20q-3.35 0-5.675-2.325Q4 15.35 4 12q0-3.35 2.325-5.675Q8.65 4 12 4q3.35 0 5.675 2.325Q20 8.65 20 12q0 3.35-2.325 5.675Q15.35 20 12 20Zm0-2q2.5 0 4.25-1.75T18 12q0-2.5-1.75-4.25T12 6q-2.5 0-4.25 1.75T6 12q0 2.5 1.75 4.25T12 18Zm0-6Zm0 2q-.825 0-1.413-.588Q10 12.825 10 12q0-.825.587-1.413Q11.175 10 12 10q.825 0 1.413.587Q14 11.175 14 12q0 .825-.587 1.412Q12.825 14 12 14Z"/>
+          <path
+              d="M12 20q-3.35 0-5.675-2.325Q4 15.35 4 12q0-3.35 2.325-5.675Q8.65 4 12 4q3.35 0 5.675 2.325Q20 8.65 20 12q0 3.35-2.325 5.675Q15.35 20 12 20Zm0-2q2.5 0 4.25-1.75T18 12q0-2.5-1.75-4.25T12 6q-2.5 0-4.25 1.75T6 12q0 2.5 1.75 4.25T12 18Zm0-6Zm0 2q-.825 0-1.413-.588Q10 12.825 10 12q0-.825.587-1.413Q11.175 10 12 10q.825 0 1.413.587Q14 11.175 14 12q0 .825-.587 1.412Q12.825 14 12 14Z"/>
         </svg>
       </button>
+
+      <!-- Leyenda / guía para usuarios -->
+      <div style="position: absolute; bottom: 10px; left: 10px; z-index: 12; background: rgba(255,255,255,0.95); border: 1px solid #ddd; padding: 8px 10px; border-radius: 6px; font-size: 13px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center;background:green;color:white;border-radius:3px;font-size:11px;">✔</span>
+          <span>Checkin exitoso</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="width:14px;height:14px;display:inline-block;border:2px solid red;border-radius:50%;box-sizing:border-box;"></span>
+          <span>Checkin sin contribución</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="width:12px;height:12px;border-radius:50%;background:lightblue;display:inline-block;"></span>
+          <span>Tu ubicación</span>
+        </div>
+
+        <!-- Leyenda para áreas -->
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="width:18px;height:14px;display:inline-block;background:rgba(0,0,255,0.3);border:2px solid #319FD3;border-radius:3px;box-sizing:border-box;"></span>
+          <span>Área con tareas</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="width:18px;height:14px;display:inline-block;background:rgba(0,0,255,0.15);border:2px solid lightgray;border-radius:3px;box-sizing:border-box;"></span>
+          <span>Área sin tareas</span>
+        </div>
+      </div>
+
       <div id="tooltip"
            style="position: absolute; background: white; border: 1px solid black; padding: 5px; display: none; pointer-events: none; font-size: 12px;"></div>
     </div>

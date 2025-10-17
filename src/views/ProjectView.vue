@@ -3,8 +3,10 @@
     <h1>{{project.name}}</h1>
     <hr>
     <!-- Áreas del Proyecto -->
-    <GeoMap :visualization="true" v-if="project.areas" :tasks="tasks" :area="project.areas"
-            @selected-area="updateSelectedArea"/>
+    <GeoMap :visualization="true"
+            v-if="project.areas" :checkins="checkins" :tasks="tasks" :area="project.areas"
+            @selected-area="updateSelectedArea"
+    />
     <small>Puedes clickear las areas para filtrar tareas ☝️</small>
     <!-- Tabla de Tareas -->
     <div class="mt-6">
