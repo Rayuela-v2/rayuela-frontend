@@ -85,15 +85,33 @@
             :class="{ 'grayscale': !badge.active }"
             @click="toggleTooltip(index)"
         />
-        <v-tooltip :v-model="badgeTooltip === index" activator="parent">
-    <span>
-      {{ badge.checkinsAmount }} checkins en área {{ badge.areaId }} tipo de tarea {{
-        badge.taskType
-      }} intervalo {{ badge.timeIntervalId }}
-    </span>
-        </v-tooltip>
         <h6>{{ badge.name }}</h6>
       </div>
+
+      <v-dialog v-model="showBadgeDialog" max-width="500">
+        <v-card v-if="selectedBadge">
+          <v-card-title class="headline">{{ selectedBadge.name }}</v-card-title>
+          <v-card-text>
+            <div style="display:flex; gap:16px; align-items:flex-start">
+              <img :src="selectedBadge.imageUrl" alt="" width="90" height="90" />
+              <div>
+                <p><strong>Reglas para ganarla:</strong></p>
+                <ul>
+                  <li>Cantidad de checkins: {{ selectedBadge.checkinsAmount }}</li>
+                  <li v-if="selectedBadge.mustContribute">(Tienen que resolver una tarea)</li>
+                  <li>Area: {{ selectedBadge.areaId }}</li>
+                  <li>Intervalo de tiempo: {{ selectedBadge.timeIntervalId }}</li>
+                  <li>Tipo de tarea: {{ selectedBadge.taskType }}</li>
+                </ul>
+              </div>
+            </div>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer />
+            <v-btn text @click="showBadgeDialog = false">Cerrar</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </div>
     <h2>Puntos</h2>
     <h3>Tienes {{ project.user.points }}pts</h3>
@@ -160,6 +178,15 @@ const badgeTooltip = ref(-1);
 const toggleTooltip = (index) => {
   badgeTooltip.value = index;
 };
+
+const showBadgeDialog = computed({
+  get: () => badgeTooltip.value !== -1,
+  set: (val) => { if (!val) badgeTooltip.value = -1; }
+});
+
+const selectedBadge = computed(() => {
+  return badgeTooltip.value === -1 ? null : project.value.user?.badges?.[badgeTooltip.value] ?? null;
+});
 
 const project = ref({
   name: '',
@@ -261,6 +288,7 @@ onMounted(async () => {
 }
 
 .badge-item img {
+  cursor: pointer;
   width: 60px;
   height: 60px;
   object-fit: cover;
