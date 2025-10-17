@@ -4,7 +4,7 @@
     <hr>
     <!-- Áreas del Proyecto -->
     <GeoMap :visualization="true"
-            v-if="project.areas && checkins.length" :checkins="checkins" :tasks="tasks" :area="project.areas"
+            v-if="project.areas && checkins !== null" :checkins="checkins" :tasks="tasks" :area="project.areas"
             @selected-area="updateSelectedArea"
     />
     <small>Puedes clickear las areas para filtrar tareas ☝️</small>
@@ -175,7 +175,7 @@ import UserCheckins from "@/components/UserCheckins.vue";
 const route = useRoute();
 const tasks = ref([]);
 const leaderboard = ref([]);
-const checkins = ref([]);
+const checkins = ref(null);
 const filterAreaId = ref(null);
 
 const badgeTooltip = ref(-1);
