@@ -114,7 +114,7 @@
                 los días
                 <span v-for="(day, idx) in interval.days" :key="day">
                   {{
-                    ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][day]
+                    ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][day - 1]
                   }}<span v-if="idx < interval.days.length - 1">, </span>
                 </span>
               </span>
