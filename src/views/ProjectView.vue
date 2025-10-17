@@ -12,6 +12,14 @@
           <v-btn :href="project.web" target="_blank" color="primary" class="mb-2">
             Visitar Sitio Web
           </v-btn>
+          <v-btn
+              color="blue"
+              class="mb-2 ml-2"
+              @click="shareProject"
+          >
+            <v-icon left>mdi-share</v-icon>
+            Compartir
+          </v-btn>
         </v-col>
       </v-row>
     </v-card>
@@ -190,6 +198,19 @@ const filteredTasks = computed(() => {
   if (!filterAreaId.value) return tasks.value;
   return tasks.value.filter(task => task.areaGeoJSON.properties.id === filterAreaId.value);
 });
+
+const shareProject = () => {
+  const text = `¡Mira este proyecto! ${project.value.name} - ${project.value.web}`;
+  if (navigator.share) {
+    navigator.share({
+      title: project.value.name,
+      text,
+      url: project.value.web
+    });
+  } else {
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  }
+};
 
 const formattedTasks = computed(() => {
   return filteredTasks.value.map(task => ({
