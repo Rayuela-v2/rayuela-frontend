@@ -1,7 +1,6 @@
 <script setup>
 import {onMounted, ref} from 'vue';
 import ProjectsService from "@/services/ProjectsService";
-import {toast} from "vue3-toastify";
 import router from "@/router";
 
 const projects_user = ref([]);
