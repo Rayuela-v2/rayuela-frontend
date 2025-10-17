@@ -25,6 +25,8 @@ const props = defineProps({
   visualization: Boolean
 });
 
+const UPDATE_LOCATION_TIMEOUT = 10000
+
 const emit = defineEmits(['update-area', 'selected-area']);
 
 const area = ref(props.area);
@@ -65,8 +67,8 @@ function getTextCurrentLocation(features, userCoords) {
   const insideFeature = features.find(feature => {
     const geom = feature.getGeometry();
     return geom && typeof geom.intersectsCoordinate === "function"
-      ? geom.intersectsCoordinate(userCoords)
-      : false;
+        ? geom.intersectsCoordinate(userCoords)
+        : false;
   });
   if (insideFeature) {
     return `Estás dentro del área "${insideFeature.getId()}"`;
@@ -127,8 +129,6 @@ const addCurrentLocationToMap = (features) => {
     return;
   }
 
-  let markerLayer = null;
-
   const updateLocation = () => {
     navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -157,13 +157,10 @@ const addCurrentLocationToMap = (features) => {
             }),
           });
 
-          // Elimina la capa anterior si existe
-          if (markerLayer) {
-            map.value.removeLayer(markerLayer);
-          }
-          markerLayer = marker;
-          map.value.addLayer(markerLayer);
-          map.value.getView().setCenter(coords);
+          map.value.addLayer(marker);
+          setTimeout(() => {
+            map.value.getLayers().removeAt(map.value.getLayers().getLength()-1);
+          }, UPDATE_LOCATION_TIMEOUT);
         },
         () => {
           toast.warning("No se pudo obtener la ubicación actual.");
@@ -178,9 +175,10 @@ const addCurrentLocationToMap = (features) => {
     if (addCurrentLocationToMap.intervalId) {
       clearInterval(addCurrentLocationToMap.intervalId);
     }
-    addCurrentLocationToMap.intervalId = setInterval(updateLocation, 15000);
+    addCurrentLocationToMap.intervalId = setInterval(updateLocation, UPDATE_LOCATION_TIMEOUT);
   }
 };
+
 const initializeMap = () => {
   if (!map.value && tab.value === 'map') {
     try {
@@ -268,6 +266,23 @@ watch(area, (newArea) => {
   }
 });
 
+const centerMapOnCurrentLocation = () => {
+  if (!map.value) return;
+  if (!navigator.geolocation) {
+    toast.warning("La geolocalización no está disponible en este navegador.");
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const coords = fromLonLat([position.coords.longitude, position.coords.latitude]);
+        map.value.getView().setCenter(coords);
+      },
+      () => {
+        toast.warning("No se pudo obtener la ubicación actual.");
+      }
+  );
+};
+
 const updateAreaFromJSON = (json) => {
   try {
     const parsedJSON = JSON.parse(json);
@@ -326,12 +341,25 @@ const isValidGeoJSON = (geojson) => {
       <v-tab value="map">Mapa</v-tab>
       <v-tab value="mapJSON" v-if="!visualization">GeoJSON</v-tab>
     </v-tabs>
+    <div style="position: relative; width: 100%; height: 400px;">
+      <div id="map" style="width: 100%; height: 400px;"></div>
+      <button
+          @click="centerMapOnCurrentLocation"
+          style="position: absolute; top: 10px; right: 10px; z-index: 10; background: white; border: none; border-radius: 50%; width: 40px; height: 40px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; cursor: pointer;"
+          title="Centrar en mi ubicación"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" fill="black" viewBox="0 0 24 24">
+          <path d="M12 20q-3.35 0-5.675-2.325Q4 15.35 4 12q0-3.35 2.325-5.675Q8.65 4 12 4q3.35 0 5.675 2.325Q20 8.65 20 12q0 3.35-2.325 5.675Q15.35 20 12 20Zm0-2q2.5 0 4.25-1.75T18 12q0-2.5-1.75-4.25T12 6q-2.5 0-4.25 1.75T6 12q0 2.5 1.75 4.25T12 18Zm0-6Zm0 2q-.825 0-1.413-.588Q10 12.825 10 12q0-.825.587-1.413Q11.175 10 12 10q.825 0 1.413.587Q14 11.175 14 12q0 .825-.587 1.412Q12.825 14 12 14Z"/>
+        </svg>
+      </button>
+      <div id="tooltip"
+           style="position: absolute; background: white; border: 1px solid black; padding: 5px; display: none; pointer-events: none; font-size: 12px;"></div>
+    </div>
 
     <v-card-text>
       <v-tabs-window v-model="tab">
         <v-tabs-window-item value="map">
           <v-container>
-            <div id="map" style="width: 100%; height: 400px;"></div>
             <div id="tooltip"
                  style="position: absolute; background: white; border: 1px solid black; padding: 5px; display: none; pointer-events: none; font-size: 12px;"></div>
           </v-container>
