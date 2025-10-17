@@ -545,18 +545,31 @@ const isValidGeoJSON = (geojson) => {
 /* Fullscreen styles */
 .map-container.fullscreen {
   position: fixed !important;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  z-index: 10000;
+  z-index: 10000 !important;
+  background: white;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Mantener los canvas y capas del mapa detrás */
+.map-container.fullscreen #map,
+.map-container.fullscreen #map * {
+  z-index: 1 !important;
+}
+
+/* Traer controles, botones y overlays por encima del mapa */
+.map-container.fullscreen > *:not(#map) {
+  z-index: 2147483647 !important;
 }
 
 .map-container.fullscreen #map {
   height: 100vh !important;
 }
-
 
 </style>
