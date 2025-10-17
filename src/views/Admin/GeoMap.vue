@@ -199,8 +199,8 @@ function addCheckinsToMap(checkins) {
         text: new Text({
           text: '✔',
           font: 'bold 18px Calibri, sans-serif',
-          fill: new Fill({ color: 'green' }),
-          stroke: new Stroke({ color: '#ffffff', width: 3 }),
+          fill: new Fill({color: 'green'}),
+          stroke: new Stroke({color: '#ffffff', width: 3}),
           offsetY: 0
         })
       }));
@@ -209,8 +209,8 @@ function addCheckinsToMap(checkins) {
       feature.setStyle(new Style({
         image: new Circle({
           radius: 8,
-          fill: new Fill({ color: 'transparent' }),
-          stroke: new Stroke({ color: 'red', width: 2 })
+          fill: new Fill({color: 'transparent'}),
+          stroke: new Stroke({color: 'red', width: 2})
         })
       }));
     }
@@ -279,13 +279,15 @@ const initializeMap = () => {
 onMounted(() => {
   initializeMap();
   const onFullscreenChange = () => {
-    isFullscreen.value = !!document.fullscreenElement;
+    isFullscreen.value = !!(document.fullscreenElement || document.webkitFullscreenElement);
     if (map.value) setTimeout(() => map.value.updateSize(), 200);
   };
   document.addEventListener('fullscreenchange', onFullscreenChange);
+  document.addEventListener('webkitfullscreenchange', onFullscreenChange);
   // Limpia el intervalo y listeners al desmontar el componente
   onUnmounted(() => {
     document.removeEventListener('fullscreenchange', onFullscreenChange);
+    document.removeEventListener('webkitfullscreenchange', onFullscreenChange);
     if (addCurrentLocationToMap.intervalId) {
       clearInterval(addCurrentLocationToMap.intervalId);
     }
@@ -340,21 +342,46 @@ const centerMapOnCurrentLocation = () => {
 const toggleFullscreen = async () => {
   if (!mapContainer.value) return;
   try {
-    if (!isFullscreen.value) {
+    const hasRequestAPI = mapContainer.value.requestFullscreen || mapContainer.value.webkitRequestFullscreen || mapContainer.value.msRequestFullscreen;
+    const hasExitAPI = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+
+    if (!isFullscreen.value && hasRequestAPI) {
       if (mapContainer.value.requestFullscreen) {
         await mapContainer.value.requestFullscreen();
       } else if (mapContainer.value.webkitRequestFullscreen) {
         await mapContainer.value.webkitRequestFullscreen();
+      } else if (mapContainer.value.msRequestFullscreen) {
+        await mapContainer.value.msRequestFullscreen();
       }
-    } else {
+      // isFullscreen se actualizará desde el listener de fullscreenchange
+    } else if (isFullscreen.value && hasExitAPI) {
       if (document.exitFullscreen) {
         await document.exitFullscreen();
       } else if (document.webkitExitFullscreen) {
         await document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) {
+        await document.msExitFullscreen();
       }
+    } else {
+      // Fallback para navegadores/móviles sin soporte: usar la clase CSS fullscreen
+      isFullscreen.value = !isFullscreen.value;
+      if (isFullscreen.value) {
+        mapContainer.value.classList.add('fullscreen');
+      } else {
+        mapContainer.value.classList.remove('fullscreen');
+      }
+      setTimeout(() => map.value && map.value.updateSize(), 200);
     }
   } catch (e) {
     console.error('Error cambiando pantalla completa:', e);
+    // Intentar fallback CSS si ocurre un error
+    isFullscreen.value = !isFullscreen.value;
+    if (isFullscreen.value) {
+      mapContainer.value.classList.add('fullscreen');
+    } else {
+      mapContainer.value.classList.remove('fullscreen');
+    }
+    setTimeout(() => map.value && map.value.updateSize(), 200);
   }
 };
 
@@ -416,7 +443,8 @@ const isValidGeoJSON = (geojson) => {
       <v-tab value="map">Mapa</v-tab>
       <v-tab value="mapJSON" v-if="!visualization">GeoJSON</v-tab>
     </v-tabs>
-    <div ref="mapContainer" :class="{fullscreen: isFullscreen}" class="map-container" style="position: relative; width: 100%; height: 400px;">
+    <div ref="mapContainer" :class="{fullscreen: isFullscreen}" class="map-container"
+         style="position: relative; width: 100%; height: 400px;">
       <div id="map" style="width: 100%; height: 100%;"></div>
 
       <button
@@ -436,19 +464,23 @@ const isValidGeoJSON = (geojson) => {
           style="position: absolute; top: 60px; right: 10px; z-index: 10; background: white; border: none; border-radius: 6px; padding: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); cursor: pointer;"
       >
         <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" fill="black" viewBox="0 0 24 24">
-          <path v-if="!isFullscreen" d="M7 14H5v4h4v-2H7v-2zm10 2v2h-2v4h4v-4h-2v-2zM5 5v4h2V7h2V5H5zm14 0h-4v2h2v2h2V5z"/>
+          <path v-if="!isFullscreen"
+                d="M7 14H5v4h4v-2H7v-2zm10 2v2h-2v4h4v-4h-2v-2zM5 5v4h2V7h2V5H5zm14 0h-4v2h2v2h2V5z"/>
           <path v-else d="M6 6h5V4H4v7h2V6zm12 0v5h2V4h-7v2h5zM6 18v-5H4v7h7v-2H6zm12-5h-5v2h5v5h2v-7h-2z"/>
         </svg>
       </button>
 
       <!-- Leyenda / guía para usuarios -->
-      <div style="position: absolute; bottom: 10px; left: 10px; z-index: 12; background: rgba(255,255,255,0.95); border: 1px solid #ddd; padding: 8px 10px; border-radius: 6px; font-size: 13px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+      <div
+          style="position: absolute; bottom: 10px; left: 10px; z-index: 12; background: rgba(255,255,255,0.95); border: 1px solid #ddd; padding: 8px 10px; border-radius: 6px; font-size: 13px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
         <div style="display:flex;align-items:center;gap:6px;">
-          <span style="width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center;background:green;color:white;border-radius:3px;font-size:11px;">✔</span>
+          <span
+              style="width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center;background:green;color:white;border-radius:3px;font-size:11px;">✔</span>
           <span>Checkin exitoso</span>
         </div>
         <div style="display:flex;align-items:center;gap:6px;">
-          <span style="width:14px;height:14px;display:inline-block;border:2px solid red;border-radius:50%;box-sizing:border-box;"></span>
+          <span
+              style="width:14px;height:14px;display:inline-block;border:2px solid red;border-radius:50%;box-sizing:border-box;"></span>
           <span>Checkin sin contribución</span>
         </div>
         <div style="display:flex;align-items:center;gap:6px;">
@@ -458,11 +490,13 @@ const isValidGeoJSON = (geojson) => {
 
         <!-- Leyenda para áreas -->
         <div style="display:flex;align-items:center;gap:6px;">
-          <span style="width:18px;height:14px;display:inline-block;background:rgba(0,0,255,0.3);border:2px solid #319FD3;border-radius:3px;box-sizing:border-box;"></span>
+          <span
+              style="width:18px;height:14px;display:inline-block;background:rgba(0,0,255,0.3);border:2px solid #319FD3;border-radius:3px;box-sizing:border-box;"></span>
           <span>Área con tareas</span>
         </div>
         <div style="display:flex;align-items:center;gap:6px;">
-          <span style="width:18px;height:14px;display:inline-block;background:rgba(0,0,255,0.15);border:2px solid lightgray;border-radius:3px;box-sizing:border-box;"></span>
+          <span
+              style="width:18px;height:14px;display:inline-block;background:rgba(0,0,255,0.15);border:2px solid lightgray;border-radius:3px;box-sizing:border-box;"></span>
           <span>Área sin tareas</span>
         </div>
       </div>
