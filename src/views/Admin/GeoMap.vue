@@ -555,15 +555,15 @@ const isValidGeoJSON = (geojson) => {
 /* Fullscreen styles */
 .map-container.fullscreen {
   position: fixed !important;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  z-index: 9999;
+  z-index: 2147483647999999999 !important;
+  background: white;
 }
-
 .map-container.fullscreen #map {
   height: 100vh !important;
 }
