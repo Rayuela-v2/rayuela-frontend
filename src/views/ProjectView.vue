@@ -1,30 +1,6 @@
 <template>
-  <v-container>
-    <!-- Información del Proyecto -->
-    <v-card class="pa-4 mb-6">
-      <v-row>
-        <v-col cols="12" md="6">
-          <v-img :src="project.image" alt="Imagen del proyecto" class="mb-4" contain/>
-        </v-col>
-        <v-col cols="12" md="6">
-          <h2>{{ project.name }}</h2>
-          <p class="text-subtitle-1 mb-3" v-html="project.description.replace(/\n/g, '<br>')"></p>
-          <v-btn :href="project.web" target="_blank" color="primary" class="mb-2">
-            Visitar Sitio Web
-          </v-btn>
-          <v-btn
-              color="blue"
-              class="mb-2 ml-2"
-              @click="shareProject"
-          >
-            <v-icon left>mdi-share</v-icon>
-            Compartir
-          </v-btn>
-        </v-col>
-      </v-row>
-    </v-card>
-  </v-container>
   <v-container v-if="project.user?.isSubscribed">
+    <h1>{{project.name}}</h1>
     <hr>
     <!-- Áreas del Proyecto -->
     <GeoMap :visualization="true" v-if="project.areas" :tasks="tasks" :area="project.areas"
@@ -151,6 +127,29 @@
     </v-card>
   </v-container>
   <v-container v-if="!project.user?.isSubscribed" >
+    <!-- Información del Proyecto -->
+    <v-card class="pa-4 mb-6">
+      <v-row>
+        <v-col cols="12" md="6">
+          <v-img :src="project.image" alt="Imagen del proyecto" class="mb-4" contain/>
+        </v-col>
+        <v-col cols="12" md="6">
+          <h2>{{ project.name }}</h2>
+          <p class="text-subtitle-1 mb-3" v-html="project.description.replace(/\n/g, '<br>')"></p>
+          <v-btn :href="project.web" target="_blank" color="primary" class="mb-2">
+            Visitar Sitio Web
+          </v-btn>
+          <v-btn
+              color="blue"
+              class="mb-2 ml-2"
+              @click="shareProject"
+          >
+            <v-icon left>mdi-share</v-icon>
+            Compartir
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-card>
     <v-btn color="green" block large @click="subscribe">
       <v-icon left size="large">mdi-account-plus</v-icon>
       Inscribirse

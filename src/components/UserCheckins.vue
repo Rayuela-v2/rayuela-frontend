@@ -1,5 +1,5 @@
 <template>
-  <h2>Checkins</h2>
+  <h2>Tus últimos checkins</h2>
   <div class="user-checkins">
     <ul v-if="checkins && checkins.length">
       <li v-for="c in checkins" :key="c._id" class="checkin">
