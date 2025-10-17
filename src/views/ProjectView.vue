@@ -200,12 +200,12 @@ const filteredTasks = computed(() => {
 });
 
 const shareProject = () => {
-  const text = `¡Mira este proyecto! ${project.value.name} - ${project.value.web}`;
+  const text = `¡Mira este proyecto! ${project.value.name} - ${this.location.href}`;
   if (navigator.share) {
     navigator.share({
       title: project.value.name,
       text,
-      url: project.value.web
+      url: this.location.href,
     });
   } else {
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');

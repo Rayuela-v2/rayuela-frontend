@@ -38,6 +38,10 @@ class ProjectsService extends RayuelaService {
     async toggleSubscription(projectId) {
         return this.post('/volunteer/subscription/' + projectId);
     }
+
+    async getPublicProjectById(projectId) {
+        return this.get(`/projects/public/${projectId}`);
+    }
 }
 
 export default new ProjectsService(); // Sinleton pattern

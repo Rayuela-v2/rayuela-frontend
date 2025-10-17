@@ -54,6 +54,11 @@ const router = createRouter({
             component: () => import('../views/ProjectView.vue')
         },
         {
+            path: '/public/project/:projectId/view',
+            name: 'PublicProjectView',
+            component: () => import('../views/PublicProjectView.vue')
+        },
+        {
             path: '/leaderboard',
             name: 'leaderboard',
             component: () => import('../views/Leaderboard.vue')
