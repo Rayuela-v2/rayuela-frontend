@@ -96,8 +96,10 @@
           <h3>¡Checkin registrado!</h3>
           <div style="border: 2px dashed lightblue; border-radius: 18px"
                v-for="(badge, index) in serviceResponse?._gameStatus?.newBadges" :key="index" class="badge-item">
+            <h4>Nueva medalla!</h4>
             <img :src="badge.imageUrl" alt="Imagen de la insignia"/>
             <h6>{{ badge.name }}</h6>
+            <small>{{ badge.description }}</small>
           </div>
           <p v-if="serviceResponse?._gameStatus?.newPoints">
             Sumaste {{ serviceResponse._gameStatus.newPoints }}
