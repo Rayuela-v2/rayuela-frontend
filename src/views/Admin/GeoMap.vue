@@ -28,13 +28,13 @@ const props = defineProps({
   visualization: Boolean
 });
 
-const UPDATE_LOCATION_TIMEOUT = 10000
-
+const UPDATE_LOCATION_TIMEOUT = 10000;
 const emit = defineEmits(['update-area', 'selected-area']);
-
 const area = ref(props.area);
 const tab = ref('map');
 const map = ref(null);
+const mapContainer = ref(null);
+const isFullscreen = ref(false);
 const areaJSON = ref(JSON.stringify(area.value, null, 2));
 const error = ref('');
 
@@ -275,16 +275,21 @@ const initializeMap = () => {
     }
   }
 };
+
 onMounted(() => {
   initializeMap();
-  // Limpia el intervalo al desmontar el componente
-  if (props.visualization) {
-    onUnmounted(() => {
-      if (addCurrentLocationToMap.intervalId) {
-        clearInterval(addCurrentLocationToMap.intervalId);
-      }
-    });
-  }
+  const onFullscreenChange = () => {
+    isFullscreen.value = !!document.fullscreenElement;
+    if (map.value) setTimeout(() => map.value.updateSize(), 200);
+  };
+  document.addEventListener('fullscreenchange', onFullscreenChange);
+  // Limpia el intervalo y listeners al desmontar el componente
+  onUnmounted(() => {
+    document.removeEventListener('fullscreenchange', onFullscreenChange);
+    if (addCurrentLocationToMap.intervalId) {
+      clearInterval(addCurrentLocationToMap.intervalId);
+    }
+  });
 });
 
 watch(area, (newArea) => {
@@ -324,11 +329,33 @@ const centerMapOnCurrentLocation = () => {
       (position) => {
         const coords = fromLonLat([position.coords.longitude, position.coords.latitude]);
         map.value.getView().setCenter(coords);
+        setTimeout(() => map.value.updateSize(), 200);
       },
       () => {
         toast.warning("No se pudo obtener la ubicación actual.");
       }
   );
+};
+
+const toggleFullscreen = async () => {
+  if (!mapContainer.value) return;
+  try {
+    if (!isFullscreen.value) {
+      if (mapContainer.value.requestFullscreen) {
+        await mapContainer.value.requestFullscreen();
+      } else if (mapContainer.value.webkitRequestFullscreen) {
+        await mapContainer.value.webkitRequestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        await document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        await document.webkitExitFullscreen();
+      }
+    }
+  } catch (e) {
+    console.error('Error cambiando pantalla completa:', e);
+  }
 };
 
 const updateAreaFromJSON = (json) => {
@@ -389,8 +416,9 @@ const isValidGeoJSON = (geojson) => {
       <v-tab value="map">Mapa</v-tab>
       <v-tab value="mapJSON" v-if="!visualization">GeoJSON</v-tab>
     </v-tabs>
-    <div style="position: relative; width: 100%; height: 400px;">
-      <div id="map" style="width: 100%; height: 400px;"></div>
+    <div ref="mapContainer" :class="{fullscreen: isFullscreen}" class="map-container" style="position: relative; width: 100%; height: 400px;">
+      <div id="map" style="width: 100%; height: 100%;"></div>
+
       <button
           @click="centerMapOnCurrentLocation"
           style="position: absolute; top: 10px; right: 10px; z-index: 10; background: white; border: none; border-radius: 50%; width: 40px; height: 40px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; cursor: pointer;"
@@ -399,6 +427,17 @@ const isValidGeoJSON = (geojson) => {
         <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" fill="black" viewBox="0 0 24 24">
           <path
               d="M12 20q-3.35 0-5.675-2.325Q4 15.35 4 12q0-3.35 2.325-5.675Q8.65 4 12 4q3.35 0 5.675 2.325Q20 8.65 20 12q0 3.35-2.325 5.675Q15.35 20 12 20Zm0-2q2.5 0 4.25-1.75T18 12q0-2.5-1.75-4.25T12 6q-2.5 0-4.25 1.75T6 12q0 2.5 1.75 4.25T12 18Zm0-6Zm0 2q-.825 0-1.413-.588Q10 12.825 10 12q0-.825.587-1.413Q11.175 10 12 10q.825 0 1.413.587Q14 11.175 14 12q0 .825-.587 1.412Q12.825 14 12 14Z"/>
+        </svg>
+      </button>
+
+      <button
+          @click="toggleFullscreen"
+          :title="isFullscreen ? 'Salir pantalla completa' : 'Pantalla completa'"
+          style="position: absolute; top: 60px; right: 10px; z-index: 10; background: white; border: none; border-radius: 6px; padding: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); cursor: pointer;"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" fill="black" viewBox="0 0 24 24">
+          <path v-if="!isFullscreen" d="M7 14H5v4h4v-2H7v-2zm10 2v2h-2v4h4v-4h-2v-2zM5 5v4h2V7h2V5H5zm14 0h-4v2h2v2h2V5z"/>
+          <path v-else d="M6 6h5V4H4v7h2V6zm12 0v5h2V4h-7v2h5zM6 18v-5H4v7h7v-2H6zm12-5h-5v2h5v5h2v-7h-2z"/>
         </svg>
       </button>
 
@@ -467,5 +506,31 @@ const isValidGeoJSON = (geojson) => {
 #map {
   height: 400px;
   width: 100%;
+}
+
+#error {
+  color: red;
+  font-weight: bold;
+}
+
+#map {
+  height: 400px;
+  width: 100%;
+}
+
+/* Fullscreen styles */
+.map-container.fullscreen {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 9999;
+}
+
+.map-container.fullscreen #map {
+  height: 100vh !important;
 }
 </style>
