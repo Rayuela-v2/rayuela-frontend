@@ -216,7 +216,7 @@ const shareProject = () => {
 
 const formattedTasks = computed(() => {
   return filteredTasks.value.map(task => ({
-    formatted: `${task.points}pts - ${task.timeInterval.name} - ${task.type}`,
+    formatted: `[${task.areaGeoJSON.properties.id}] ${task.points}pts - ${task.timeInterval.name} - ${task.type}`,
     solved: task.solved
   }));
 });
