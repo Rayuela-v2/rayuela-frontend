@@ -200,12 +200,12 @@ const filteredTasks = computed(() => {
 });
 
 const shareProject = () => {
-  const text = `¡Hola!  Querés jugar en rayuela? :) ${project.value.name} - ${location.href}`;
+  const text = `¡Hola!  Querés jugar en rayuela? :) ${project.value.name}`;
   if (navigator.share) {
     navigator.share({
       title: project.value.name,
       text,
-      url: location.href,
+      url: `https://rayuela-frontend.vercel.app/public/project/${project.value.id}/view`,
     });
   } else {
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
