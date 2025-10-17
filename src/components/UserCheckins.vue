@@ -28,7 +28,7 @@ export default {
     formatDate (iso) {
       if (!iso) return ''
       const d = new Date(iso)
-      return d.toLocaleString()
+      return `${d.getDay()}/${d.getMonth()} ${d.toLocaleTimeString()}`
     }
   }
 }
