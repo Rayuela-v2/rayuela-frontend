@@ -10,15 +10,6 @@ onMounted(async () => {
   projects_user.value = await ProjectsService.getProjects();
 });
 
-function subscribe(project) {
-  ProjectsService.toggleSubscription(project._id)
-      .then(() => {
-        toast.success("Perfecto!");
-      })
-      .then(async () => projects_user.value = await ProjectsService.getProjects())
-      .catch(() => toast.error('Hubo un error al inscribirse'));
-}
-
 const seeProjectDetails = (id) => {
   router.push(`/project/${id}/view`);
 }
@@ -63,10 +54,9 @@ const seeProjectDetails = (id) => {
             </div>
             <v-card-actions>
               <v-btn
-                  :color="project.subscribed ? 'red' : 'green'"
-                  @click="subscribe(project)"
+                  @click="seeProjectDetails(project._id)"
               >
-                {{ project.subscribed ? 'Darse de baja' : 'Inscribirse' }}
+                Ver más
               </v-btn>
             </v-card-actions>
           </v-card>
