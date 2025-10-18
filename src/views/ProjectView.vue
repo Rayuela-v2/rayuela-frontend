@@ -35,7 +35,7 @@
             <td>
               <span :class="{ 'text-decoration-line-through': item.solved }">
               {{ item.formatted }}
-              <v-badge v-if="item.solved" color="green" content="Resuelta" inline></v-badge>
+              <v-badge v-if="item.solved" color="green" :content="`Resuelta por ${item.solvedBy}`" inline></v-badge>
               <v-badge v-if="!item.solved" color='blue' content="Pendiente" inline></v-badge>
         </span>
             </td>
@@ -251,7 +251,8 @@ const shareProject = () => {
 const formattedTasks = computed(() => {
   return filteredTasks.value.map(task => ({
     formatted: `[${task.areaGeoJSON.properties.id}] ${task.points}pts - ${task.timeInterval.name} - ${task.type}`,
-    solved: task.solved
+    solved: task.solved,
+    solvedBy: task.solvedBy || ''
   }));
 });
 
