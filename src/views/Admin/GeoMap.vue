@@ -45,7 +45,7 @@ const createAreaStyle = (feature) => {
       width: 2
     }),
     fill: new Fill({
-      color: getTaskArrayFromFeature(feature).length > 0 ? 'rgba(0, 0, 255, 0.3)' : 'rgba(0, 0, 255, 0.15)',
+      color: getTaskArrayFromFeature(feature).filter(t=>!t.solved).length > 0 ? 'rgba(0, 0, 255, 0.3)' : 'rgba(128, 128, 128, .5)',
     }),
     text: new Text({
       font: '12px Calibri,sans-serif',
@@ -80,14 +80,25 @@ function getTaskArrayFromFeature(feature) {
   return props.tasks ? props.tasks.filter(task => task.areaGeoJSON.properties.id === feature.getId()) : [""];
 }
 
+function getMessageForTasks(ts) {
+  const solvedCount = ts.filter(t=>t.solved).length;
+  if(solvedCount === 0) {
+    return `${ts.length} tareas pendientes`;
+  } else if (solvedCount === ts.length) {
+    return `Todas las tareas completadas`;
+  } else {
+    return `${solvedCount} de ${ts.length} tareas completadas`;
+  }
+}
+
 function tasksForFeature(feature) {
   const ts = getTaskArrayFromFeature(feature);
   if (ts.length === 0) return "No hay tareas en esta area";
-  return `<h3>Área ${feature.getId()}<h3/> <br> <h4>${ts.length} tareas disponibles</h4>`;
+  const msg = getMessageForTasks(ts);
+  return `<h3>Área ${feature.getId()}<h3/> <br> <h4>${msg}</h4>`;
 }
 
 const setTooltipContentToAreas = (map, vectorSource) => {
-  // Crear el elemento HTML para el tooltip
   const tooltip = document.createElement('div');
   tooltip.className = 'tooltip';
   tooltip.style.position = 'absolute';
@@ -100,7 +111,7 @@ const setTooltipContentToAreas = (map, vectorSource) => {
   const overlay = new Overlay({
     source: vectorSource,
     element: tooltip,
-    offset: [10, 0], // Ajuste para que no esté justo bajo el cursor
+    offset: [10, 0],
     positioning: 'bottom-left',
   })
   map.value.addOverlay(overlay);
