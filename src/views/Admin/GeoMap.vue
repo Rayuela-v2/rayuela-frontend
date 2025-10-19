@@ -87,7 +87,7 @@ function getMessageForTasks(ts) {
   } else if (solvedCount === ts.length) {
     return `Todas las tareas completadas`;
   } else {
-    return `${solvedCount} de ${ts.length} tareas completadas`;
+    return `Quedan ${ts.length - solvedCount} tareas pendientes`;
   }
 }
 
