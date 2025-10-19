@@ -335,7 +335,8 @@ const centerMapOnCurrentLocation = () => {
       },
       () => {
         toast.warning("No se pudo obtener la ubicación actual.");
-      }
+      },
+      { enableHighAccuracy: true }
   );
 };
 

@@ -186,7 +186,8 @@ const getCurrentLocation = () => {
         toast.info('No se pudo obtener la ubicación. Por favor ingrésela manualmente.');
         manualLocation.value = true;
         loadingLocation.value = false;
-      }
+      },
+      { enableHighAccuracy: true }
   );
 };
 
