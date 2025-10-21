@@ -483,7 +483,7 @@ const isValidGeoJSON = (geojson) => {
       </button>
 
       <!-- Leyenda / guía para usuarios -->
-      <div
+      <div v-if="visualization"
           style="position: absolute; bottom: 10px; left: 10px; z-index: 12; background: rgba(255,255,255,0.95); border: 1px solid #ddd; padding: 8px 10px; border-radius: 6px; font-size: 13px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
         <div style="display:flex;align-items:center;gap:6px;">
           <span
