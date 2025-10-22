@@ -141,8 +141,8 @@ const headers = [
   {title: 'Orden', value: 'index'},
   {title: 'Nombre', value: 'name'},
   {title: 'Tipo', value: 'type'},
-  {title: 'Área', value: 'areaId'},
-  {title: 'Int. de tiempo', value: 'timeIntervalId'},
+  {title: 'Área', value: 'areaGeoJSON.properties.id'},
+  {title: 'Int. de tiempo', value: 'timeInterval.name'},
   {title: 'Acciones', value: 'actions', sortable: false}
 ];
 
@@ -198,11 +198,10 @@ const generateTasks = () => {
           name: `Tarea ${type} - ${timeInterval} - Área ${area}`,
           description: `Automáticamente generada para ${type}, ${timeInterval}, área ${area}`,
           projectId: projectId,
-          timeIntervalId: timeInterval,
-          areaId: area,
+          timeInterval: {name:timeInterval},
+          areaGeoJSON: {properties: {id: area}},
           type: type
         };
-        console.log(tasks.value)
         tasks.value = tasks.value.concat([newTask]);
       });
     });
@@ -220,7 +219,7 @@ const deleteTask = (task) => {
   const index = tasks.value.indexOf(task);
   if (index > -1) {
     tasks.value.splice(index, 1);
-    toast.info('Tarea eliminada', { autoClose: 200 } );
+    toast.info('Tarea eliminada', {autoClose: 200});
   }
 };
 
