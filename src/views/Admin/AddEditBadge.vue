@@ -116,7 +116,13 @@ onMounted(() => {
         <v-text-field label="URL de la imagen" v-model="badge.imageUrl" required/>
         <v-row class="my-3" v-if="badge.imageUrl">
           <v-col cols="12" sm="6" md="4">
-            <v-img :src="badge.imageUrl" alt="Previsualización de la imagen" contain max-height="200"/>
+            <v-img :src="badge.imageUrl" alt="Previsualización de la imagen" contain max-height="200">
+              <template #error>
+                <v-alert density="compact" variant="tonal" color="error" class="ma-0">
+                  No se pudo cargar la imagen. Verifique la URL.
+                </v-alert>
+              </template>
+            </v-img>
           </v-col>
         </v-row>
         <v-text-field
