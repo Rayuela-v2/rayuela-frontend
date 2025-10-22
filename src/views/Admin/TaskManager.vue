@@ -119,7 +119,11 @@ const editingIndex = ref(null);
 
 onMounted(async () => {
   project.value = await ProjectsService.getProjectById(projectId);
-  tasks.value = (await TaskService.getTaskForProject(projectId) || []);
+  tasks.value = (await TaskService.getTaskForProject(projectId) || []).map(t => ({
+    ...t,
+    timeIntervalId: t.timeInterval.name,
+    areaId: t.areaGeoJSON.properties.id,
+  }));
   taskTypes.value = project.value.taskTypes;
   timeIntervals.value = project.value.timeIntervals.map(ti => ti.name);
   areas.value = project.value.areas.features.map(f => f.properties.id);
@@ -141,8 +145,8 @@ const headers = [
   {title: 'Orden', value: 'index'},
   {title: 'Nombre', value: 'name'},
   {title: 'Tipo', value: 'type'},
-  {title: 'Área', value: 'areaGeoJSON.properties.id'},
-  {title: 'Int. de tiempo', value: 'timeInterval.name'},
+  {title: 'Área', value: 'areaId'},
+  {title: 'Int. de tiempo', value: 'timeIntervalId'},
   {title: 'Acciones', value: 'actions', sortable: false}
 ];
 
@@ -198,10 +202,11 @@ const generateTasks = () => {
           name: `Tarea ${type} - ${timeInterval} - Área ${area}`,
           description: `Automáticamente generada para ${type}, ${timeInterval}, área ${area}`,
           projectId: projectId,
-          timeInterval: {name:timeInterval},
-          areaGeoJSON: {properties: {id: area}},
+          timeIntervalId: timeInterval,
+          areaId: area,
           type: type
         };
+        console.log(tasks.value)
         tasks.value = tasks.value.concat([newTask]);
       });
     });
@@ -219,7 +224,7 @@ const deleteTask = (task) => {
   const index = tasks.value.indexOf(task);
   if (index > -1) {
     tasks.value.splice(index, 1);
-    toast.info('Tarea eliminada', {autoClose: 200});
+    toast.info('Tarea eliminada', { autoClose: 200 } );
   }
 };
 
