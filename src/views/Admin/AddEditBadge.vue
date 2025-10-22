@@ -95,8 +95,7 @@ onMounted(() => {
     if (stateBadge) {
       badge.value = {...defaultBadge, ...stateBadge};
     } else {
-      console.error('Error al cargar la insignia');
-      toast.error('Error al cargar la insignia');
+      router.push('/admin/');
     }
   }
 });

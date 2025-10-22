@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <BreadCrumb :items="'pointRulesPaths'" />
+    <BreadCrumb :items="'pointRulesPaths'"/>
     <h1 class="mb-6">{{ isNew ? 'Crear Regla de Puntaje' : 'Editar Regla de Puntaje' }}</h1>
 
     <v-form @submit.prevent="saveScoreRule">
@@ -88,24 +88,23 @@ const saveScoreRule = async () => {
 };
 
 onMounted(async () => {
-  const project = store.state.project;
-  const ruleId = route.params.id;
-  taskTypeOptions.value = project.taskTypes.concat(["Cualquiera"]);
-  areaOptions.value = project.areas.features.map(feature => feature.properties.id).concat(["Cualquiera"]);
-  intervalOptions.value = project.timeIntervals.map(ti => ti.name).concat(["Cualquiera"]);
+  try {
+    const project = store.state.project;
+    const ruleId = route.params.id;
+    taskTypeOptions.value = project.taskTypes.concat(["Cualquiera"]);
+    areaOptions.value = project.areas.features.map(feature => feature.properties.id).concat(["Cualquiera"]);
+    intervalOptions.value = project.timeIntervals.map(ti => ti.name).concat(["Cualquiera"]);
 
-  if (ruleId === 'new') {
-    isNew.value = true;
-    scoreRule.value = {...defaultScoreRule};
-  } else {
-    isNew.value = false;
-    try {
+    if (ruleId === 'new') {
+      isNew.value = true;
+      scoreRule.value = {...defaultScoreRule};
+    } else {
+      isNew.value = false;
       const stateRule = store.state.currentScoreRule;
       scoreRule.value = {...defaultScoreRule, ...stateRule};
-    } catch (error) {
-      console.error("Error al cargar la regla de puntaje:", error);
-      toast.error('Error al cargar la regla de puntaje');
     }
+  } catch (error) {
+    router.push(`/admin`);
   }
 });
 </script>
