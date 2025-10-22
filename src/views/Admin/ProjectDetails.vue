@@ -96,7 +96,7 @@
             <v-col cols="6">
               <v-text-field
                   label="Hora de inicio"
-                  type="number"
+                  type="time"
                   v-model="interval.time.start"
                   :min="0"
                   :max="24"
@@ -107,7 +107,7 @@
             <v-col cols="6">
               <v-text-field
                   label="Hora de finalización"
-                  type="number"
+                  type="time"
                   v-model="interval.time.end"
                   :min="0"
                   :max="24"
@@ -116,31 +116,6 @@
               />
             </v-col>
           </v-row>
-          <v-progress-linear
-              :value="interval.time.end > interval.time.start ? ((interval.time.end - interval.time.start) / 24) * 100 : 0"
-              color="primary"
-              height="20"
-              rounded
-          >
-            <template #default>
-              <span style="position:absolute;">{{interval.time.start}} a {{interval.time.end}}</span>
-              <div style="position: relative; width: 100%; height: 100%;">
-                <div
-                    v-if="interval.time.end > interval.time.start"
-                    :style="{
-          position: 'absolute',
-          left: ((interval.time.start / 24) * 100) + '%',
-          width: (((interval.time.end - interval.time.start) / 24) * 100) + '%',
-          height: '100%',
-          background: 'rgba(33,150,243,0.5)',
-          borderRadius: '10px'
-        }"
-                ></div>
-                <span style="position: relative; z-index: 1;">
-      </span>
-              </div>
-            </template>
-          </v-progress-linear>
           <h4>Días de la semana</h4>
           <v-checkbox
               v-for="day in daysOfWeek"
@@ -243,8 +218,13 @@ const removeTaskType = (index) => {
 
 // Validar si un intervalo de tiempo es válido
 const isValidInterval = (interval) => {
+  const start = interval.time.start;
+  const end = interval.time.end;
+  // Validar formato HH:mm:ss y que end > start
+  const isValidFormat = (t) => /^\d{2}:\d{2}:\d{2}$/.test(t);
   return interval.name.trim() !== '' &&
-      interval.time.start >= 0 && interval.time.end > interval.time.start &&
+      isValidFormat(start) && isValidFormat(end) &&
+      start < end &&
       interval.days.length > 0;
 };
 
