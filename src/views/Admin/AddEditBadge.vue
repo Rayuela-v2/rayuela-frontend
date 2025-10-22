@@ -79,7 +79,8 @@ const saveBadge = async () => {
     await router.push(`/admin/project/${route.params.projectId}/gamification`);
   } catch (error) {
     console.error('Error al guardar la insignia:', error);
-    toast.error('Error al guardar la insignia');}
+    toast.error('Error al guardar la insignia');
+  }
 };
 
 // Cargar datos al montar
@@ -113,6 +114,11 @@ onMounted(() => {
         <v-text-field label="Nombre de la Insignia" v-model="badge.name" :disabled="!isNew" required/>
         <v-textarea label="Descripción de la Insignia" v-model="badge.description" required/>
         <v-text-field label="URL de la imagen" v-model="badge.imageUrl" required/>
+        <v-row class="my-3" v-if="badge.imageUrl">
+          <v-col cols="12" sm="6" md="4">
+            <v-img :src="badge.imageUrl" alt="Previsualización de la imagen" contain max-height="200"/>
+          </v-col>
+        </v-row>
         <v-text-field
             label="Cantidad de Check-ins"
             v-model.number="badge.checkinsAmount"
