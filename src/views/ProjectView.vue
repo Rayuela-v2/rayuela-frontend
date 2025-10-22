@@ -1,6 +1,6 @@
 <template>
   <v-container v-if="project.user?.isSubscribed">
-    <h1>{{project.name}}</h1>
+    <h1>{{ project.name }}</h1>
     <hr>
     <!-- Áreas del Proyecto -->
     <GeoMap :visualization="true"
@@ -31,13 +31,23 @@
 
         <!-- Slot para modificar la visualización de las filas -->
         <template v-slot:item="{ item }">
-          <tr :class="{ 'resolved-task': item.solved }">
+          <tr :class="{ 'resolved-task': item.solved }" @click.stop="showTaskDetail(item)" style="cursor: pointer">
             <td>
               <span :class="{ 'text-decoration-line-through': item.solved }">
-              {{ item.formatted }}
-              <v-badge v-if="item.solved" color="green" :content="`Resuelta por ${item.solvedBy}`" inline></v-badge>
-              <v-badge v-if="!item.solved" color='blue' content="Pendiente" inline></v-badge>
-        </span>
+                {{ item.formatted }}
+                <v-badge
+                    v-if="item.solved"
+                    color="green"
+                    :content="`Resuelta por ${item.solvedBy}`"
+                    inline
+                ></v-badge>
+                <v-badge
+                    v-if="!item.solved"
+                    color="blue"
+                    content="Pendiente"
+                    inline
+                ></v-badge>
+              </span>
             </td>
           </tr>
         </template>
@@ -65,13 +75,40 @@
         />
         <h6>{{ badge.name }}</h6>
       </div>
-
+      <v-dialog v-model="taskDetailDialog" max-width="500">
+        <v-card v-if="taskDetail">
+          <v-card-title class="headline">Detalle de la tarea</v-card-title>
+          <v-card-text>
+            <p><strong>Intervalo de tiempo:</strong> {{
+                taskDetail.intervalDescription || taskDetail.timeInterval?.name
+              }}</p>
+            <p><strong>Tipo de tarea:</strong> {{ taskDetail.type }}</p>
+            <p v-if="taskDetail.timeInterval">
+              <strong>Horario:</strong>
+              De {{ taskDetail.timeInterval?.time?.start }}:00 a {{ (taskDetail.timeInterval?.time?.end ?? '') + 1 }}:00
+              hs
+            </p>
+            <p v-if="taskDetail.timeInterval?.days">
+              <strong>Días:</strong>
+              <span v-for="(day, idx) in taskDetail.timeInterval.days" :key="day">
+          {{
+                  ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][day - 1]
+                }}<span v-if="idx < taskDetail.timeInterval.days.length - 1">, </span>
+        </span>
+            </p>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer/>
+            <v-btn text @click="taskDetailDialog = false">Cerrar</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
       <v-dialog v-model="showBadgeDialog" max-width="500">
         <v-card v-if="selectedBadge">
           <v-card-title class="headline">{{ selectedBadge.name }}</v-card-title>
           <v-card-text>
             <div style="display:flex; gap:16px; align-items:flex-start">
-              <img :src="selectedBadge.imageUrl" alt="" width="90" height="90" />
+              <img :src="selectedBadge.imageUrl" alt="" width="90" height="90"/>
               <div>
                 <p><strong>Reglas para ganarla:</strong></p>
                 <ul>
@@ -85,7 +122,7 @@
             </div>
           </v-card-text>
           <v-card-actions>
-            <v-spacer />
+            <v-spacer/>
             <v-btn text @click="showBadgeDialog = false">Cerrar</v-btn>
           </v-card-actions>
         </v-card>
@@ -128,7 +165,7 @@
       </ul>
     </v-card>
   </v-container>
-  <v-container v-if="!project.user?.isSubscribed" >
+  <v-container v-if="!project.user?.isSubscribed">
     <!-- Información del Proyecto -->
     <v-card class="pa-4 mb-6">
       <v-row>
@@ -177,7 +214,8 @@ const tasks = ref([]);
 const leaderboard = ref([]);
 const checkins = ref(null);
 const filterAreaId = ref(null);
-
+const taskDetailDialog = ref(false);
+const taskDetail = ref(null);
 const badgeTooltip = ref(-1);
 
 const toggleTooltip = (index) => {
@@ -186,8 +224,15 @@ const toggleTooltip = (index) => {
 
 const showBadgeDialog = computed({
   get: () => badgeTooltip.value !== -1,
-  set: (val) => { if (!val) badgeTooltip.value = -1; }
+  set: (val) => {
+    if (!val) badgeTooltip.value = -1;
+  }
 });
+
+function showTaskDetail(item) {
+  taskDetail.value = item;
+  taskDetailDialog.value = true;
+}
 
 const selectedBadge = computed(() => {
   return badgeTooltip.value === -1 ? null : project.value.user?.badges?.[badgeTooltip.value] ?? null;
@@ -252,7 +297,10 @@ const formattedTasks = computed(() => {
   return filteredTasks.value.map(task => ({
     formatted: `[${task.areaGeoJSON.properties.id}] ${task.points}pts - ${task.timeInterval.name} - ${task.type}`,
     solved: task.solved,
-    solvedBy: task.solvedBy || ''
+    solvedBy: task.solvedBy || '',
+    intervalDescription: task.timeInterval?.description || '',
+    type: task.type,
+    timeInterval: task.timeInterval
   }));
 });
 
