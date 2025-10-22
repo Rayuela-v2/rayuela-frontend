@@ -147,7 +147,7 @@
         <li v-for="interval in project.timeIntervals" :key="interval._id">
           <strong>{{ interval.name }}</strong>:
           <span>
-                De {{ interval.time.start }}:00 a {{ interval.time.end + 1 }}:00 hs,
+                De {{ interval.time.start }} a {{ interval.time.end }} hs,
                 los días
                 <span v-for="(day, idx) in interval.days" :key="day">
                   {{
