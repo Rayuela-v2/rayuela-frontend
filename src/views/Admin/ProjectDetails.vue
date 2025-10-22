@@ -45,7 +45,7 @@
       <!-- Áreas -->
       <CollapsableSection title="Áreas">
         <p class="text-subtitle-1 mb-3">Define las áreas geográficas del proyecto</p>
-        <GeoMap v-if="project.areas" :area="project.areas" @update-area="updateProjectAreas" />
+        <GeoMap v-if="project.areas" :area="project.areas" @update-area="updateProjectAreas"/>
       </CollapsableSection>
 
       <CollapsableSection title="Tipos de Tareas">
@@ -116,7 +116,31 @@
               />
             </v-col>
           </v-row>
-
+          <v-progress-linear
+              :value="interval.time.end > interval.time.start ? ((interval.time.end - interval.time.start) / 24) * 100 : 0"
+              color="primary"
+              height="20"
+              rounded
+          >
+            <template #default>
+              <span style="position:absolute;">{{interval.time.start}} a {{interval.time.end}}</span>
+              <div style="position: relative; width: 100%; height: 100%;">
+                <div
+                    v-if="interval.time.end > interval.time.start"
+                    :style="{
+          position: 'absolute',
+          left: ((interval.time.start / 24) * 100) + '%',
+          width: (((interval.time.end - interval.time.start) / 24) * 100) + '%',
+          height: '100%',
+          background: 'rgba(33,150,243,0.5)',
+          borderRadius: '10px'
+        }"
+                ></div>
+                <span style="position: relative; z-index: 1;">
+      </span>
+              </div>
+            </template>
+          </v-progress-linear>
           <h4>Días de la semana</h4>
           <v-checkbox
               v-for="day in daysOfWeek"
