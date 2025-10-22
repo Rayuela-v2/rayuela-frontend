@@ -79,6 +79,9 @@
         <v-card v-if="taskDetail">
           <v-card-title class="headline">Detalle de la tarea</v-card-title>
           <v-card-text>
+            <p>{{
+                taskDetail.taskDescription
+              }}</p>
             <p><strong>Intervalo de tiempo:</strong> {{
                 taskDetail.intervalDescription || taskDetail.timeInterval?.name
               }}</p>
@@ -299,6 +302,7 @@ const formattedTasks = computed(() => {
     solved: task.solved,
     solvedBy: task.solvedBy || '',
     intervalDescription: task.timeInterval?.description || '',
+    taskDescription: task.description || '',
     type: task.type,
     timeInterval: task.timeInterval
   }));
