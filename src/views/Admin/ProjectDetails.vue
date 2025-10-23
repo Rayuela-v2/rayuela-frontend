@@ -97,6 +97,26 @@
           <v-row>
             <v-col cols="6">
               <v-text-field
+                  label="Fecha de inicio"
+                  type="date"
+                  v-model="interval.startDate"
+                  step="1"
+                  required
+              />
+            </v-col>
+            <v-col cols="6">
+              <v-text-field
+                  label="Fecha de finalización"
+                  type="date"
+                  v-model="interval.endDate"
+                  step="1"
+                  required
+              />
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="6">
+              <v-text-field
                   label="Hora de inicio"
                   type="time"
                   v-model="interval.time.start"
@@ -227,14 +247,20 @@ const isValidInterval = (interval) => {
   return interval.name.trim() !== '' &&
       isValidFormat(start) && isValidFormat(end) &&
       start < end &&
+      interval.startDate < interval.endDate &&
       interval.days.length > 0;
 };
 
 const addNewTimeInterval = () => {
+  const nextYear = new Date();
+  nextYear.setFullYear(nextYear.getFullYear() + 1);
+
   project.value.timeIntervals.push({
     name: '',
     time: {start: 0, end: 0},
-    days: []
+    days: [],
+    startDate: new Date(),
+    endDate: nextYear,
   });
 };
 
