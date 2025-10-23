@@ -29,11 +29,13 @@
         <v-card>
           <v-card-title>¿Qué es una adaptación de ludificación?</v-card-title>
           <v-card-text>
-            <p>La gamificación es una estrategia que utiliza elementos de juego en contextos no lúdicos. En este
-              proyecto, puedes elegir entre:</p>
+            <p>Las estrategias de adaptación permiten adecuar los elementos de juego a cada persona en un contexto
+              determinado. En este proyecto, puedes elegir entre:</p>
             <ul>
-              <li><strong>Elástica:</strong> Se ajusta dinámicamente a las necesidades del usuario.</li>
               <li><strong>Básica:</strong> Aplica reglas predefinidas sin adaptación dinámica.</li>
+              <li><strong>Elástica:</strong> El cálculo de retribución de puntos es relativo a la posición de cada
+                persona en la tabla de posiciones. Si está más lejos, el puntaje es mayor que si está cerca.
+              </li>
             </ul>
           </v-card-text>
           <v-card-actions>
