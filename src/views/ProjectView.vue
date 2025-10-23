@@ -115,6 +115,9 @@
               <div>
                 <p><strong>Reglas para ganarla:</strong></p>
                 <ul>
+                  <li>Medallas previas: {{
+                      selectedBadge.previousBadges.length > 0 ? selectedBadge.previousBadges.toString() : 'Ninguna'
+                    }}</li>
                   <li>Cantidad de checkins: {{ selectedBadge.checkinsAmount }}</li>
                   <li v-if="selectedBadge.mustContribute">(Tienen que resolver una tarea)</li>
                   <li>Area: {{ selectedBadge.areaId }}</li>
