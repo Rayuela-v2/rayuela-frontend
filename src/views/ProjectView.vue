@@ -88,7 +88,7 @@
             <p><strong>Tipo de tarea:</strong> {{ taskDetail.type }}</p>
             <p v-if="taskDetail.timeInterval">
               <strong>Horario:</strong>
-              De {{ taskDetail.timeInterval?.time?.start }} a {{ (taskDetail.timeInterval?.time?.end ?? '') + 1 }}
+              De {{ taskDetail.timeInterval?.time?.start }} a {{ (taskDetail.timeInterval?.time?.end ?? '') }}
               hs
             </p>
             <p v-if="taskDetail.timeInterval?.days">
