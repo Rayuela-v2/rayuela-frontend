@@ -12,17 +12,9 @@ const projects = ref([])
 const errors = []
 
 onMounted(async () => {
-  if (localStorage.getItem("token")) {
-    router.push({path: '/dashboard'})
-  } else {
-    if (localStorage.getItem("msg_logout") == "1") {
-      toast.success("Sesión finalizada correctamente", {autoClose: 3000});
-      localStorage.removeItem("msg_logout")
-    }
-  }
   try {
-    const response = await ProjectsService.getProjects()
-    projects.value = response.slice(0, 3)
+    const response = await ProjectsService.getPublicrojects()
+    projects.value = response.slice(0, 4)
   } catch (e) {
     errors.push(e)
   }
@@ -32,27 +24,62 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div>
-    <h2 class="subtitle">Proyectos disponibles</h2>
-    <div class="container">
-      <div v-for="project in projects" :key="project.id">
-        <ProjectCard :project="project"/>
-      </div>
-      <ViewMoreButton />
-    </div>
-  </div>
+  <v-row>
+    <v-col
+      v-for="project in projects"
+      :key="project._id"
+      cols="12"
+      sm="6"
+      md="4"
+      lg="3"
+    >
+      <v-card
+        class="mx-auto"
+        max-width="344"
+        @click="router.push('/public/project/' + project._id + '/view')"
+        style="cursor: pointer;"
+      >
+        <v-img
+          :src="project.image"
+          height="180"
+          cover
+          alt="Imagen del proyecto"
+        ></v-img>
+        <v-card-title>{{ project.name }}</v-card-title>
+        <v-card-text>
+          <p>{{ project.description.slice(0,120) }}...</p>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span v-if="project.available" style="color: #27ae60; font-weight: 600;">Disponible</span>
+            <span v-else style="color: #c0392b; font-weight: 600;">No disponible</span>
+            <span v-if="project.subscribed"
+                  style="background: #2980b9; color: #fff; border-radius: 0.5rem; padding: 0.2rem 0.7rem; font-size: 0.9rem;">Suscrito</span>
+          </div>
+        </v-card-text>
+      </v-card>
+    </v-col>
+  </v-row>
 </template>
 
 <style scoped>
 .container {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
   justify-content: center;
+  align-items: stretch;
+  padding: 2rem 0;
+  background: #f8f9fa;
+  border-radius: 1rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
 }
 
 .subtitle {
-  font-size: large;
-  padding: 1rem;
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #2c3e50;
+  letter-spacing: 1px;
 }
 
 </style>

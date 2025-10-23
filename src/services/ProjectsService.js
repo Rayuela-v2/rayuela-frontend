@@ -1,9 +1,14 @@
 import RayuelaService from "@/services/RayuelaService";
 
 class ProjectsService extends RayuelaService {
+
+    async getPublicrojects() {
+        return this.get(`/volunteer/public/projects/`).then((r) => r.filter(p => p.available))
+    }
+
     async getProjects() {
-        if (localStorage.getItem('role')!== 'Admin') {
-            return this.get(`/volunteer/projects/`).then((r) => r.filter(p=>p.available))
+        if (localStorage.getItem('role') !== 'Admin') {
+            return this.get(`/volunteer/projects/`).then((r) => r.filter(p => p.available))
         }
     }
 

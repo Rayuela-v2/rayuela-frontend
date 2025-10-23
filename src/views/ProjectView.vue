@@ -1,6 +1,6 @@
 <template>
   <v-container v-if="project.user?.isSubscribed">
-    <h1>{{ project.name }}</h1>
+    <h1>{{ project.name }} </h1>
     <hr>
     <!-- Áreas del Proyecto -->
     <GeoMap :visualization="true"
@@ -197,6 +197,14 @@
       Inscribirse
     </v-btn>
   </v-container>
+  <v-btn
+      color="blue"
+      class="mb-2 ml-2"
+      @click="shareProject"
+  >
+    <v-icon left>mdi-share</v-icon>
+    Compartir proyecto
+  </v-btn>
 </template>
 
 <script setup>
