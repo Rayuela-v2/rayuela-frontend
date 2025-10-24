@@ -17,15 +17,23 @@
           item-value="formatted"
           dense
           class="elevation-1"
+          :search="tableSearch"
       >
         <template v-slot:top>
           <v-toolbar flat>
-            <v-toolbar-title>
+            <v-toolbar-title style="flex:1">
               <div style="display: flex; justify-content: space-between; margin-right: 8px">
-                Tareas {{ filterAreaId && ` del área ${filterAreaId}` }}
-                <v-btn v-if="filterAreaId" variant="outlined" @click="clearFilter">Limpiar filtro</v-btn>
+                Tareas
               </div>
             </v-toolbar-title>
+            <v-text-field
+                v-model="tableSearch"
+                placeholder="Buscar tareas..."
+                clearable
+                dense
+                hide-details
+                style="max-width: 300px"
+            />
           </v-toolbar>
         </template>
 
@@ -117,7 +125,8 @@
                 <ul>
                   <li>Medallas previas: {{
                       selectedBadge.previousBadges.length > 0 ? selectedBadge.previousBadges.toString() : 'Ninguna'
-                    }}</li>
+                    }}
+                  </li>
                   <li>Cantidad de checkins: {{ selectedBadge.checkinsAmount }}</li>
                   <li v-if="selectedBadge.mustContribute">(Tienen que resolver una tarea)</li>
                   <li>Area: {{ selectedBadge.areaId }}</li>
@@ -227,7 +236,7 @@ const route = useRoute();
 const tasks = ref([]);
 const leaderboard = ref([]);
 const checkins = ref(null);
-const filterAreaId = ref(null);
+const tableSearch = ref('');
 const taskDetailDialog = ref(false);
 const taskDetail = ref(null);
 const badgeTooltip = ref(-1);
@@ -262,10 +271,6 @@ const project = ref({
   areas: null
 });
 
-const clearFilter = () => {
-  filterAreaId.value = null;
-};
-
 const subscribe = () => {
   ProjectsService.toggleSubscription(route.params.projectId)
       .then(async () => {
@@ -286,13 +291,8 @@ const handleModalClosed = async () => {
 };
 
 const updateSelectedArea = (areaId) => {
-  filterAreaId.value = areaId;
+  tableSearch.value = areaId;
 };
-
-const filteredTasks = computed(() => {
-  if (!filterAreaId.value) return tasks.value;
-  return tasks.value.filter(task => task.areaGeoJSON.properties.id === filterAreaId.value);
-});
 
 const shareProject = () => {
   const text = `¡Hola!  Querés jugar en rayuela? :) ${project.value.name}`;
@@ -308,7 +308,7 @@ const shareProject = () => {
 };
 
 const formattedTasks = computed(() => {
-  return filteredTasks.value.map(task => ({
+  return tasks.value.map(task => ({
     formatted: `[${task.areaGeoJSON.properties.id}] ${task.points}pts - ${task.timeInterval.name} - ${task.type}`,
     solved: task.solved,
     solvedBy: task.solvedBy || '',
