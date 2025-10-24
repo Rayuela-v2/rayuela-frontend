@@ -8,6 +8,10 @@
             @selected-area="updateSelectedArea"
     />
     <small>Puedes clickear las areas para filtrar tareas ☝️</small>
+    <v-alert v-if="project.gamificationStrategy === 'ELASTICA'" type="info" variant="outlined" class="mt-4">
+      Estás jugando en modo <strong style="color: blue">turbo</strong>. Si estas en muy lejos del primer puesto, vas a
+      obtener puntos extra por cada tarea 🔥
+    </v-alert>
     <!-- Tabla de Tareas -->
     <div class="mt-6">
       <v-data-table
