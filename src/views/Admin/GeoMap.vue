@@ -77,7 +77,7 @@ function getTextCurrentLocation(features, userCoords) {
 }
 
 function getTaskArrayFromFeature(feature) {
-  return props.tasks ? props.tasks.filter(task => task.areaGeoJSON.properties.id === feature.getId()) : [""];
+  return props.tasks ? props.tasks.filter(task => task.areaGeoJSON?.properties?.id === feature.getId()) : [""];
 }
 
 function getMessageForTasks(ts) {
@@ -420,7 +420,7 @@ const isValidGeoJSON = (geojson) => {
   if (!Array.isArray(geojson.features)) {
     toast.warning("El campo features del geoJSON debe ser un array");
   }
-  if (!geojson.features.every((feature) => feature.properties && feature.properties.id)) {
+  if (!geojson.features.every((feature) => feature.properties && feature.properties?.id)) {
     toast.warning("Algun campo feature del geoJSON no tiene id");
   }
 
@@ -432,7 +432,7 @@ const isValidGeoJSON = (geojson) => {
   return (
       geojson.type === 'FeatureCollection' &&
       Array.isArray(geojson.features) &&
-      geojson.features.every((feature) => feature.properties && feature.properties.id)
+      geojson.features.every((feature) => feature.properties && feature.properties?.id)
   );
 };
 </script>

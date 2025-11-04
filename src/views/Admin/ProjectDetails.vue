@@ -284,8 +284,6 @@ const saveProject = async () => {
       ProjectsService.updateProject({id: project.value.id, areas}),
     ]).then(([r]) => {
       toast.success('Proyecto actualizado exitosamente');
-      TaskService.removeUselessTasks(project.value.id)
-          .then(res => res && toast.info('Se eliminaron ' + res + ' tareas en consecuencia'))
       return r;
     });
   }

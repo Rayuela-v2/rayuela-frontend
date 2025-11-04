@@ -224,7 +224,7 @@ const deleteTask = (task) => {
   const index = tasks.value.indexOf(task);
   if (index > -1) {
     tasks.value.splice(index, 1);
-    toast.info('Tarea eliminada', { autoClose: 200 } );
+    toast.info('Tarea eliminada', {autoClose: 200});
   }
 };
 
@@ -269,3 +269,10 @@ const isLast = (item) => {
   return tasks.value.indexOf(item) === tasks.value.length - 1;
 };
 </script>
+
+<style scoped>
+.grayed-row {
+  opacity: 0.6;
+  background-color: #f5f5f5;
+}
+</style>

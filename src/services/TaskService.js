@@ -1,8 +1,9 @@
 import RayuelaService from "@/services/RayuelaService";
 
 class TaskService extends RayuelaService {
-    getTaskForProject(projectId) {
-        return this.get(`/task/project/${projectId}`);
+    getTaskForProject(projectId, filterUseless = false) {
+        return this.get(`/task/project/${projectId}`)
+            .then(r => r.filter(t => (t.timeInterval?.name !== 'unavailable' && t.areaGeoJSON) || !filterUseless));
     }
 
     async bulkSave(tasks, projectId) {

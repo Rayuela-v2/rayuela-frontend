@@ -291,7 +291,7 @@ const handleModalClosed = async () => {
   project.value = await ProjectsService.getProjectById(route.params.projectId);
   leaderboard.value = (await GamificationService.getLeaderboardFor(route.params.projectId))?.users;
   checkins.value = await CheckinService.getByProject(route.params.projectId);
-  tasks.value = await TaskService.getTaskForProject(route.params.projectId);
+  tasks.value = await TaskService.getTaskForProject(route.params.projectId, true);
 };
 
 const updateSelectedArea = (areaId) => {
@@ -325,7 +325,7 @@ const formattedTasks = computed(() => {
 
 onMounted(async () => {
   project.value = await ProjectsService.getProjectById(route.params.projectId);
-  tasks.value = await TaskService.getTaskForProject(route.params.projectId);
+  tasks.value = await TaskService.getTaskForProject(route.params.projectId, true);
   checkins.value = await CheckinService.getByProject(route.params.projectId);
   leaderboard.value = (await GamificationService.getLeaderboardFor(route.params.projectId))?.users;
 });
