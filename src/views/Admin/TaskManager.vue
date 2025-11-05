@@ -122,7 +122,7 @@ onMounted(async () => {
   tasks.value = (await TaskService.getTaskForProject(projectId) || []).map(t => ({
     ...t,
     timeIntervalId: t.timeInterval.name,
-    areaId: t.areaGeoJSON.properties.id,
+    areaId: t.areaGeoJSON?.properties?.id,
   }));
   taskTypes.value = project.value.taskTypes;
   timeIntervals.value = project.value.timeIntervals.map(ti => ti.name);
