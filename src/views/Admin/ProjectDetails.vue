@@ -122,25 +122,23 @@
           </v-row>
           <v-row>
             <v-col cols="6">
-              <v-text-field
-                  label="Hora de inicio"
-                  type="time"
-                  v-model="interval.time.start"
-                  :min="0"
-                  :max="24"
-                  step="1"
-                  required
+              <v-select
+                :items="Array.from({length: 24}, (_, i) => i)"
+                v-model="interval.time.start"
+                label="Hora de inicio"
+                :hint="`El valor seleccionado será ${interval.time.start}:00`"
+                persistent-hint
+                required
               />
             </v-col>
             <v-col cols="6">
-              <v-text-field
-                  label="Hora de finalización"
-                  type="time"
-                  v-model="interval.time.end"
-                  :min="0"
-                  :max="24"
-                  step="1"
-                  required
+              <v-select
+                :items="Array.from({length: 24}, (_, i) => i)"
+                v-model="interval.time.end"
+                label="Hora de finalización"
+                :hint="`El valor seleccionado será ${interval.time.end}:59`"
+                persistent-hint
+                required
               />
             </v-col>
           </v-row>
@@ -180,7 +178,6 @@ import CollapsableSection from '@/components/utils/CollapsableSection.vue';
 import GeoMap from "@/views/Admin/GeoMap.vue";
 import BreadCrumb from "@/components/utils/BreadCrumb.vue";
 import router from "@/router";
-import TaskService from "@/services/TaskService";
 
 const route = useRoute();
 const project = ref({
@@ -248,10 +245,7 @@ const removeTaskType = (index) => {
 const isValidInterval = (interval) => {
   const start = interval.time.start;
   const end = interval.time.end;
-  // Validar formato HH:mm:ss y que end > start
-  const isValidFormat = (t) => /^\d{2}:\d{2}:\d{2}$/.test(t);
   return interval.name.trim() !== '' &&
-      isValidFormat(start) && isValidFormat(end) &&
       start < end &&
       interval.startDate < interval.endDate &&
       interval.days.length > 0;
@@ -277,16 +271,35 @@ const removeTimeInterval = (index) => {
 };
 
 const saveProject = async () => {
+  // Formatea los intervalos de tiempo antes de enviar
+  const formattedIntervals = project.value.timeIntervals.map(interval => ({
+    ...interval,
+    time: {
+      start: typeof interval.time.start === 'number'
+        ? `${interval.time.start.toString().padStart(2, '0')}:00:00`
+        : interval.time.start,
+      end: typeof interval.time.end === 'number'
+        ? `${interval.time.end.toString().padStart(2, '0')}:00:00`
+        : interval.time.end,
+    }
+  }));
+
   if (isNew.value) {
-    return ProjectsService.createProject(project.value).then((r) => {
+    return ProjectsService.createProject({
+      ...project.value,
+      timeIntervals: formattedIntervals
+    }).then((r) => {
       toast.success('Proyecto creado exitosamente');
       return r;
     });
   } else {
-    // Divide the payload to avoid payload too large
+    // Divide el payload para evitar que sea demasiado grande
     const {areas, ...projectWithoutAreas} = project.value;
     return Promise.all([
-      ProjectsService.updateProject(projectWithoutAreas),
+      ProjectsService.updateProject({
+        ...projectWithoutAreas,
+        timeIntervals: formattedIntervals
+      }),
       ProjectsService.updateProject({id: project.value.id, areas}),
     ]).then(([r]) => {
       toast.success('Proyecto actualizado exitosamente');
@@ -314,7 +327,18 @@ onMounted(async () => {
       manualLocation: false,
     };
   } else {
-    project.value = await ProjectsService.getProjectById(projectId);
-  }
+const fetchedProject = await ProjectsService.getProjectById(projectId);
+    fetchedProject.timeIntervals = fetchedProject.timeIntervals.map(interval => ({
+      ...interval,
+      time: {
+        start: typeof interval.time.start === 'string'
+          ? Number(interval.time.start.split(':')[0])
+          : interval.time.start,
+        end: typeof interval.time.end === 'string'
+          ? Number(interval.time.end.split(':')[0])
+          : interval.time.end,
+      }
+    }));
+    project.value = fetchedProject;  }
 });
 </script>
