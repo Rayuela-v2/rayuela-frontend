@@ -55,11 +55,17 @@ const leaderboardData = computed(() =>
 
       <!-- Columna de Puntuación -->
       <template #item.score="{ item }">
-        <span v-if="props.leaderboardStrategy === 'PUNTOS PRIMERO'">
-          {{ item.points || 0 }} punto<span v-if="!item.points || item.points !== 1">s</span>
-        </span>
-        <span v-else>
-          {{ item.badges?.length || 0 }} medalla<span v-if="item.badges && item.badges.length !== 1">s</span>
+        <span>
+          <template v-if="props.leaderboardStrategy === 'PUNTOS PRIMERO'">
+            {{ item.points || 0 }} punto<span v-if="!item.points || item.points !== 1">s</span>
+            &nbsp;|&nbsp;
+            {{ item.badges?.length || 0 }} medalla<span v-if="item.badges && item.badges.length !== 1">s</span>
+          </template>
+          <template v-else>
+            {{ item.badges?.length || 0 }} medalla<span v-if="item.badges && item.badges.length !== 1">s</span>
+            &nbsp;|&nbsp;
+            {{ item.points || 0 }} punto<span v-if="!item.points || item.points !== 1">s</span>
+          </template>
         </span>
       </template>
     </v-data-table>
