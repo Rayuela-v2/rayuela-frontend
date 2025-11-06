@@ -7,6 +7,11 @@ const props = defineProps({
     required: true,
     default: () => [],
   },
+  leaderboardStrategy: {
+    type: String,
+    required: false,
+    default: 'PUNTOS PRIMERO',
+  }
 });
 
 // Computed para mapear el leaderboard con la posición
@@ -43,7 +48,6 @@ const leaderboardData = computed(() =>
 
       <!-- Columna de Nombre -->
       <template #item.name="{ item }">
-        <!--        <UserPFP :username="item.completeName"/>-->
         <span>
           {{ item.completeName }}
         </span>
@@ -51,7 +55,12 @@ const leaderboardData = computed(() =>
 
       <!-- Columna de Puntuación -->
       <template #item.score="{ item }">
-        <span>{{ item.points }}</span>
+        <span v-if="props.leaderboardStrategy === 'PUNTOS PRIMERO'">
+          {{ item.points || 0 }} punto<span v-if="!item.points || item.points !== 1">s</span>
+        </span>
+        <span v-else>
+          {{ item.badges?.length || 0 }} medalla<span v-if="item.badges && item.badges.length !== 1">s</span>
+        </span>
       </template>
     </v-data-table>
   </v-container>

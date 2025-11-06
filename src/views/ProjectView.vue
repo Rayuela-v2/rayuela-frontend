@@ -149,7 +149,7 @@
     </div>
     <h2>Puntos</h2>
     <h3>Tienes {{ project.user.points }}pts</h3>
-    <Leaderboard :leaderboard="leaderboard"/>
+    <Leaderboard :leaderboard="leaderboard" :leaderboardStrategy="project.leaderboardStrategy"/>
     <UserCheckins :checkins="checkins"/>
     <h1 class="mb-6">Detalle del Proyecto</h1>
 

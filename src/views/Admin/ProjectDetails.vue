@@ -21,6 +21,12 @@
             <v-icon @click="showGamificationInfo">mdi-information</v-icon>
           </template>
         </v-select>
+        <v-select
+            label="Tipo de leaderboard"
+            v-model="project.leaderboardStrategy"
+            :items="['PUNTOS PRIMERO', 'MEDALLAS PRIMERO']"
+            required
+        ></v-select>
         <v-switch label="Disponible" v-model="project.available" color="green"/>
         <v-switch label="Checkins con ubicación manual" v-model="project.manualLocation" color="green"/>
       </v-card>
