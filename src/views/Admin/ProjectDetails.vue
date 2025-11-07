@@ -141,10 +141,10 @@
             </v-col>
             <v-col cols="6">
               <v-select
-                :items="Array.from({length: 24}, (_, i) => i)"
+                :items="Array.from({length: 24}, (_, i) => i + 1)"
                 v-model="interval.time.end"
                 label="Hora de finalización"
-                :hint="`El valor seleccionado será ${interval.time.end}:59`"
+                :hint="`El valor seleccionado será ${interval.time.end}:00`"
                 persistent-hint
                 required
               />
@@ -287,7 +287,7 @@ const saveProject = async () => {
         ? `${interval.time.start.toString().padStart(2, '0')}:00:00`
         : interval.time.start,
       end: typeof interval.time.end === 'number'
-        ? `${interval.time.end.toString().padStart(2, '0')}:00:00`
+        ? `${(interval.time.end - 1).toString().padStart(2, '0')}:59:59`
         : interval.time.end,
     }
   }));
