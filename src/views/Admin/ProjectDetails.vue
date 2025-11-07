@@ -27,6 +27,12 @@
             :items="['PUNTOS PRIMERO', 'MEDALLAS PRIMERO']"
             required
         ></v-select>
+        <v-select
+            label="Algoritmo de recomendación"
+            v-model="project.recommendationStrategy"
+            :items="['SIMPLE', 'ADAPTATIVO']"
+            required
+        ></v-select>
         <v-switch label="Disponible" v-model="project.available" color="green"/>
         <v-switch label="Checkins con ubicación manual" v-model="project.manualLocation" color="green"/>
       </v-card>
