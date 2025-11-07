@@ -68,7 +68,8 @@
           </v-col>
         </v-row>
 
-        <v-simple-table class="mt-4">
+        <v-row>
+        <v-table style="width: 100%;">
           <thead>
           <tr>
             <th>Tipo de Tarea</th>
@@ -85,7 +86,8 @@
             </td>
           </tr>
           </tbody>
-        </v-simple-table>
+        </v-table>
+        </v-row>
       </CollapsableSection>
       <!-- Intervalos de Tiempo -->
       <CollapsableSection title="Intervalos de Tiempo">
