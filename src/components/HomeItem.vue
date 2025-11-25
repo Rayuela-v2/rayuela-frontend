@@ -6,7 +6,7 @@
         <span class="highlight">somos el pueblo haciendo ciencia</span>
       </h1>
       <p class="hero-description">
-        En rayuela podés contribuir con tu proyecto de ciencia participativa, desde cualquier dispositivo y en cualquier momento.
+        En rayuela podés contribuir en los proyectos de ciencia participativa, desde cualquier dispositivo y en cualquier momento.
       </p>
       <button class="cta-button" @click="scrollToProjects">Empezar ahora</button>
     </div>

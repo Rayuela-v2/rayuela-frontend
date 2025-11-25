@@ -49,7 +49,6 @@ function logout() {
             </option>
           </select>
         </div>
-        <RouterLink to="/about"><a class="navbar-item">{{ $t("navBar.about") }}</a></RouterLink>
       </div>
 
       <div class="navbar-end">
