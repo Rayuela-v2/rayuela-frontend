@@ -137,6 +137,7 @@ const scrollToProjects = () => {
   }
 
   .hero-title {
+    margin-top: 2.5rem;
     font-size: 2.2rem;
   }
 
