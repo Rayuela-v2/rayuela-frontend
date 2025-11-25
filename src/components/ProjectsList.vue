@@ -24,43 +24,58 @@ onMounted(async () => {
 </script>
 
 <template>
-  <v-row>
-    <v-col
-      v-for="project in projects"
-      :key="project._id"
-      cols="12"
-      sm="6"
-      md="4"
-      lg="3"
-    >
-      <v-card
-        class="mx-auto"
-        max-width="344"
-        @click="router.push('/public/project/' + project._id + '/view')"
-        style="cursor: pointer;"
+  <div class="projects-section" id="projects-section">
+    <h2 class="subtitle">Elegí tu proyecto favorito para comenzar</h2>
+    <hr class="separator"/>
+    <v-row>
+      <v-col
+          v-for="project in projects"
+          :key="project._id"
+          cols="12"
+          sm="6"
+          md="4"
+          lg="3"
       >
-        <v-img
-          :src="project.image"
-          height="180"
-          cover
-          alt="Imagen del proyecto"
-        ></v-img>
-        <v-card-title>{{ project.name }}</v-card-title>
-        <v-card-text>
-          <p>{{ project.description.slice(0,120) }}...</p>
-          <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <span v-if="project.available" style="color: #27ae60; font-weight: 600;">Disponible</span>
-            <span v-else style="color: #c0392b; font-weight: 600;">No disponible</span>
-            <span v-if="project.subscribed"
-                  style="background: #2980b9; color: #fff; border-radius: 0.5rem; padding: 0.2rem 0.7rem; font-size: 0.9rem;">Suscrito</span>
-          </div>
-        </v-card-text>
-      </v-card>
-    </v-col>
-  </v-row>
+        <v-card
+          class="mx-auto"
+          max-width="344"
+          @click="router.push('/public/project/' + project._id + '/view')"
+          style="cursor: pointer;"
+        >
+          <v-img
+            :src="project.image"
+            height="180"
+            cover
+            alt="Imagen del proyecto"
+          ></v-img>
+          <v-card-title>{{ project.name }}</v-card-title>
+          <v-card-text>
+            <p>{{ project.description.slice(0,120) }}...</p>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span v-if="project.available" style="color: #27ae60; font-weight: 600;">Disponible</span>
+              <span v-else style="color: #c0392b; font-weight: 600;">No disponible</span>
+              <span v-if="project.subscribed"
+                    style="background: #2980b9; color: #fff; border-radius: 0.5rem; padding: 0.2rem 0.7rem; font-size: 0.9rem;">Suscrito</span>
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+  </div>
 </template>
 
 <style scoped>
+.projects-section {
+  padding: 2rem 0;
+}
+
+.separator {
+  border: 0;
+  height: 1px;
+  background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0));
+  margin: 1rem 0 3rem;
+}
+
 .container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -77,7 +92,7 @@ onMounted(async () => {
   font-size: 2rem;
   font-weight: 700;
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   color: #2c3e50;
   letter-spacing: 1px;
 }
