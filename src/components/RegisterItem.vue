@@ -33,11 +33,11 @@ function is_valid_form() {
 async function signup() {
   if (is_valid_form()) {
     const user = {
-      username: username.value,
-      email: email.value,
+      username: username.value?.trim(),
+      email: email.value?.trim(),
       password: password1.value,
       profile_image: "https://example.com/image.jpg",
-      complete_name: username.value,
+      complete_name: username.value?.trim(),
     };
     AuthService.register(user)
         .then(() => {
