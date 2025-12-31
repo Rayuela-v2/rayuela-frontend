@@ -4,11 +4,14 @@ import ProjectsService from "@/services/ProjectsService";
 import {useRouter} from "vue-router";
 import {toast} from "vue3-toastify";
 import {store} from "@/vuex/state";
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const projects = ref([]);
 const headers = ref([
-  {title: 'Nombre del proyecto', value: 'name', sortable: true},
-  {title: 'Acciones', value: 'actions', sortable: false}
+  {title: t('admin.project_name'), value: 'name', sortable: true},
+  {title: t('common.actions'), value: 'actions', sortable: false}
 ]);
 
 const selectedProject = ref(null);
@@ -33,8 +36,8 @@ const editGamification = (project) => {
 
 const addProject = async () => {
   const newP = await ProjectsService.createProject({
-    name: "Nuevo proyecto",
-    description: "Descripcion del proyecto",
+    name: t("admin.new_project_default_name"),
+    description: t("admin.project_description_default"),
     image: "https://example.com/image.jpg",
     web: "https://example.com",
     available: true,
@@ -88,7 +91,7 @@ const disableProject = async () => {
   selectedProject.value.available = !selectedProject.value.available;
   await ProjectsService.toggleAvailability(selectedProject.value._id)
       .then(async () => {
-        toast.success('Proyecto actualizado :)');
+        toast.success(t('admin.project_updated_success'));
         dialogDisable.value = false;
         projects.value = await ProjectsService.getAdminProjects();
       });
@@ -97,14 +100,14 @@ const disableProject = async () => {
 
 <template>
   <main>
-    <h1>Mis proyectos</h1>
+    <h1>{{ $t('admin.my_projects') }}</h1>
     <div style="display: flex; justify-content: flex-end;">
-      <v-btn color="black" @click="addProject">Agregar proyecto</v-btn>
+      <v-btn color="black" @click="addProject">{{ $t('admin.add_project') }}</v-btn>
     </div>
     <v-container>
       <v-data-table
           :headers="headers"
-          :no-data-text="'Aún no hay datos para mostrar.'"
+          :no-data-text="$t('leaderboard.no_data')"
           :items="projects"
           class="elevation-1"
       >
@@ -117,13 +120,13 @@ const disableProject = async () => {
             </template>
             <v-list>
               <v-list-item @click="editProject(item)">
-                <v-list-item-title>Editar datos</v-list-item-title>
+                <v-list-item-title>{{ $t('admin.edit_data') }}</v-list-item-title>
               </v-list-item>
               <v-list-item @click="editGamification(item)">
-                <v-list-item-title>Editar ludificación</v-list-item-title>
+                <v-list-item-title>{{ $t('admin.edit_gamification') }}</v-list-item-title>
               </v-list-item>
               <v-list-item @click="confirmDisable(item)">
-                <v-list-item-title>{{ item.available ? "Esconder" : "Mostrar" }}</v-list-item-title>
+                <v-list-item-title>{{ item.available ? $t('admin.hide') : $t('admin.show') }}</v-list-item-title>
               </v-list-item>
             </v-list>
           </v-menu>
@@ -132,16 +135,15 @@ const disableProject = async () => {
 
       <v-dialog v-model="dialogDisable" max-width="400px">
         <v-card>
-          <v-card-title class="headline">¿Estás seguro?</v-card-title>
+          <v-card-title class="headline">{{ $t('admin.confirm_title') }}</v-card-title>
           <v-card-text>
-            ¿Estás seguro que quieres {{ selectedProject?.available ? "esconder" : "mostrar" }} el proyecto
-            <strong>{{ selectedProject?.name }}</strong>?
+            <span v-html="$t('admin.confirm_message', { action: selectedProject?.available ? $t('admin.hide') : $t('admin.show'), name: selectedProject?.name })"></span>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="primary" text @click="dialogDisable = false">Cancelar</v-btn>
+            <v-btn color="primary" text @click="dialogDisable = false">{{ $t('common.cancel') }}</v-btn>
             <v-btn color="warning" text @click="disableProject">{{
-                selectedProject?.available ? "Esconder" : "Mostrar"
+                selectedProject?.available ? $t('admin.hide') : $t('admin.show')
               }}
             </v-btn>
           </v-card-actions>

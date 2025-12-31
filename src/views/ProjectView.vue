@@ -7,16 +7,15 @@
             v-if="project.areas && checkins !== null" :checkins="checkins" :tasks="tasks" :area="project.areas"
             @selected-area="updateSelectedArea"
     />
-    <small>Puedes clickear las areas para filtrar tareas ☝️</small>
+    <small>{{ $t('project.click_areas_hint') }}</small>
     <v-alert v-if="project.gamificationStrategy === 'ELASTICA'" type="info" variant="outlined" class="mt-4">
-      Estás jugando en modo <strong style="color: blue">turbo</strong>. Si estas en muy lejos del primer puesto, vas a
-      obtener puntos extra por cada tarea 🔥
+      <span v-html="$t('project.turbo_mode_alert')"></span>
     </v-alert>
     <!-- Tabla de Tareas -->
     <div class="mt-6">
       <v-data-table
           :items="formattedTasks"
-          :no-data-text="'Aún no hay datos para mostrar.'"
+          :no-data-text="$t('leaderboard.no_data')"
           :headers="taskHeaders"
           item-value="formatted"
           dense
@@ -27,12 +26,12 @@
           <v-toolbar flat>
             <v-toolbar-title style="flex:1">
               <div style="display: flex; justify-content: space-between; margin-right: 8px">
-                Tareas
+                {{ $t('project.tasks_title') }}
               </div>
             </v-toolbar-title>
             <v-text-field
                 v-model="tableSearch"
-                placeholder="Buscar tareas..."
+                :placeholder="$t('project.search_placeholder')"
                 clearable
                 dense
                 hide-details
@@ -50,13 +49,13 @@
                 <v-badge
                     v-if="item.solved"
                     color="green"
-                    :content="`Resuelta por ${item.solvedBy}`"
+                    :content="$t('project.solved_by', { name: item.solvedBy })"
                     inline
                 ></v-badge>
                 <v-badge
                     v-if="!item.solved"
                     color="blue"
-                    content="Pendiente"
+                    :content="$t('project.pending')"
                     inline
                 ></v-badge>
               </span>
@@ -71,17 +70,17 @@
                      class="floating-button"
     />
 
-    <h2>Medallas</h2>
+    <h2>{{ $t('project.badges_title') }}</h2>
     <div class="pa-4 mb-6 badges-container">
-      <v-alert title="Sin medallas"
+      <v-alert :title="$t('project.no_badges_title')"
                color="gray"
                variant="tonal"
-               v-if="project.user.badges.length === 0">Aun no tienes medallas, quieres comenzar con un checkin?
+               v-if="project.user.badges.length === 0">{{ $t('project.no_badges_message') }}
       </v-alert>
       <div v-for="(badge, index) in project.user.badges" :key="index" class="badge-item">
         <img
             :src="badge.imageUrl"
-            alt="Imagen de la insignia"
+            :alt="$t('project.image_alt')"
             :class="{ 'grayscale': !badge.active }"
             @click="toggleTooltip(index)"
         />
@@ -89,32 +88,29 @@
       </div>
       <v-dialog v-model="taskDetailDialog" max-width="500">
         <v-card v-if="taskDetail">
-          <v-card-title class="headline">Detalle de la tarea</v-card-title>
+          <v-card-title class="headline">{{ $t('project.task_detail_title') }}</v-card-title>
           <v-card-text>
             <p>{{
                 taskDetail.taskDescription
               }}</p>
-            <p><strong>Intervalo de tiempo:</strong> {{
+            <p><strong>{{ $t('project.time_interval_label') }}</strong> {{
                 taskDetail.intervalDescription || taskDetail.timeInterval?.name
               }}</p>
-            <p><strong>Tipo de tarea:</strong> {{ taskDetail.type }}</p>
+            <p><strong>{{ $t('project.task_type_label') }}</strong> {{ taskDetail.type }}</p>
             <p v-if="taskDetail.timeInterval">
-              <strong>Horario:</strong>
-              De {{ taskDetail.timeInterval?.time?.start }} a {{ (taskDetail.timeInterval?.time?.end ?? '') }}
-              hs
+              <strong>{{ $t('project.schedule_label') }}</strong>
+              {{ $t('project.time_range', { start: taskDetail.timeInterval?.time?.start, end: taskDetail.timeInterval?.time?.end ?? '', suffix: $t('common.hours_suffix') }) }}
             </p>
             <p v-if="taskDetail.timeInterval?.days">
-              <strong>Días:</strong>
+              <strong>{{ $t('project.days_label') }}</strong>
               <span v-for="(day, idx) in taskDetail.timeInterval.days" :key="day">
-          {{
-                  ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][day - 1]
-                }}<span v-if="idx < taskDetail.timeInterval.days.length - 1">, </span>
+          {{ $t('common.days')[day - 1] }}<span v-if="idx < taskDetail.timeInterval.days.length - 1">, </span>
         </span>
             </p>
           </v-card-text>
           <v-card-actions>
             <v-spacer/>
-            <v-btn text @click="taskDetailDialog = false">Cerrar</v-btn>
+            <v-btn text @click="taskDetailDialog = false">{{ $t('common.close') }}</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -125,57 +121,55 @@
             <div style="display:flex; gap:16px; align-items:flex-start">
               <img :src="selectedBadge.imageUrl" alt="" width="90" height="90"/>
               <div>
-                <p><strong>Reglas para ganarla:</strong></p>
+                <p><strong>{{ $t('project.badge_rules_label') }}</strong></p>
                 <ul>
-                  <li>Medallas previas: {{
-                      selectedBadge.previousBadges.length > 0 ? selectedBadge.previousBadges.toString() : 'Ninguna'
+                  <li>{{ $t('project.previous_badges_label') }} {{
+                      selectedBadge.previousBadges.length > 0 ? selectedBadge.previousBadges.toString() : $t('common.none')
                     }}
                   </li>
-                  <li>Cantidad de checkins: {{ selectedBadge.checkinsAmount }}</li>
-                  <li v-if="selectedBadge.mustContribute">(Tienen que resolver una tarea)</li>
-                  <li>Area: {{ selectedBadge.areaId }}</li>
-                  <li>Intervalo de tiempo: {{ selectedBadge.timeIntervalId }}</li>
-                  <li>Tipo de tarea: {{ selectedBadge.taskType }}</li>
+                  <li>{{ $t('project.checkins_amount_label') }} {{ selectedBadge.checkinsAmount }}</li>
+                  <li v-if="selectedBadge.mustContribute">{{ $t('project.must_contribute_hint') }}</li>
+                  <li>{{ $t('project.area_label') }} {{ selectedBadge.areaId }}</li>
+                  <li>{{ $t('project.interval_label') }} {{ selectedBadge.timeIntervalId }}</li>
+                  <li>{{ $t('project.type_label') }} {{ selectedBadge.taskType }}</li>
                 </ul>
               </div>
             </div>
           </v-card-text>
           <v-card-actions>
             <v-spacer/>
-            <v-btn text @click="showBadgeDialog = false">Cerrar</v-btn>
+            <v-btn text @click="showBadgeDialog = false">{{ $t('common.close') }}</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
     </div>
-    <h2>Puntos</h2>
-    <h3>Tienes {{ project.user.points }}pts</h3>
+    <h2>{{ $t('project.points_title') }}</h2>
+    <h3>{{ $t('project.user_points', { points: project.user.points }) }}</h3>
     <Leaderboard :leaderboard="leaderboard" :leaderboardStrategy="project.leaderboardStrategy"/>
     <UserCheckins :checkins="checkins"/>
-    <h1 class="mb-6">Detalle del Proyecto</h1>
+    <h1 class="mb-6">{{ $t('admin.project_detail') }}</h1>
 
     <!-- Sección de explicación de intervalos de tiempo -->
-    <h2>Intervalos de tiempo</h2>
+    <h2>{{ $t('project.intervals_title') }}</h2>
     <v-card class="pa-4 mb-6">
       <p>
-        Los intervalos de tiempo definen en qué días y horarios se pueden realizar tareas específicas en el proyecto.
+        {{ $t('project.intervals_description') }}
       </p>
       <ul>
         <li v-for="interval in project.timeIntervals" :key="interval._id">
           <strong>{{ interval.name }}</strong>:
           <span>
-                De {{ interval.time.start }} a {{ interval.time.end }} hs,
-                los días
+                {{ $t('project.time_range', { start: interval.time.start, end: interval.time.end, suffix: $t('common.hours_suffix') }) }},
+                {{ $t('project.days_label').toLowerCase() }}
                 <span v-for="(day, idx) in interval.days" :key="day">
-                  {{
-                    ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][day - 1]
-                  }}<span v-if="idx < interval.days.length - 1">, </span>
+                  {{ $t('common.days')[day - 1] }}<span v-if="idx < interval.days.length - 1">, </span>
                 </span>
               </span>
         </li>
       </ul>
     </v-card>
 
-    <h2>Tipos de tarea</h2>
+    <h2>{{ $t('project.type_label').replace(':', '') }}</h2>
     <v-card class="pa-4 mb-6">
       <ul>
         <li v-for="(type, idx) in project.taskTypes" :key="idx">
@@ -189,13 +183,13 @@
     <v-card class="pa-4 mb-6">
       <v-row>
         <v-col cols="12" md="6">
-          <v-img :src="project.image" alt="Imagen del proyecto" class="mb-4" contain/>
+          <v-img :src="project.image" :alt="$t('project.image_alt')" class="mb-4" contain/>
         </v-col>
         <v-col cols="12" md="6">
           <h2>{{ project.name }}</h2>
           <p class="text-subtitle-1 mb-3" v-html="project.description.replace(/\n/g, '<br>')"></p>
           <v-btn :href="project.web" target="_blank" color="primary" class="mb-2">
-            Visitar Sitio Web
+            {{ $t('project.visit_website') }}
           </v-btn>
           <v-btn
               color="blue"
@@ -203,14 +197,14 @@
               @click="shareProject"
           >
             <v-icon left>mdi-share</v-icon>
-            Compartir
+            {{ $t('common.share') }}
           </v-btn>
         </v-col>
       </v-row>
     </v-card>
     <v-btn color="green" block large @click="subscribe">
       <v-icon left size="large">mdi-account-plus</v-icon>
-      Inscribirse
+      {{ $t('project.button_subscribe') }}
     </v-btn>
   </v-container>
   <v-btn
@@ -219,7 +213,7 @@
       @click="shareProject"
   >
     <v-icon left>mdi-share</v-icon>
-    Compartir proyecto
+    {{ $t('project.button_share') }}
   </v-btn>
 </template>
 
@@ -235,6 +229,9 @@ import {toast} from "vue3-toastify";
 import GamificationService from "@/services/GamificationService";
 import CheckinService from "@/services/CheckinService";
 import UserCheckins from "@/components/UserCheckins.vue";
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const route = useRoute();
 const tasks = ref([]);
@@ -278,7 +275,7 @@ const project = ref({
 const subscribe = () => {
   ProjectsService.toggleSubscription(route.params.projectId)
       .then(async () => {
-        toast.success("Inscripción exitosa");
+        toast.success(t("project.subscribe_success"));
         project.value = await ProjectsService.getProjectById(route.params.projectId);
       });
 }
@@ -299,7 +296,7 @@ const updateSelectedArea = (areaId) => {
 };
 
 const shareProject = () => {
-  const text = `¡Hola!  Querés jugar en rayuela? :) ${project.value.name}`;
+  const text = t("project.share_text", { name: project.value.name });
   if (navigator.share) {
     navigator.share({
       title: project.value.name,

@@ -25,15 +25,15 @@ const leaderboardData = computed(() =>
 
 <template>
   <v-container>
-    <h2 class="mb-6">Leaderboard</h2>
+    <h2 class="mb-6">{{ $t('leaderboard.title') }}</h2>
     <v-data-table
         :headers="[
-        { title: 'Posición', value: 'position' },
-        { title: 'Nombre', value: 'name' },
-        { title: 'Puntuación', value: 'score' }
+        { title: $t('leaderboard.position'), value: 'position' },
+        { title: $t('leaderboard.name_header'), value: 'name' },
+        { title: $t('leaderboard.score_header'), value: 'score' }
       ]"
         :items="leaderboardData"
-        :no-data-text="'Aún no hay datos para mostrar.'"
+        :no-data-text="$t('leaderboard.no_data')"
         class="elevation-2"
         dense
         hide-default-footer
@@ -57,14 +57,14 @@ const leaderboardData = computed(() =>
       <template #item.score="{ item }">
         <span>
           <template v-if="props.leaderboardStrategy === 'PUNTOS PRIMERO'">
-            {{ item.points || 0 }} punto<span v-if="!item.points || item.points !== 1">s</span>
+            {{ $t('leaderboard.points', item.points || 0) }}
             &nbsp;|&nbsp;
-            {{ item.badges?.length || 0 }} medalla<span v-if="item.badges && item.badges.length !== 1">s</span>
+            {{ $t('leaderboard.medals', item.badges?.length || 0) }}
           </template>
           <template v-else>
-            {{ item.badges?.length || 0 }} medalla<span v-if="item.badges && item.badges.length !== 1">s</span>
+            {{ $t('leaderboard.medals', item.badges?.length || 0) }}
             &nbsp;|&nbsp;
-            {{ item.points || 0 }} punto<span v-if="!item.points || item.points !== 1">s</span>
+            {{ $t('leaderboard.points', item.points || 0) }}
           </template>
         </span>
       </template>

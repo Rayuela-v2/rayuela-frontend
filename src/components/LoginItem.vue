@@ -4,6 +4,9 @@ import { useRouter } from 'vue-router';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 import AuthService from "@/services/AuthService";
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const router = useRouter();
 const username = ref("");
@@ -30,7 +33,7 @@ async function login() {
             });
       })
       .catch(() => {
-        toast.error("Credenciales de acceso incorrectas", { autoClose: 3000 });
+        toast.error(t("login.error_credentials"), { autoClose: 3000 });
       });
 }
 </script>

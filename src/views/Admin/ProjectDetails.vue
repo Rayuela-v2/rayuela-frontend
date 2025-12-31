@@ -1,18 +1,18 @@
 <template>
   <v-container>
     <BreadCrumb items="projectDetailsPath"/>
-    <h1 class="mb-6">Detalle del proyecto</h1>
+    <h1 class="mb-6">{{ $t('admin.project_detail') }}</h1>
 
     <v-form @submit.prevent="saveProject">
       <!-- Información del proyecto -->
       <v-card class="pa-4 mb-6">
-        <h2>Información del Proyecto</h2>
-        <v-text-field label="Nombre del proyecto" v-model="project.name" required/>
-        <v-textarea label="Descripción del proyecto" v-model="project.description" required/>
-        <v-text-field label="URL de la imagen" v-model="project.image"/>
-        <v-text-field label="Sitio web del proyecto" v-model="project.web"/>
+        <h2>{{ $t('admin.project_info') }}</h2>
+        <v-text-field :label="$t('admin.project_name')" v-model="project.name" required/>
+        <v-textarea :label="$t('admin.project_description_label')" v-model="project.description" required/>
+        <v-text-field :label="$t('admin.project_image_label')" v-model="project.image"/>
+        <v-text-field :label="$t('admin.project_website_label')" v-model="project.web"/>
         <v-select
-            label="Tipo de adaptación"
+            :label="$t('admin.adaptation_type_label')"
             v-model="project.gamificationStrategy"
             :items="['ELASTICA', 'SIN ADAPTACION']"
             required
@@ -22,55 +22,54 @@
           </template>
         </v-select>
         <v-select
-            label="Tipo de leaderboard"
+            :label="$t('admin.leaderboard_type_label')"
             v-model="project.leaderboardStrategy"
             :items="['PUNTOS PRIMERO', 'MEDALLAS PRIMERO']"
             required
         ></v-select>
         <v-select
-            label="Algoritmo de recomendación"
+            :label="$t('admin.recommendation_algorithm_label')"
             v-model="project.recommendationStrategy"
             :items="['SIMPLE', 'ADAPTATIVO']"
             required
         ></v-select>
-        <v-switch label="Disponible" v-model="project.available" color="green"/>
-        <v-switch label="Checkins con ubicación manual" v-model="project.manualLocation" color="green"/>
+        <v-switch :label="$t('project.status_available')" v-model="project.available" color="green"/>
+        <v-switch :label="$t('admin.manual_location_switch')" v-model="project.manualLocation" color="green"/>
       </v-card>
 
       <v-dialog v-model="gamificationDialog" max-width="500px">
         <v-card>
-          <v-card-title>¿Qué es una adaptación de ludificación?</v-card-title>
+          <v-card-title>{{ $t('admin.gamification_info_title') }}</v-card-title>
           <v-card-text>
-            <p>Las estrategias de adaptación permiten adecuar los elementos de juego a cada persona en un contexto
-              determinado. En este proyecto, puedes elegir entre:</p>
+            <p>{{ $t('admin.gamification_info_text') }}</p>
             <ul>
-              <li><strong>Básica:</strong> Aplica reglas predefinidas sin adaptación dinámica.</li>
-              <li><strong>Elástica:</strong> El cálculo de retribución de puntos es relativo a la posición de cada
+              <li><strong>{{ $t('admin.basic') }}:</strong> Aplica reglas predefinidas sin adaptación dinámica.</li>
+              <li><strong>{{ $t('admin.elastic') }}:</strong> El cálculo de retribución de puntos es relativo a la posición de cada
                 persona en la tabla de posiciones. Si está más lejos, el puntaje es mayor que si está cerca.
               </li>
             </ul>
           </v-card-text>
           <v-card-actions>
-            <v-btn color="primary" @click="gamificationDialog = false">Cerrar</v-btn>
+            <v-btn color="primary" @click="gamificationDialog = false">{{ $t('common.close') }}</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
 
       <!-- Áreas -->
-      <CollapsableSection title="Áreas">
-        <p class="text-subtitle-1 mb-3">Define las áreas geográficas del proyecto</p>
+      <CollapsableSection :title="$t('admin.areas_title')">
+        <p class="text-subtitle-1 mb-3">{{ $t('admin.define_areas') }}</p>
         <GeoMap v-if="project.areas" :area="project.areas" @update-area="updateProjectAreas"/>
       </CollapsableSection>
 
-      <CollapsableSection title="Tipos de Tareas">
-        <p class="text-subtitle-1 mb-3">Tabla de tipos de tareas</p>
+      <CollapsableSection :title="$t('admin.task_types_title')">
+        <p class="text-subtitle-1 mb-3">{{ $t('admin.task_types_table') }}</p>
         <v-row>
           <v-col cols="10">
-            <v-text-field v-model="newTaskType" label="Añadir nuevo tipo de tarea"
-                          placeholder="Escribe un tipo de tarea"/>
+            <v-text-field v-model="newTaskType" :label="$t('admin.add_task_type_label')"
+                          :placeholder="$t('admin.task_type_placeholder')"/>
           </v-col>
           <v-col cols="2">
-            <v-btn color="black" @click="addNewTaskType">Agregar</v-btn>
+            <v-btn color="black" @click="addNewTaskType">{{ $t('common.add') }}</v-btn>
           </v-col>
         </v-row>
 
@@ -78,8 +77,8 @@
         <v-table style="width: 100%;">
           <thead>
           <tr>
-            <th>Tipo de Tarea</th>
-            <th>Acciones</th>
+            <th>{{ $t('admin.task_type') }}</th>
+            <th>{{ $t('common.actions') }}</th>
           </tr>
           </thead>
           <tbody>
@@ -96,22 +95,22 @@
         </v-row>
       </CollapsableSection>
       <!-- Intervalos de Tiempo -->
-      <CollapsableSection title="Intervalos de Tiempo">
-        <p class="text-subtitle-1 mb-3">Define los intervalos de tiempo y los días aplicables</p>
+      <CollapsableSection :title="$t('admin.time_intervals_title')">
+        <p class="text-subtitle-1 mb-3">{{ $t('admin.define_intervals') }}</p>
 
         <v-btn color="primary" class="mb-4" @click="addNewTimeInterval">
-          Añadir nuevo intervalo de tiempo
+          {{ $t('admin.add_time_interval_button') }}
         </v-btn>
 
         <CollapsableSection style="background: whitesmoke; padding: 2em"
                             v-for="(interval, index) in project.timeIntervals"
-                            :key="index" class="mb-4" :title="interval.name || 'Nuevo Intervalo'">
-          <v-text-field label="Nombre del intervalo" v-model="interval.name" required/>
+                            :key="index" class="mb-4" :title="interval.name || $t('admin.new_interval_placeholder')">
+          <v-text-field :label="$t('admin.interval_name_label')" v-model="interval.name" required/>
 
           <v-row>
             <v-col cols="6">
               <v-text-field
-                  label="Fecha de inicio"
+                  :label="$t('admin.start_date_label')"
                   type="date"
                   v-model="interval.startDate"
                   step="1"
@@ -120,7 +119,7 @@
             </v-col>
             <v-col cols="6">
               <v-text-field
-                  label="Fecha de finalización"
+                  :label="$t('admin.end_date_label')"
                   type="date"
                   v-model="interval.endDate"
                   step="1"
@@ -133,8 +132,8 @@
               <v-select
                 :items="Array.from({length: 24}, (_, i) => i)"
                 v-model="interval.time.start"
-                label="Hora de inicio"
-                :hint="`El valor seleccionado será ${interval.time.start}:00`"
+                :label="$t('admin.start_hour_label')"
+                :hint="t('admin.time_hint', { time: interval.time.start })"
                 persistent-hint
                 required
               />
@@ -143,35 +142,35 @@
               <v-select
                 :items="Array.from({length: 24}, (_, i) => i + 1)"
                 v-model="interval.time.end"
-                label="Hora de finalización"
-                :hint="`El valor seleccionado será ${interval.time.end}:00`"
+                :label="$t('admin.end_hour_label')"
+                :hint="t('admin.time_hint', { time: interval.time.end })"
                 persistent-hint
                 required
               />
             </v-col>
           </v-row>
-          <h4>Días de la semana</h4>
+          <h4>{{ $t('admin.days_of_week') }}</h4>
           <v-checkbox
-              v-for="day in daysOfWeek"
+              v-for="(day, idx) in daysOfWeek"
               :key="day.value"
               v-model="interval.days"
-              :label="day.text"
+              :label="$t('common.days')[idx + 1] === undefined ? $t('common.days')[0] : $t('common.days')[idx + 1]"
               :value="day.value"
               hide-details
           />
 
-          <v-btn color="red" @click="removeTimeInterval(index)">Eliminar intervalo</v-btn>
+          <v-btn color="red" @click="removeTimeInterval(index)">{{ $t('admin.remove_interval') }}</v-btn>
 
           <!-- Mostrar advertencias de validación -->
           <v-alert v-if="!isValidInterval(interval) && interval.name" type="error" variant="outlined" class="mt-4">
-            El intervalo debe tener un nombre, un horario válido y al menos un día seleccionado.
+            {{ $t('admin.invalid_interval_alert') }}
           </v-alert>
         </CollapsableSection>
       </CollapsableSection>
-      <CollapsableSection title="Tareas" @click="taskSectionClick">
+      <CollapsableSection :title="$t('admin.task_management') " @click="taskSectionClick">
       </CollapsableSection>
       <v-btn type="submit" variant="elevated" color="primary" width="100%" :disabled="hasInvalidTimeIntervals">
-        {{ isNew ? 'Crear' : 'Actualizar' }}
+        {{ isNew ? $t('common.add') : $t('admin.project_updated_success').split(' ')[1] }}
       </v-btn>
     </v-form>
   </v-container>
@@ -180,6 +179,9 @@
 <script setup>
 import {computed, onMounted, ref} from 'vue';
 import {useRoute} from 'vue-router';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 import ProjectsService from '@/services/ProjectsService';
 import {toast} from 'vue3-toastify';
 import CollapsableSection from '@/components/utils/CollapsableSection.vue';
@@ -223,7 +225,7 @@ const taskSectionClick = () => {
 }
 const updateProjectAreas = (newAreas) => {
   project.value.areas = newAreas;
-  toast.success('Áreas actualizadas correctamente');
+  toast.success(t('admin.areas_updated_success'));
 };
 
 // Computed para saber si hay intervalos de tiempo inválidos
@@ -239,13 +241,13 @@ const addNewTaskType = () => {
   const taskType = newTaskType.value.trim();
   if (taskType && !project.value.taskTypes.includes(taskType)) {
     project.value.taskTypes.push(taskType);
-    toast.success(`Tarea "${taskType}" añadida`);
+    toast.success(t("admin.task_type_added_success", { type: taskType }));
     newTaskType.value = '';
   }
 };
 
 const removeTaskType = (index) => {
-  confirm('Si borras un tipo de tarea se eliminaran todas las tareas que lo contienen, quieres continuar?')
+  confirm(t('admin.confirm_delete_task_type'))
   project.value.taskTypes.splice(index, 1);
 };
 
@@ -273,9 +275,9 @@ const addNewTimeInterval = () => {
 };
 
 const removeTimeInterval = (index) => {
-  confirm('Si borras un intervalo de tiempo se eliminaran todas las tareas que lo contienen, quieres continuar?')
+  confirm(t('admin.confirm_delete_interval'))
   project.value.timeIntervals.splice(index, 1);
-  toast.info('Intervalo eliminado');
+  toast.info(t('admin.interval_removed_success'));
 };
 
 const saveProject = async () => {
@@ -297,7 +299,7 @@ const saveProject = async () => {
       ...project.value,
       timeIntervals: formattedIntervals
     }).then((r) => {
-      toast.success('Proyecto creado exitosamente');
+      toast.success(t('admin.project_created_success'));
       return r;
     });
   } else {
@@ -310,7 +312,7 @@ const saveProject = async () => {
       }),
       ProjectsService.updateProject({id: project.value.id, areas}),
     ]).then(([r]) => {
-      toast.success('Proyecto actualizado exitosamente');
+      toast.success(t('admin.project_updated_success'));
       return r;
     });
   }

@@ -15,7 +15,7 @@ const seeProjectDetails = (id) => {
 </script>
 <template>
   <div class="container">
-    <h2 class="subtitle mb-4">Proyectos</h2>
+    <h2 class="subtitle mb-4">{{ $t('common.projects') }}</h2>
     <v-container>
       <v-row>
         <v-col
@@ -40,13 +40,13 @@ const seeProjectDetails = (id) => {
               </div>
 
               <v-card-subtitle class="pt-2">
-                {{ project.available ? 'Disponible' : 'No disponible' }}
+                {{ project.available ? $t('project.status_available') : $t('project.status_unavailable') }}
               </v-card-subtitle>
 
               <v-card-text>
-                <div>{{ (project.description?.slice(0, 50) || 'Sin descripción disponible') + '...' }}</div>
+                <div>{{ (project.description?.slice(0, 50) || $t('project.no_description')) + '...' }}</div>
                 <div v-if="project.web">
-                  <a :href="project.web" target="_blank" class="text-decoration-none">Visitar sitio web</a>
+                  <a :href="project.web" target="_blank" class="text-decoration-none">{{ $t('project.visit_website') }}</a>
                 </div>
               </v-card-text>
 
@@ -55,7 +55,7 @@ const seeProjectDetails = (id) => {
               <v-btn
                   @click="seeProjectDetails(project._id)"
               >
-                Ver más
+                {{ $t('common.see_more') }}
               </v-btn>
             </v-card-actions>
           </v-card>

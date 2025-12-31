@@ -3,31 +3,31 @@
     <!-- Botón para abrir el modal -->
     <v-btn color="blue" variant="elevated" block size='large' @click="openModal">
       <v-icon style="margin-right: 8px" left size="large">mdi-map-marker-plus</v-icon>
-      Registrar Check-in
+      {{ $t('checkin.button_register') }}
     </v-btn>
 
     <!-- Modal principal para registrar el check-in -->
     <v-dialog v-model="showModal" persistent max-width="600px">
       <v-card>
         <v-card-title>
-          <span class="text-h6">Registrar Check-in</span>
+          <span class="text-h6">{{ $t('checkin.title_register') }}</span>
         </v-card-title>
 
         <v-card-text>
           <!-- Spinner mientras se busca la ubicación -->
           <div v-if="loadingLocation" class="text-center">
             <v-progress-circular indeterminate color="primary"></v-progress-circular>
-            <p>Estamos buscando tu localización...</p>
+            <p>{{ $t('checkin.searching_location') }}</p>
           </div>
 
           <!-- Formulario -->
           <v-form v-else>
             <!-- Sección: Ubicación -->
-            <h4>Ubicación</h4>
+            <h4>{{ $t('checkin.location') }}</h4>
             <v-row>
               <v-col cols="6">
                 <v-text-field
-                    label="Latitud"
+                    :label="$t('checkin.latitude')"
                     v-model="form.latitude"
                     type="number"
                     :readonly="!manualLocation"
@@ -36,7 +36,7 @@
               </v-col>
               <v-col cols="6">
                 <v-text-field
-                    label="Longitud"
+                    :label="$t('checkin.longitude')"
                     type="number"
                     v-model="form.longitude"
                     :readonly="!manualLocation"
@@ -45,24 +45,24 @@
               </v-col>
               <v-col cols="12" class="text-right">
                 <v-btn variant="plain" v-if="props.manualLocationEnabled" @click="toggleManualLocation">
-                  {{ manualLocation ? 'Usar ubicación automática' : 'Ingresar ubicación manualmente' }}
+                  {{ manualLocation ? $t('checkin.use_auto_location') : $t('checkin.use_manual_location') }}
                 </v-btn>
               </v-col>
             </v-row>
 
             <!-- Sección: Fecha y Hora -->
-            <h4 class="mt-4">Fecha y Hora</h4>
+            <h4 class="mt-4">{{ $t('checkin.date_time') }}</h4>
             <v-text-field
-                label="Timestamp"
+                :label="$t('checkin.timestamp')"
                 v-model="form.datetime"
                 type="datetime-local"
                 outlined
             ></v-text-field>
 
             <!-- Sección: Tipo de Tarea -->
-            <h4 class="mt-4">Tipo de Tarea</h4>
+            <h4 class="mt-4">{{ $t('checkin.task_type_label') }}</h4>
             <v-select
-                label="Tipo de tarea"
+                :label="$t('checkin.task_type_label')"
                 v-model="form.taskType"
                 :items="props.taskTypes"
                 outlined
@@ -72,7 +72,7 @@
 
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn text @click="closeModal" :disabled="loadingCheckin">Cancelar</v-btn>
+          <v-btn text @click="closeModal" :disabled="loadingCheckin">{{ $t('common.cancel') }}</v-btn>
           <v-btn
               color="primary"
               @click="submitForm"
@@ -80,9 +80,9 @@
           >
             <template v-if="loadingCheckin">
               <v-progress-circular indeterminate color="white" size="20" class="mr-2"></v-progress-circular>
-              Guardando...
+              {{ $t('common.saving') }}
             </template>
-            <template v-else>Guardar</template>
+            <template v-else>{{ $t('common.save') }}</template>
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -93,33 +93,33 @@
       <v-card>
         <v-card-text class="text-center">
           <v-icon color="green" size="48">mdi-check-circle-outline</v-icon>
-          <h3>¡Checkin registrado!</h3>
+          <h3>{{ $t('checkin.registered_success') }}</h3>
           <div style="border: 2px dashed lightblue; border-radius: 18px"
                v-for="(badge, index) in serviceResponse?._gameStatus?.newBadges" :key="index" class="badge-item">
-            <h4>Nueva medalla!</h4>
+            <h4>{{ $t('checkin.new_badge') }}</h4>
             <img :src="badge.imageUrl" alt="Imagen de la insignia"/>
             <h6>{{ badge.name }}</h6>
             <small>{{ badge.description }}</small>
           </div>
           <p v-if="serviceResponse?._gameStatus?.newPoints">
-            Sumaste {{ serviceResponse._gameStatus.newPoints }}
-            puntos!</p>
-          <p v-if="serviceResponse?.contributesTo">Contribuiste a {{ serviceResponse.contributesTo?.name }}</p>
-          <p v-else>No contribuiste a ninguna tarea</p>
+            {{ $t('checkin.points_added', { points: serviceResponse._gameStatus.newPoints }) }}
+          </p>
+          <p v-if="serviceResponse?.contributesTo">{{ $t('checkin.contributed_to', { name: serviceResponse.contributesTo?.name }) }}</p>
+          <p v-else>{{ $t('checkin.no_contribution') }}</p>
           <v-alert v-if="serviceResponse?.contributesTo"
                    width="100%"
           >
-            <h4>Como sentiste la tarea?</h4>
+            <h4>{{ $t('checkin.how_did_you_feel') }}</h4>
             <hr>
             <v-rating v-model="form.rating" background-color="grey lighten-2" color="orange"
-                      :item-labels="['Aburrida', '', '', '', 'Divertida']"
+                      :item-labels="[$t('checkin.rating_boring'), '', '', '', $t('checkin.rating_fun')]"
                       item-label-position="bottom" large></v-rating>
           </v-alert>
 
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary" @click="closeConfirmationModal">Aceptar</v-btn>
+          <v-btn color="primary" @click="closeConfirmationModal">{{ $t('common.accept') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -130,7 +130,10 @@
 import {ref, watch} from 'vue';
 import {useRoute} from 'vue-router';
 import {toast} from "vue3-toastify";
+import { useI18n } from 'vue-i18n';
 import GamificationService from "@/services/GamificationService";
+
+const { t } = useI18n();
 
 
 const emit = defineEmits(['modalClosed']);
@@ -170,7 +173,7 @@ const toggleManualLocation = () => {
 
 const getCurrentLocation = () => {
   if (!navigator.geolocation) {
-    toast.info('La geolocalización no es compatible con este navegador.');
+    toast.info(t('checkin.geo_not_supported'));
     manualLocation.value = true;
     loadingLocation.value = false;
     return;
@@ -183,7 +186,7 @@ const getCurrentLocation = () => {
         loadingLocation.value = false;
       },
       () => {
-        toast.info('No se pudo obtener la ubicación. Por favor ingrésela manualmente.');
+        toast.info(t('checkin.geo_failed'));
         manualLocation.value = true;
         loadingLocation.value = false;
       },
@@ -216,7 +219,7 @@ const closeConfirmationModal = async () => {
 
 const submitForm = () => {
   if (!form.value.latitude || !form.value.longitude || !form.value.taskType) {
-    toast.info('Por favor completa todos los campos.');
+    toast.info(t('common.complete_all_fields'));
     return;
   }
 
@@ -226,7 +229,7 @@ const submitForm = () => {
       .then((res) => {
         serviceResponse.value = res;
       })
-      .catch(() => toast.error('Ha ocurrido un error en el registro.'))
+      .catch(() => toast.error(t('checkin.register_error')))
       .finally(() => {
         loadingCheckin.value = false; // Detiene el spinner
         closeModal();

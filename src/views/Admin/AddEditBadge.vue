@@ -6,6 +6,9 @@ import {toast} from 'vue3-toastify';
 import GamificationService from "@/services/GamificationService";
 import router from "@/router";
 import BreadCrumb from "@/components/utils/BreadCrumb.vue";
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const store = useStore();
 const route = useRoute();
@@ -19,20 +22,20 @@ const defaultBadge = {
   imageUrl: '',
   checkinsAmount: 1,
   previousBadges: [],
-  taskType: 'Cualquiera',
-  areaId: 'Cualquiera',
-  timeIntervalId: 'Cualquiera',
+  taskType: t('common.any'),
+  areaId: t('common.any'),
+  timeIntervalId: t('common.any'),
   mustContribute: false,
 };
 
 const badge = ref({...defaultBadge});
 
-const taskTypeOptions = computed(() => store.getters.project?.taskTypes.concat(['Cualquiera']) || []);
+const taskTypeOptions = computed(() => store.getters.project?.taskTypes.concat([t('common.any')]) || []);
 const areaOptions = computed(() =>
-    store.getters.project?.areas.features.map((feature) => feature.properties.id).concat(['Cualquiera']) || []
+    store.getters.project?.areas.features.map((feature) => feature.properties.id).concat([t('common.any')]) || []
 );
 const intervalOptions = computed(() =>
-    store.getters.project?.timeIntervals.map((ti) => ti.name).concat(['Cualquiera']) || []
+    store.getters.project?.timeIntervals.map((ti) => ti.name).concat([t('common.any')]) || []
 );
 const badgeOptions = computed(() =>
     store.state.currentGamification.badgesRules
@@ -53,14 +56,14 @@ const validateBadge = () => {
 
   for (const field of requiredFields) {
     if (!badge.value[field]) {
-      toast.error(`El campo "${field}" es obligatorio`);
+      toast.error(t('common.field_required', { field: field }));
       return false;
     }
   }
   console.log(isNew.value)
 
   if (isNew.value && store.state.currentGamification.badgesRules.find(b => b.name === badge.value.name)) {
-    toast.error('Ya existe otra insignia con ese nombre');
+    toast.error(t('admin.badge_name_exists'));
     return false
   }
   return true;
@@ -75,11 +78,11 @@ const saveBadge = async () => {
     } else {
       await GamificationService.update(badge.value, route.params.projectId);
     }
-    toast.success(isNew.value ? 'Insignia creada exitosamente' : 'Insignia actualizada exitosamente');
+    toast.success(isNew.value ? t('admin.badge_created_success') : t('admin.badge_updated_success'));
     await router.push(`/admin/project/${route.params.projectId}/gamification`);
   } catch (error) {
     console.error('Error al guardar la insignia:', error);
-    toast.error('Error al guardar la insignia');
+    toast.error(t('admin.badge_save_error'));
   }
 };
 
@@ -104,59 +107,59 @@ onMounted(() => {
 <template>
   <v-container>
     <BreadCrumb items="badgePath"/>
-    <h1 class="mb-6">{{ isNew ? 'Crear Insignia' : 'Editar Insignia' }}</h1>
+    <h1 class="mb-6">{{ isNew ? $t('admin.create_badge') : $t('admin.edit_badge') }}</h1>
 
     <v-form @submit.prevent="saveBadge">
       <!-- Información de la Insignia -->
       <v-card class="pa-4 mb-6">
-        <h2>Información de la Insignia</h2>
-        <v-text-field label="Nombre de la Insignia" v-model="badge.name" :disabled="!isNew" required/>
-        <v-textarea label="Descripción de la Insignia" v-model="badge.description" required/>
-        <v-text-field label="URL de la imagen" v-model="badge.imageUrl" required/>
+        <h2>{{ $t('admin.badge_info') }}</h2>
+        <v-text-field :label="$t('admin.badge_name_label')" v-model="badge.name" :disabled="!isNew" required/>
+        <v-textarea :label="$t('admin.badge_description_label')" v-model="badge.description" required/>
+        <v-text-field :label="$t('admin.project_image_label')" v-model="badge.imageUrl" required/>
         <v-row class="my-3" v-if="badge.imageUrl">
           <v-col cols="12" sm="6" md="4">
-            <v-img :src="badge.imageUrl" alt="Previsualización de la imagen" contain max-height="200">
+            <v-img :src="badge.imageUrl" :alt="$t('common.image_preview')" contain max-height="200">
               <template #error>
                 <v-alert density="compact" variant="tonal" color="error" class="ma-0">
-                  No se pudo cargar la imagen. Verifique la URL.
+                  {{ $t('common.image_load_error') }}
                 </v-alert>
               </template>
             </v-img>
           </v-col>
         </v-row>
         <v-text-field
-            label="Cantidad de Check-ins"
+            :label="$t('admin.checkins_amount_label')"
             v-model.number="badge.checkinsAmount"
             type="number"
             min="1"
             required
         />
         <v-checkbox
-            label="El checkin debe ser contribución"
+            :label="$t('admin.must_contribute_label')"
             v-model="badge.mustContribute"
         />
 
         <v-select
-            label="Insignias Anteriores"
+            :label="$t('admin.previous_badges_label')"
             v-model="badge.previousBadges"
             :items="badgeOptions"
             multiple
             chips
         />
         <v-select
-            label="Tipo de Tarea"
+            :label="$t('admin.task_type')"
             v-model="badge.taskType"
             :items="taskTypeOptions"
             required
         />
         <v-select
-            label="Área"
+            :label="$t('admin.map')"
             v-model="badge.areaId"
             :items="areaOptions"
             required
         />
         <v-select
-            label="Intervalo de Tiempo"
+            :label="$t('admin.interval_name_label')"
             v-model="badge.timeIntervalId"
             :items="intervalOptions"
             required
@@ -165,7 +168,7 @@ onMounted(() => {
 
       <!-- Botón de guardar -->
       <v-btn type="submit" variant="elevated" color="primary" width="100%">
-        {{ isNew ? 'Crear Insignia' : 'Actualizar Insignia' }}
+        {{ isNew ? $t('admin.create_badge') : $t('admin.update_badge') }}
       </v-btn>
     </v-form>
   </v-container>

@@ -1,4 +1,7 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 import {onMounted, onUnmounted, ref, watch} from 'vue';
 import 'ol/ol.css';
 import {Map, Overlay, View} from 'ol';
@@ -71,7 +74,7 @@ function getTextCurrentLocation(features, userCoords) {
         : false;
   });
   if (insideFeature) {
-    return `Estás dentro del área "${insideFeature.getId()}"`;
+    return t("map.inside_area", { id: insideFeature.getId() });
   }
   return "";
 }
@@ -83,19 +86,19 @@ function getTaskArrayFromFeature(feature) {
 function getMessageForTasks(ts) {
   const solvedCount = ts.filter(t=>t.solved).length;
   if(solvedCount === 0) {
-    return `${ts.length} tareas pendientes`;
+    return t("map.tasks_pending", ts.length);
   } else if (solvedCount === ts.length) {
-    return `Todas las tareas completadas`;
+    return t("map.all_tasks_completed");
   } else {
-    return `Quedan ${ts.length - solvedCount} tareas pendientes`;
+    return t("map.remaining_tasks", ts.length - solvedCount);
   }
 }
 
 function tasksForFeature(feature) {
   const ts = getTaskArrayFromFeature(feature);
-  if (ts.length === 0) return "No hay tareas en esta area";
+  if (ts.length === 0) return t("map.no_tasks_in_area");
   const msg = getMessageForTasks(ts);
-  return `<h3>Área ${feature.getId()}<h3/> <br> <h4>${msg}</h4>`;
+  return `<h3>${t("map.area_title", { id: feature.getId() })}<h3/> <br> <h4>${msg}</h4>`;
 }
 
 const setTooltipContentToAreas = (map, vectorSource) => {
@@ -136,7 +139,7 @@ const setTooltipContentToAreas = (map, vectorSource) => {
 const addCurrentLocationToMap = (features) => {
   if (!map.value) return;
   if (!navigator.geolocation) {
-    toast.warning("La geolocalización no está disponible en este navegador.");
+    toast.warning(t("checkin.geo_not_supported"));
     return;
   }
 
@@ -174,7 +177,7 @@ const addCurrentLocationToMap = (features) => {
           }, UPDATE_LOCATION_TIMEOUT);
         },
         () => {
-          toast.warning("No se pudo obtener la ubicación actual.");
+          toast.warning(t("checkin.geo_failed"));
         }
     );
   };
@@ -241,7 +244,7 @@ const initializeMap = () => {
   if (!map.value && tab.value === 'map') {
     try {
       if (!isValidGeoJSON(area.value)) {
-        throw new Error('GeoJSON inválido');
+        throw new Error(t('map.invalid_geojson'));
       }
 
       const features = new GeoJSON().readFeatures(area.value, {
@@ -335,7 +338,7 @@ watch(area, (newArea) => {
 const centerMapOnCurrentLocation = () => {
   if (!map.value) return;
   if (!navigator.geolocation) {
-    toast.warning("La geolocalización no está disponible en este navegador.");
+    toast.warning(t("checkin.geo_not_supported"));
     return;
   }
   navigator.geolocation.getCurrentPosition(
@@ -345,7 +348,7 @@ const centerMapOnCurrentLocation = () => {
         setTimeout(() => map.value.updateSize(), 200);
       },
       () => {
-        toast.warning("No se pudo obtener la ubicación actual.");
+        toast.warning(t("checkin.geo_failed"));
       },
       { enableHighAccuracy: true }
   );
@@ -405,28 +408,28 @@ const updateAreaFromJSON = (json) => {
       emit('update-area', parsedJSON); // Emitir el evento
       error.value = ''; // Limpia el error si el JSON es válido
     } else {
-      throw new Error('GeoJSON inválido');
+      throw new Error(t('map.invalid_geojson'));
     }
   } catch (e) {
-    error.value = 'El formato no corresponde a un GeoJSON válido.';
+    error.value = t('map.invalid_format');
   }
 };
 
 const isValidGeoJSON = (geojson) => {
   // Verifica si el objeto tiene las propiedades esperadas de un GeoJSON
   if (geojson.type !== 'FeatureCollection') {
-    toast.warning("El campo type del geoJSON debe ser FeatureCollection");
+    toast.warning(t("map.geojson_type_error"));
   }
   if (!Array.isArray(geojson.features)) {
-    toast.warning("El campo features del geoJSON debe ser un array");
+    toast.warning(t("map.geojson_features_error"));
   }
   if (!geojson.features.every((feature) => feature.properties && feature.properties?.id)) {
-    toast.warning("Algun campo feature del geoJSON no tiene id");
+    toast.warning(t("map.geojson_id_error"));
   }
 
   const availableTypes = ['Polygon', 'Feature'];
   if (!geojson.features.some((feature) => availableTypes.includes(feature.geometry.type))) {
-    toast.error("Todas las areas deben ser de tipo Polygon o Feature");
+    toast.error(t("map.geojson_geometry_error"));
   }
 
   return (
@@ -439,21 +442,19 @@ const isValidGeoJSON = (geojson) => {
 
 <template>
   <v-alert
-      title="Importante"
+      :title="$t('common.important')"
       type="info"
       color="black"
       variant="tonal"
       v-if="!visualization"
   >
-    Las áreas deben estar en formato geoJSON. El JSON debe ser una FeatureCollection, y cada feature interiormente debe
-    tener una propiedad <strong>id</strong>. Puedes generar las áreas manualmente en <a href="https://geojson.io/"
-                                                                                        target="_blank">https://geojson.io/</a>.
+    <span v-html="$t('map.geojson_instruction')"></span>
   </v-alert>
   <br/>
   <v-card>
     <v-tabs v-model="tab" bg-color="black">
-      <v-tab value="map">Mapa</v-tab>
-      <v-tab value="mapJSON" v-if="!visualization">GeoJSON</v-tab>
+      <v-tab value="map">{{ $t('admin.map') }}</v-tab>
+      <v-tab value="mapJSON" v-if="!visualization">{{ $t('admin.geojson') }}</v-tab>
     </v-tabs>
     <div ref="mapContainer" :class="{fullscreen: isFullscreen}" class="map-container"
          style="position: relative; width: 100%; height: 400px;">
@@ -462,7 +463,7 @@ const isValidGeoJSON = (geojson) => {
       <button
           @click="centerMapOnCurrentLocation"
           style="position: absolute; top: 10px; right: 10px; z-index: 10; background: white; border: none; border-radius: 50%; width: 40px; height: 40px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; cursor: pointer;"
-          title="Centrar en mi ubicación"
+          :title="$t('map.center_on_location')"
       >
         <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" fill="black" viewBox="0 0 24 24">
           <path
@@ -472,7 +473,7 @@ const isValidGeoJSON = (geojson) => {
 
       <button
           @click="toggleFullscreen"
-          :title="isFullscreen ? 'Salir pantalla completa' : 'Pantalla completa'"
+          :title="isFullscreen ? $t('map.exit_fullscreen') : $t('map.enter_fullscreen')"
           style="position: absolute; top: 60px; right: 10px; z-index: 10; background: white; border: none; border-radius: 6px; padding: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); cursor: pointer;"
       >
         <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" fill="black" viewBox="0 0 24 24">
@@ -488,28 +489,28 @@ const isValidGeoJSON = (geojson) => {
         <div style="display:flex;align-items:center;gap:6px;">
           <span
               style="width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center;background:green;color:white;border-radius:3px;font-size:11px;">✔</span>
-          <span>Checkin exitoso</span>
+          <span>{{ $t('checkin.success') }}</span>
         </div>
         <div style="display:flex;align-items:center;gap:6px;">
           <span
               style="width:14px;height:14px;display:inline-block;border:2px solid red;border-radius:50%;box-sizing:border-box;"></span>
-          <span>Checkin sin contribución</span>
+          <span>{{ $t('checkin.no_contribution_marker') }}</span>
         </div>
         <div style="display:flex;align-items:center;gap:6px;">
           <span style="width:12px;height:12px;border-radius:50%;background:lightblue;display:inline-block;"></span>
-          <span>Tu ubicación</span>
+          <span>{{ $t('checkin.your_location') }}</span>
         </div>
 
         <!-- Leyenda para áreas -->
         <div style="display:flex;align-items:center;gap:6px;">
           <span
               style="width:18px;height:14px;display:inline-block;background:rgba(0,0,255,0.3);border:2px solid #319FD3;border-radius:3px;box-sizing:border-box;"></span>
-          <span>Área con tareas</span>
+          <span>{{ $t('map.area_with_tasks') }}</span>
         </div>
         <div style="display:flex;align-items:center;gap:6px;">
           <span
               style="width:18px;height:14px;display:inline-block;background:rgba(0,0,255,0.15);border:2px solid lightgray;border-radius:3px;box-sizing:border-box;"></span>
-          <span>Área sin tareas</span>
+          <span>{{ $t('map.area_without_tasks') }}</span>
         </div>
       </div>
 
@@ -529,7 +530,7 @@ const isValidGeoJSON = (geojson) => {
         <v-tabs-window-item value="mapJSON">
           <v-container>
             <v-textarea
-                label="Estructura del área (GeoJSON)"
+                :label="$t('map.area_structure_label')"
                 v-model="areaJSON"
                 rows="20"
                 @input="updateAreaFromJSON($event.target.value)"

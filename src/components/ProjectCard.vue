@@ -14,7 +14,7 @@ defineProps(['project'])
       <div class="card" v-bind="activatorProps" @click="showId = project.id">
         <div>
           <figure class="image is-4by3">
-            <img :src="project.image" alt="Project image">
+            <img :src="project.image" :alt="$t('common.image_alt')">
           </figure>
         </div>
         <div class="card-content">
@@ -45,14 +45,14 @@ defineProps(['project'])
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn
-              text="Cerrar"
+           <v-btn
+              :text="$t('common.close')"
               @click="isActive.value = false"
           ></v-btn>
           <v-btn
               variant="tonal"
               append-icon="fa-solid fa-share"
-              text="Ir al sitio"
+              :text="$t('project.visit_website')"
               :href="project.web"
           ></v-btn>
         </v-card-actions>

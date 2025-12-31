@@ -7,7 +7,7 @@ export default createI18n({
     legacy: false,
     locale: 'ES', // Idioma por defecto
     fallbackLocale: 'ES', // Secundario
-    availableLocales: ['ES, EN, PT'],
+    availableLocales: ['ES', 'EN', 'PT'],
     messages: {
         ES,
         EN,

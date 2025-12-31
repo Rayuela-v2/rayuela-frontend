@@ -3,6 +3,9 @@ import { ref } from 'vue';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 import AuthService from "@/services/AuthService";
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const email = ref("");
 const loading = ref(false);
@@ -17,33 +20,33 @@ async function sendResetLink() {
       loading.value = true;
       await AuthService.sendResetPasswordEmail(email.value);
       loading.value = false;
-      toast.success("Se ha enviado un enlace de restablecimiento a tu correo", { autoClose: 3000 });
+      toast.success(t("auth.reset_link_sent"), { autoClose: 3000 });
     }
     else {
-      toast.error("El correo no tiene un formato correcto", { autoClose: 3000 });
+      toast.error(t("register.error_email_invalid"), { autoClose: 3000 });
     }
   } catch (error) {
     loading.value = false;
-    toast.error("Error al enviar el enlace de restablecimiento", { autoClose: 3000 });
+    toast.error(t("auth.reset_link_error"), { autoClose: 3000 });
   }
 }
 </script>
 
 <template>
   <v-container class="container">
-    <h1 class="title">Restablecer Contraseña</h1>
+    <h1 class="title">{{ $t("auth.reset_password_title") }}</h1>
     <br />
     <v-form @submit.prevent="sendResetLink">
       <v-text-field
           v-model="email"
-          label="Correo Electrónico"
-          placeholder="Ingresa tu correo"
+          :label="$t('register.email_field')"
+          :placeholder="$t('auth.email_placeholder')"
           outlined
           type="email"
           :loading="loading"
           required
       />
-      <v-btn color="success" type="submit" block>Enviar Enlace</v-btn>
+      <v-btn color="success" type="submit" block>{{ $t("auth.send_link") }}</v-btn>
     </v-form>
   </v-container>
 </template>

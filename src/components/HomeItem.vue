@@ -2,13 +2,13 @@
   <section class="hero-section">
     <div class="hero-content">
       <h1 class="hero-title">
-        No hacemos ciencia para el pueblo, <br/>
-        <span class="highlight">somos el pueblo haciendo ciencia</span>
+        {{ $t('home.hero_title_1') }} <br/>
+        <span class="highlight">{{ $t('home.hero_title_2') }}</span>
       </h1>
       <p class="hero-description">
-        En rayuela podés contribuir en los proyectos de ciencia participativa, desde cualquier dispositivo y en cualquier momento.
+        {{ $t('home.hero_description') }}
       </p>
-      <button class="cta-button" @click="scrollToProjects">Empezar ahora</button>
+      <button class="cta-button" @click="scrollToProjects">{{ $t('home.start_now') }}</button>
     </div>
     <div class="hero-images">
       <img src="/rayuela_ludif.png" alt="App screenshot ludification" class="app-image image-back"/>

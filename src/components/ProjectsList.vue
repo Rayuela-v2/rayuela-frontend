@@ -25,7 +25,7 @@ onMounted(async () => {
 
 <template>
   <div class="projects-section" id="projects-section">
-    <h2 class="subtitle">Elegí tu proyecto favorito para comenzar</h2>
+    <h2 class="subtitle">{{ $t('projects.selector_title') }}</h2>
     <hr class="separator"/>
     <v-row>
       <v-col
@@ -46,16 +46,16 @@ onMounted(async () => {
             :src="project.image"
             height="180"
             cover
-            alt="Imagen del proyecto"
+            :alt="$t('project.image_alt')"
           ></v-img>
           <v-card-title>{{ project.name }}</v-card-title>
           <v-card-text>
             <p>{{ project.description.slice(0,120) }}...</p>
             <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <span v-if="project.available" style="color: #27ae60; font-weight: 600;">Disponible</span>
-              <span v-else style="color: #c0392b; font-weight: 600;">No disponible</span>
+              <span v-if="project.available" style="color: #27ae60; font-weight: 600;">{{ $t('project.status_available') }}</span>
+              <span v-else style="color: #c0392b; font-weight: 600;">{{ $t('project.status_unavailable') }}</span>
               <span v-if="project.subscribed"
-                    style="background: #2980b9; color: #fff; border-radius: 0.5rem; padding: 0.2rem 0.7rem; font-size: 0.9rem;">Suscrito</span>
+                    style="background: #2980b9; color: #fff; border-radius: 0.5rem; padding: 0.2rem 0.7rem; font-size: 0.9rem;">{{ $t('project.status_subscribed') }}</span>
             </div>
           </v-card-text>
         </v-card>

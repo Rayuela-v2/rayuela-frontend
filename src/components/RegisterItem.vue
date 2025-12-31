@@ -3,6 +3,9 @@ import {ref} from 'vue';
 import {useRouter} from 'vue-router';
 import {toast} from "vue3-toastify";
 import AuthService from "@/services/AuthService";
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const router = useRouter();
 const username = ref("");
@@ -22,11 +25,11 @@ function isValidEmail(email) {
 
 function is_valid_form() {
   errors.value = {};
-  if (!username.value) errors.value.username = 'El nombre de usuario es requerido';
-  if (!email.value || !isValidEmail(email.value)) errors.value.email = 'El correo no tiene un formato correcto';
-  if (!password1.value) errors.value.password1 = 'La contraseña es requerida';
-  if (password1.value !== password2.value) errors.value.password2 = 'Las contraseñas no coinciden';
-  if (!readAgreement.value) errors.value.readAgreement = 'Debe aceptar los términos y condiciones';
+  if (!username.value) errors.value.username = t('register.error_username_required');
+  if (!email.value || !isValidEmail(email.value)) errors.value.email = t('register.error_email_invalid');
+  if (!password1.value) errors.value.password1 = t('register.error_password_required');
+  if (password1.value !== password2.value) errors.value.password2 = t('register.error_passwords_mismatch');
+  if (!readAgreement.value) errors.value.readAgreement = t('register.error_agreement_required');
   return Object.keys(errors.value).length === 0;
 }
 
@@ -41,7 +44,7 @@ async function signup() {
     };
     AuthService.register(user)
         .then(() => {
-          toast.success('Registro exitoso, por favor revise su casilla de correo para verificarlo antes de iniciar sesión', {autoClose: 3000});
+          toast.success(t('register.success_registration'), {autoClose: 3000});
           showSuccessScreen.value = true;
           setTimeout(() =>
               window.location.href = "/login", 3000)
