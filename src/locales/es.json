@@ -137,6 +137,8 @@
         "date_time": "Fecha y Hora",
         "timestamp": "Timestamp",
         "task_type_label": "Tipo de tarea",
+        "image_label": "Foto de evidencia",
+        "image_placeholder": "Selecciona o toma una foto",
         "new_badge": "¡Nueva medalla!",
         "contributed_to": "Contribuiste a {name}",
         "no_contribution": "No contribuiste a ninguna tarea",

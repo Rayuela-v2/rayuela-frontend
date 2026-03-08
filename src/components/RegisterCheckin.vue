@@ -67,8 +67,21 @@
                 :items="props.taskTypes"
                 outlined
             ></v-select>
+
+            <!-- Sección: Imagen (Opcional) -->
+            <h4 class="mt-4">{{ $t('checkin.image_label') || 'Foto de evidencia' }}</h4>
+            <v-file-input
+                :label="$t('checkin.image_placeholder') || 'Selecciona o toma una foto'"
+                v-model="imageFile"
+                accept="image/*"
+                prepend-icon="mdi-camera"
+                @update:modelValue="onImageSelected"
+                outlined
+            ></v-file-input>
+            <v-img v-if="imagePreview" :src="imagePreview" max-height="200" contain class="mt-2"></v-img>
           </v-form>
         </v-card-text>
+
 
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -144,10 +157,25 @@ const serviceResponse = ref(null);
 const manualLocation = ref(false);
 const loadingLocation = ref(false);
 const loadingCheckin = ref(false); // Spinner para el registro de check-in
+const imageFile = ref(null);
+const imagePreview = ref(null);
+
 const props = defineProps({
   taskTypes: Array,
   manualLocationEnabled: Boolean
 });
+
+const onImageSelected = (file) => {
+  if (file) {
+    if (Array.isArray(file)) {
+      file = file[0];
+    }
+    imagePreview.value = URL.createObjectURL(file);
+  } else {
+    imagePreview.value = null;
+  }
+};
+
 
 const form = ref({
   latitude: '',
@@ -202,12 +230,17 @@ const resetForm = () => {
     taskType: '',
   };
   manualLocation.value = false;
+  imageFile.value = null;
+  imagePreview.value = null;
 };
 
 const closeModal = () => {
   showModal.value = false;
   loadingCheckin.value = false;
+  imageFile.value = null;
+  imagePreview.value = null;
 };
+
 
 const closeConfirmationModal = async () => {
   if (serviceResponse.value.contributesTo) {
@@ -225,7 +258,23 @@ const submitForm = () => {
 
   loadingCheckin.value = true; // Inicia el spinner
 
-  GamificationService.registerCheckin({...form.value, projectId: route.params.projectId})
+  let payload;
+  if (imageFile.value) {
+    payload = new FormData();
+    payload.append('latitude', form.value.latitude);
+    payload.append('longitude', form.value.longitude);
+    payload.append('datetime', form.value.datetime);
+    payload.append('taskType', form.value.taskType);
+    payload.append('projectId', route.params.projectId);
+
+    // imageFile.value might be an array depending on Vuetify version/config
+    const file = Array.isArray(imageFile.value) ? imageFile.value[0] : imageFile.value;
+    payload.append('image', file);
+  } else {
+    payload = {...form.value, projectId: route.params.projectId};
+  }
+
+  GamificationService.registerCheckin(payload)
       .then((res) => {
         serviceResponse.value = res;
       })
@@ -235,6 +284,7 @@ const submitForm = () => {
         closeModal();
       });
 };
+
 
 watch(showModal, (isVisible) => {
   if (isVisible) {

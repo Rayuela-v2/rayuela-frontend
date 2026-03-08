@@ -140,6 +140,8 @@
         "date_time": "Date and Time",
         "timestamp": "Timestamp",
         "task_type_label": "Task type",
+        "image_label": "Evidence photo",
+        "image_placeholder": "Select or take a photo",
         "new_badge": "New medal!",
         "contributed_to": "You contributed to {name}",
         "no_contribution": "You didn't contribute to any task",

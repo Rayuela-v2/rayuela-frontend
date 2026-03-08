@@ -140,6 +140,8 @@
         "date_time": "Data e Hora",
         "timestamp": "Timestamp",
         "task_type_label": "Tipo de tarefa",
+        "image_label": "Foto de evidência",
+        "image_placeholder": "Selecione ou tire uma foto",
         "new_badge": "Nova medalha!",
         "contributed_to": "Você contribuiu para {name}",
         "no_contribution": "Você não contribuiu para nenhuma tarefa",

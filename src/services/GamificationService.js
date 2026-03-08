@@ -44,8 +44,16 @@ class GamificationService extends RayuelaService {
     }
 
     registerCheckin(body) {
+        if (body instanceof FormData) {
+            return this.post('/checkin', body, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+        }
         return this.post('/checkin', body);
     }
+
 
     rate(rate, checkinId) {
         return this.post('/checkin/rate', {rate, checkinId});

@@ -201,7 +201,10 @@ const project = ref({
   taskTypes: [],
   timeIntervals: [],
   gamificationStrategy: null,
+  leaderboardStrategy: 'PUNTOS PRIMERO',
+  recommendationStrategy: 'SIMPLE',
   manualLocation: false,
+  ownerId: localStorage.getItem('user_id'),
 });
 
 const daysOfWeek = [
@@ -333,8 +336,11 @@ onMounted(async () => {
       areas: [],
       taskTypes: [],
       timeIntervals: [],
-      gamificationStrategy: 'BASICA',
+      gamificationStrategy: 'SIN ADAPTACION',
+      leaderboardStrategy: 'PUNTOS PRIMERO',
+      recommendationStrategy: 'SIMPLE',
       manualLocation: false,
+      ownerId: localStorage.getItem('user_id'),
     };
   } else {
 const fetchedProject = await ProjectsService.getProjectById(projectId);
