@@ -153,11 +153,14 @@ const emit = defineEmits(['modalClosed']);
 const route = useRoute();
 
 const showModal = ref(false);
+/** @type {import('vue').Ref<any>} */
 const serviceResponse = ref(null);
 const manualLocation = ref(false);
 const loadingLocation = ref(false);
 const loadingCheckin = ref(false); // Spinner para el registro de check-in
+/** @type {import('vue').Ref<File|null>} */
 const imageFile = ref(null);
+/** @type {import('vue').Ref<string|null>} */
 const imagePreview = ref(null);
 
 const props = defineProps({
@@ -230,14 +233,18 @@ const resetForm = () => {
     taskType: '',
   };
   manualLocation.value = false;
+  /** @type {File|null} */
   imageFile.value = null;
+  /** @type {string|null} */
   imagePreview.value = null;
 };
 
 const closeModal = () => {
   showModal.value = false;
   loadingCheckin.value = false;
+  /** @type {File|null} */
   imageFile.value = null;
+  /** @type {string|null} */
   imagePreview.value = null;
 };
 
@@ -258,20 +265,17 @@ const submitForm = () => {
 
   loadingCheckin.value = true; // Inicia el spinner
 
-  let payload;
-  if (imageFile.value) {
-    payload = new FormData();
-    payload.append('latitude', form.value.latitude);
-    payload.append('longitude', form.value.longitude);
-    payload.append('datetime', form.value.datetime);
-    payload.append('taskType', form.value.taskType);
-    payload.append('projectId', route.params.projectId);
+  const payload = new FormData();
+  payload.append('latitude', form.value.latitude);
+  payload.append('longitude', form.value.longitude);
+  payload.append('datetime', form.value.datetime);
+  payload.append('taskType', form.value.taskType);
+  payload.append('projectId', route.params.projectId);
 
+  if (imageFile.value) {
     // imageFile.value might be an array depending on Vuetify version/config
     const file = Array.isArray(imageFile.value) ? imageFile.value[0] : imageFile.value;
     payload.append('image', file);
-  } else {
-    payload = {...form.value, projectId: route.params.projectId};
   }
 
   GamificationService.registerCheckin(payload)
