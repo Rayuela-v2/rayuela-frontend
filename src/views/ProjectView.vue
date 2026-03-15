@@ -67,6 +67,7 @@
     <RegisterCheckin @modalClosed="handleModalClosed"
                      :task-types="project.taskTypes"
                      :manual-location-enabled="project.manualLocation"
+                     :areas="project.areas"
                      class="floating-button"
     />
 

@@ -43,9 +43,13 @@
                     outlined
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" class="text-right">
+              <v-col cols="12" class="text-right" style="display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;">
                 <v-btn variant="plain" v-if="props.manualLocationEnabled" @click="toggleManualLocation">
                   {{ manualLocation ? $t('checkin.use_auto_location') : $t('checkin.use_manual_location') }}
+                </v-btn>
+                <v-btn variant="tonal" color="blue" @click="openMapPicker">
+                  <v-icon left class="mr-1">mdi-map-search</v-icon>
+                  {{ $t('checkin.pick_from_map') }}
                 </v-btn>
               </v-col>
             </v-row>
@@ -123,6 +127,15 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <!-- Map location picker -->
+    <LocationPicker
+      v-model="showMapPicker"
+      :areas="props.areas"
+      :initial-latitude="form.latitude"
+      :initial-longitude="form.longitude"
+      @location-selected="onMapLocationSelected"
+    />
   </div>
 </template>
 
@@ -132,6 +145,7 @@ import {useRoute} from 'vue-router';
 import {toast} from "vue3-toastify";
 import { useI18n } from 'vue-i18n';
 import GamificationService from "@/services/GamificationService";
+import LocationPicker from "@/components/LocationPicker.vue";
 
 const { t } = useI18n();
 
@@ -146,8 +160,11 @@ const loadingLocation = ref(false);
 const loadingCheckin = ref(false); // Spinner para el registro de check-in
 const props = defineProps({
   taskTypes: Array,
-  manualLocationEnabled: Boolean
+  manualLocationEnabled: Boolean,
+  areas: { type: Object, default: null }
 });
+
+const showMapPicker = ref(false);
 
 const form = ref({
   latitude: '',
@@ -169,6 +186,16 @@ const toggleManualLocation = () => {
   if (!manualLocation.value) {
     getCurrentLocation();
   }
+};
+
+const openMapPicker = () => {
+  showMapPicker.value = true;
+};
+
+const onMapLocationSelected = (coords) => {
+  form.value.latitude = coords.latitude;
+  form.value.longitude = coords.longitude;
+  manualLocation.value = true; // switch to manual so fields are visible and editable
 };
 
 const getCurrentLocation = () => {

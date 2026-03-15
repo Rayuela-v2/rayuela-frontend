@@ -118,6 +118,7 @@
         "image_load_error": "The image could not be loaded. Please check the URL.",
         "hours_suffix": "hrs",
         "complete_all_fields": "Please complete all fields.",
+        "important": "Important",
         "days": [
             "Sunday",
             "Monday",
@@ -126,7 +127,12 @@
             "Thursday",
             "Friday",
             "Saturday"
-        ]
+        ],
+        "confirm": "Confirm",
+        "accept": "Accept",
+        "saving": "Saving...",
+        "share": "Share",
+        "none": "None"
     },
     "checkin": {
         "button_register": "Register Check-in",
@@ -153,7 +159,11 @@
         "your_location": "Your location",
         "geo_not_supported": "Geolocation is not supported by this browser.",
         "geo_failed": "Could not obtain location. Please enter it manually.",
-        "register_error": "An error occurred during registration."
+        "register_error": "An error occurred during registration.",
+        "pick_from_map": "Pick from map",
+        "pick_location_title": "Pick location from map",
+        "pick_location_hint": "Tap on the map to mark your location. Project areas are shown in blue.",
+        "selected_location": "Selected location"
     },
     "home": {
         "start_now": "Start now",

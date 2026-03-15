@@ -6,7 +6,7 @@ import PT from './locales/pt.json'
 export default createI18n({
     legacy: false,
     locale: 'ES', // Idioma por defecto
-    fallbackLocale: 'ES', // Secundario
+    fallbackLocale: 'EN', // Secundario
     availableLocales: ['ES', 'EN', 'PT'],
     messages: {
         ES,

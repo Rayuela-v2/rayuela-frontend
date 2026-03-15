@@ -118,6 +118,7 @@
         "image_load_error": "Não foi possível carregar a imagem. Verifique a URL.",
         "hours_suffix": "h",
         "complete_all_fields": "Por favor, preencha todos os campos.",
+        "important": "Importante",
         "days": [
             "Domingo",
             "Segunda-feira",
@@ -126,7 +127,12 @@
             "Quinta-feira",
             "Sexta-feira",
             "Sábado"
-        ]
+        ],
+        "confirm": "Confirmar",
+        "accept": "Aceitar",
+        "saving": "Salvando...",
+        "share": "Compartilhar",
+        "none": "Nenhum"
     },
     "checkin": {
         "button_register": "Registrar Check-in",
@@ -153,7 +159,11 @@
         "your_location": "Sua localização",
         "geo_not_supported": "A geolocalização não é compatível com este navegador.",
         "geo_failed": "Não foi possível obter a localização. Por favor, insira-a manualmente.",
-        "register_error": "Ocorreu um erro no registro."
+        "register_error": "Ocorreu um erro no registro.",
+        "pick_from_map": "Escolher no mapa",
+        "pick_location_title": "Escolher localização no mapa",
+        "pick_location_hint": "Toque no mapa para marcar sua localização. As áreas do projeto são mostradas em azul.",
+        "selected_location": "Localização selecionada"
     },
     "home": {
         "start_now": "Começar agora",
