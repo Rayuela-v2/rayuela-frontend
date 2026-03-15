@@ -281,9 +281,9 @@ const subscribe = () => {
       });
 }
 
-const taskHeaders = [
-  {title: 'Detalle de la Tarea', value: 'formatted'},
-];
+const taskHeaders = computed(() => [
+  {title: t('project.task_detail_title'), value: 'formatted'},
+]);
 
 const handleModalClosed = async () => {
   project.value = await ProjectsService.getProjectById(route.params.projectId);
