@@ -163,7 +163,8 @@
         "pick_from_map": "Escolher no mapa",
         "pick_location_title": "Escolher localização no mapa",
         "pick_location_hint": "Toque no mapa para marcar sua localização. As áreas do projeto são mostradas em azul.",
-        "selected_location": "Localização selecionada"
+        "selected_location": "Localização selecionada",
+        "use_current_location": "Usar minha localização"
     },
     "home": {
         "start_now": "Começar agora",

@@ -14,14 +14,8 @@
         </v-card-title>
 
         <v-card-text>
-          <!-- Spinner mientras se busca la ubicación -->
-          <div v-if="loadingLocation" class="text-center">
-            <v-progress-circular indeterminate color="primary"></v-progress-circular>
-            <p>{{ $t('checkin.searching_location') }}</p>
-          </div>
-
           <!-- Formulario -->
-          <v-form v-else>
+          <v-form>
             <!-- Sección: Ubicación -->
             <h4>{{ $t('checkin.location') }}</h4>
             <v-row>
@@ -30,7 +24,6 @@
                     :label="$t('checkin.latitude')"
                     v-model="form.latitude"
                     type="number"
-                    :readonly="!manualLocation"
                     outlined
                 ></v-text-field>
               </v-col>
@@ -39,13 +32,13 @@
                     :label="$t('checkin.longitude')"
                     type="number"
                     v-model="form.longitude"
-                    :readonly="!manualLocation"
                     outlined
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" class="text-right" style="display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;">
-                <v-btn variant="plain" v-if="props.manualLocationEnabled" @click="toggleManualLocation">
-                  {{ manualLocation ? $t('checkin.use_auto_location') : $t('checkin.use_manual_location') }}
+              <v-col cols="12" style="display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;">
+                <v-btn variant="tonal" color="green" @click="setCurrentLocation" :loading="loadingLocation">
+                  <v-icon left class="mr-1">mdi-crosshairs-gps</v-icon>
+                  {{ $t('checkin.use_current_location') }}
                 </v-btn>
                 <v-btn variant="tonal" color="blue" @click="openMapPicker">
                   <v-icon left class="mr-1">mdi-map-search</v-icon>
@@ -155,9 +148,8 @@ const route = useRoute();
 
 const showModal = ref(false);
 const serviceResponse = ref(null);
-const manualLocation = ref(false);
 const loadingLocation = ref(false);
-const loadingCheckin = ref(false); // Spinner para el registro de check-in
+const loadingCheckin = ref(false);
 const props = defineProps({
   taskTypes: Array,
   manualLocationEnabled: Boolean,
@@ -177,15 +169,6 @@ const form = ref({
 const openModal = () => {
   resetForm();
   showModal.value = true;
-  loadingLocation.value = true;
-  getCurrentLocation();
-};
-
-const toggleManualLocation = () => {
-  manualLocation.value = !manualLocation.value;
-  if (!manualLocation.value) {
-    getCurrentLocation();
-  }
 };
 
 const openMapPicker = () => {
@@ -195,17 +178,14 @@ const openMapPicker = () => {
 const onMapLocationSelected = (coords) => {
   form.value.latitude = coords.latitude;
   form.value.longitude = coords.longitude;
-  manualLocation.value = true; // switch to manual so fields are visible and editable
 };
 
-const getCurrentLocation = () => {
+const setCurrentLocation = () => {
   if (!navigator.geolocation) {
     toast.info(t('checkin.geo_not_supported'));
-    manualLocation.value = true;
-    loadingLocation.value = false;
     return;
   }
-
+  loadingLocation.value = true;
   navigator.geolocation.getCurrentPosition(
       (position) => {
         form.value.latitude = position.coords.latitude.toFixed(6);
@@ -214,7 +194,6 @@ const getCurrentLocation = () => {
       },
       () => {
         toast.info(t('checkin.geo_failed'));
-        manualLocation.value = true;
         loadingLocation.value = false;
       },
       { enableHighAccuracy: true }
@@ -228,7 +207,6 @@ const resetForm = () => {
     datetime: new Date().toISOString().slice(0, 16),
     taskType: '',
   };
-  manualLocation.value = false;
 };
 
 const closeModal = () => {
