@@ -26,6 +26,7 @@ const emit = defineEmits(['update:modelValue', 'location-selected']);
 const map = ref(null);
 const selectedCoords = ref(null);
 const markerLayer = ref(null);
+const geoErrorMessage = ref('');
 
 const show = ref(props.modelValue);
 watch(() => props.modelValue, (val) => { show.value = val; });
@@ -152,14 +153,26 @@ function cancel() {
 }
 
 function centerOnMe() {
-  if (!navigator.geolocation || !map.value) return;
+  geoErrorMessage.value = '';
+  if (!navigator.geolocation || !map.value) {
+    geoErrorMessage.value = t('map.geolocation_not_supported') || 'Geolocation is not supported by your browser.';
+    return;
+  }
+
   navigator.geolocation.getCurrentPosition(
     (pos) => {
       const coords = fromLonLat([pos.coords.longitude, pos.coords.latitude]);
       map.value.getView().animate({ center: coords, zoom: 16, duration: 500 });
     },
-    () => {},
-    { enableHighAccuracy: true }
+    (err) => {
+      // Provide a user-friendly message for common cases
+      let msg = t('map.geolocation_error_generic') || 'Could not retrieve your location.';
+      if (err?.code === 1) msg = t('map.geolocation_permission_denied') || 'Location permission was denied.';
+      else if (err?.code === 2) msg = t('map.geolocation_position_unavailable') || 'Location position is unavailable.';
+      else if (err?.code === 3) msg = t('map.geolocation_timeout') || 'Timed out while retrieving location.';
+      geoErrorMessage.value = msg;
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
   );
 }
 
@@ -174,7 +187,7 @@ watch(show, async (visible) => {
 </script>
 
 <template>
-  <v-dialog v-model="show" max-width="700px" persistent>
+  <v-dialog v-model="show" max-width="700px" persistent @opened="onDialogOpened">
     <v-card>
       <v-card-title class="d-flex align-center">
         <v-icon class="mr-2">mdi-map-marker</v-icon>
@@ -200,6 +213,16 @@ watch(show, async (visible) => {
             </svg>
           </button>
         </div>
+
+        <v-alert
+          v-if="geoErrorMessage"
+          type="warning"
+          variant="tonal"
+          class="mt-3"
+          density="compact"
+        >
+          {{ geoErrorMessage }}
+        </v-alert>
 
         <!-- Selected coordinates preview -->
         <v-alert
