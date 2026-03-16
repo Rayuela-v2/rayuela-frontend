@@ -164,7 +164,8 @@
         "pick_location_title": "Elegir ubicación en el mapa",
         "pick_location_hint": "Tocá en el mapa para marcar tu ubicación. Las áreas del proyecto se muestran en azul.",
         "selected_location": "Ubicación seleccionada",
-        "use_current_location": "Usar mi ubicación"
+        "use_current_location": "Usar mi ubicación",
+        "manual_location_disabled_project": "La ubicación manual está deshabilitada en este proyecto"
     },
     "home": {
         "start_now": "Empezar ahora",

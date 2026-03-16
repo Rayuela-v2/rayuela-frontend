@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch, nextTick } from 'vue';
+import { ref, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import 'ol/ol.css';
 import { Map, View } from 'ol';
@@ -206,6 +206,7 @@ watch(show, async (visible) => {
           <button
             @click="centerOnMe"
             :title="t('map.center_on_location')"
+            :aria-label="t('map.center_on_location')"
             style="position: absolute; top: 10px; right: 10px; z-index: 10; background: white; border: none; border-radius: 50%; width: 40px; height: 40px; box-shadow: 0 2px 6px rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; cursor: pointer;"
           >
             <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" fill="black" viewBox="0 0 24 24">

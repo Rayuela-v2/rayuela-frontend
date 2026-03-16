@@ -164,7 +164,8 @@
         "pick_location_title": "Pick location from map",
         "pick_location_hint": "Tap on the map to mark your location. Project areas are shown in blue.",
         "selected_location": "Selected location",
-        "use_current_location": "Use my location"
+        "use_current_location": "Use my location",
+        "manual_location_disabled_project": "Manual location is disabled for this project"
     },
     "home": {
         "start_now": "Start now",

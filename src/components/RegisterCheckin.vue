@@ -25,6 +25,7 @@
                     v-model="form.latitude"
                     type="number"
                     outlined
+                    :disabled="!props.manualLocationEnabled"
                 ></v-text-field>
               </v-col>
               <v-col cols="6">
@@ -33,6 +34,7 @@
                     type="number"
                     v-model="form.longitude"
                     outlined
+                    :disabled="!props.manualLocationEnabled"
                 ></v-text-field>
               </v-col>
               <v-col cols="12" style="display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;">
@@ -40,10 +42,25 @@
                   <v-icon left class="mr-1">mdi-crosshairs-gps</v-icon>
                   {{ $t('checkin.use_current_location') }}
                 </v-btn>
-                <v-btn variant="tonal" color="blue" @click="openMapPicker">
-                  <v-icon left class="mr-1">mdi-map-search</v-icon>
-                  {{ $t('checkin.pick_from_map') }}
-                </v-btn>
+
+                <v-tooltip
+                  :text="!props.manualLocationEnabled ? $t('checkin.manual_location_disabled_project') : $t('checkin.pick_from_map')"
+                  location="top"
+                >
+                  <template #activator="{ props: tooltipProps }">
+                    <span v-bind="tooltipProps" style="display: inline-block;">
+                      <v-btn
+                        variant="tonal"
+                        color="blue"
+                        @click="openMapPicker"
+                        :disabled="!props.manualLocationEnabled"
+                      >
+                        <v-icon left class="mr-1">mdi-map-search</v-icon>
+                        {{ $t('checkin.pick_from_map') }}
+                      </v-btn>
+                    </span>
+                  </template>
+                </v-tooltip>
               </v-col>
             </v-row>
 
@@ -152,7 +169,7 @@ const loadingLocation = ref(false);
 const loadingCheckin = ref(false);
 const props = defineProps({
   taskTypes: Array,
-  manualLocationEnabled: Boolean,
+  manualLocationEnabled: { type: Boolean, default: true },
   areas: { type: Object, default: null }
 });
 

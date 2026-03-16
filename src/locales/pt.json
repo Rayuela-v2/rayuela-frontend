@@ -164,7 +164,8 @@
         "pick_location_title": "Escolher localização no mapa",
         "pick_location_hint": "Toque no mapa para marcar sua localização. As áreas do projeto são mostradas em azul.",
         "selected_location": "Localização selecionada",
-        "use_current_location": "Usar minha localização"
+        "use_current_location": "Usar minha localização",
+        "manual_location_disabled_project": "A localização manual está desativada neste projeto"
     },
     "home": {
         "start_now": "Começar agora",
@@ -225,7 +226,7 @@
         "leaderboard_type_label": "Tipo de leaderboard",
         "recommendation_algorithm_label": "Algoritmo de recomendação",
         "manual_location_switch": "Checkins com localização manual",
-        "gamification_info_title": "O que é uma adaptação de ludificación?",
+        "gamification_info_title": "O que é uma adaptação de ludificação?",
         "gamification_info_text": "As estratégias de adaptação permitem ajustar os elementos do jogo a cada pessoa em um determinado contexto. Neste projeto, você pode escolher entre:",
         "areas_title": "Áreas",
         "task_types_title": "Tipos de Tarefas",
