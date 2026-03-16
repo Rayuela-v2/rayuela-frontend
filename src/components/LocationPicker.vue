@@ -6,7 +6,7 @@ import { Map, View } from 'ol';
 import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer';
 import { OSM, Vector as VectorSource } from 'ol/source';
 import { Style, Fill, Stroke, Text } from 'ol/style';
-import Circle from 'ol/style/Circle';
+import Icon from 'ol/style/Icon';
 import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
 import GeoJSON from 'ol/format/GeoJSON';
@@ -44,11 +44,20 @@ const createAreaStyle = (feature) => {
   });
 };
 
+const markerIconSvg = encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24">
+  <path fill="#e74c3c" d="M12 2c-3.314 0-6 2.686-6 6 0 4.5 6 14 6 14s6-9.5 6-14c0-3.314-2.686-6-6-6z"/>
+  <circle cx="12" cy="8" r="2.5" fill="#ffffff"/>
+</svg>
+`).trim();
+
 const markerStyle = new Style({
-  image: new Circle({
-    radius: 10,
-    fill: new Fill({ color: '#e74c3c' }),
-    stroke: new Stroke({ color: '#fff', width: 2 }),
+  image: new Icon({
+    src: `data:image/svg+xml;charset=UTF-8,${markerIconSvg}`,
+    anchor: [0.5, 1],
+    anchorXUnits: 'fraction',
+    anchorYUnits: 'fraction',
+    scale: 1,
   }),
 });
 
