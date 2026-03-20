@@ -152,6 +152,7 @@ import {useRoute} from 'vue-router';
 import {toast} from "vue3-toastify";
 import { useI18n } from 'vue-i18n';
 import GamificationService from "@/services/GamificationService";
+import { MAX_IMAGES } from '@/utils/constants';
 
 const { t } = useI18n();
 
@@ -171,7 +172,7 @@ const imageFiles = ref([]);
 /** @type {import('vue').Ref<string[]>} */
 const imagePreviews = ref([]);
 
-const imageError = computed(() => imageFiles.value.length > 3);
+const imageError = computed(() => imageFiles.value.length > MAX_IMAGES);
 
 const props = defineProps({
   taskTypes: Array,
@@ -184,7 +185,7 @@ const onImagesSelected = (files) => {
   imagePreviews.value = [];
 
   if (files && files.length > 0) {
-    const filesToPreview = files.slice(0, 3); // Preview only up to 3
+    const filesToPreview = files.slice(0, MAX_IMAGES); // Preview only up to MAX_IMAGES
     imagePreviews.value = filesToPreview.map(file => URL.createObjectURL(file));
   }
 };
