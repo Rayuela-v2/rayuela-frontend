@@ -12,7 +12,25 @@
         
         <!-- Sección de Imágenes -->
         <div v-if="getImageRefs(c).length > 0" class="images-section mt-2">
-          <v-row dense>
+          <div v-if="!isExpanded(c._id)" class="d-flex align-center">
+            <v-btn
+              variant="text"
+              color="primary"
+              size="small"
+              prepend-icon="mdi-image"
+              @click="toggleExpand(c._id)"
+            >
+              {{ $t('checkin.see_images') || 'Ver imágenes' }}
+              ({{ getImageRefs(c).length }})
+            </v-btn>
+          </div>
+          
+          <v-row v-else dense>
+            <v-col cols="12" class="mb-1">
+              <v-btn variant="text" size="x-small" @click="toggleExpand(c._id)">
+                {{ $t('common.hide') || 'Ocultar' }}
+              </v-btn>
+            </v-col>
             <v-col v-for="(ref, index) in getImageRefs(c)" :key="index" cols="4" sm="3" md="2">
               <v-img
                 :src="getImageUrl(ref)"
@@ -47,7 +65,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, reactive } from 'vue';
 
 const props = defineProps({
   checkins: {
@@ -58,6 +76,7 @@ const props = defineProps({
 
 const imageDialog = ref(false);
 const selectedImage = ref('');
+const expandedCheckins = reactive({});
 
 const formatDate = (iso) => {
   if (!iso) return '';
@@ -77,17 +96,21 @@ const getImageRefs = (checkin) => {
 
 const getImageUrl = (ref) => {
   if (!ref) return '';
-  // Assuming the backend provides a URL or the frontend knows the base URL
-  // If it's a relative path, we might need to prepend the API base URL
   if (ref.startsWith('http')) return ref;
   
-  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/v1';
+  const baseUrl = import.meta.env.VITE_ROOT_API || 'http://localhost:3000/v1';
   return `${baseUrl}/storage/file?key=${ref}`;
 };
 
 const openImage = (ref) => {
   selectedImage.value = ref;
   imageDialog.value = true;
+};
+
+const isExpanded = (id) => !!expandedCheckins[id];
+
+const toggleExpand = (id) => {
+  expandedCheckins[id] = !expandedCheckins[id];
 };
 </script>
 
