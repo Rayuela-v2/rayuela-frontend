@@ -48,9 +48,12 @@
         "title": "Rayuela",
         "subtitle": "Ciencia ciudadana",
         "button_login": "Ingresar",
-        "button_signup": "Registrarse"
+        "button_signup": "Registrarse",
+        "selector_title": "Elegí tu proyecto favorito para empezar"
     },
     "project": {
+        "button_join": "Unirse",
+        "button_close": "Cerrar",
         "button_website": "Sitio web del proyecto",
         "visit_website": "Visitar sitio web",
         "status_available": "Disponible",
@@ -116,6 +119,7 @@
         "image_load_error": "No se pudo cargar la imagen. Verifique la URL.",
         "hours_suffix": "hs",
         "complete_all_fields": "Por favor completa todos los campos.",
+        "important": "Importante",
         "days": [
             "Domingo",
             "Lunes",
@@ -124,7 +128,12 @@
             "Jueves",
             "Viernes",
             "Sábado"
-        ]
+        ],
+        "confirm": "Confirmar",
+        "accept": "Aceptar",
+        "saving": "Guardando...",
+        "share": "Compartir",
+        "none": "Ninguno"
     },
     "checkin": {
         "button_register": "Registrar Check-in",
@@ -158,7 +167,13 @@
         "your_location": "Tu ubicación",
         "geo_not_supported": "La geolocalización no es compatible con este navegador.",
         "geo_failed": "No se pudo obtener la ubicación. Por favor ingrésela manualmente.",
-        "register_error": "Ha ocurrido un error en el registro."
+        "register_error": "Ha ocurrido un error en el registro.",
+        "pick_from_map": "Elegir en el mapa",
+        "pick_location_title": "Elegir ubicación en el mapa",
+        "pick_location_hint": "Tocá en el mapa para marcar tu ubicación. Las áreas del proyecto se muestran en azul.",
+        "selected_location": "Ubicación seleccionada",
+        "use_current_location": "Usar mi ubicación",
+        "manual_location_disabled_project": "La ubicación manual está deshabilitada en este proyecto"
     },
     "home": {
         "start_now": "Empezar ahora",
