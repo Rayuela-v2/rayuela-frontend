@@ -424,6 +424,12 @@ function requirementsList(badge) {
   margin-bottom: 6px;
 }
 
+.badge-graph-tooltip__header strong {
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+}
+
 .badge-graph-tooltip__desc {
   margin: 0 0 8px;
   opacity: 0.85;
@@ -433,6 +439,11 @@ function requirementsList(badge) {
 .badge-graph-tooltip__reqs {
   border-top: 1px solid rgba(255, 255, 255, 0.15);
   padding-top: 8px;
+}
+
+.badge-graph-tooltip__reqs strong {
+  color: #fff;
+  font-weight: 700;
 }
 
 .badge-graph-tooltip__reqs ul {
