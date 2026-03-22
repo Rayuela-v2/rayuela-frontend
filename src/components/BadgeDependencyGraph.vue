@@ -248,8 +248,8 @@ function requirementsList(badge) {
 
         <!-- Nodes -->
         <g
-          v-for="node in layoutData.nodes"
-          :key="node.name"
+          v-for="(node, index) in layoutData.nodes"
+          :key="node._id || node.id || (node.name + '-' + index)"
           :transform="`translate(${node.x}, ${node.y})`"
           class="badge-graph-node"
           :class="{

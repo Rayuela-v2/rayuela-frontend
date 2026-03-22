@@ -61,7 +61,7 @@ const deleteBadge = async () => {
   selectedBadge.value.available = !selectedBadge.value.available;
   await GamificationService.deleteBadge(selectedBadge.value._id)
       .then((res) => {
-        toast.success(t('admin.badge_created_success').replace('creada', 'eliminada'));
+        toast.success(t('admin.badge_deleted_success'));
         dialogDisableBadge.value = false;
         badges.value = res.badges;
       });

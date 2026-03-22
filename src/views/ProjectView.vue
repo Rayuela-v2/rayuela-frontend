@@ -288,7 +288,7 @@ const selectedBadge = computed(() => {
 });
 
 const onGraphBadgeClick = (badge) => {
-  const index = project.value.user?.badges?.findIndex(b => b.name === badge.name) ?? -1;
+  const index = project.value.user?.badges?.findIndex(b => b._id === badge._id) ?? -1;
   if (index !== -1) toggleTooltip(index);
 };
 
