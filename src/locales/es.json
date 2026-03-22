@@ -90,7 +90,16 @@
         "subscribe_success": "Inscripción exitosa",
         "button_subscribe": "Inscribirse",
         "button_share": "Compartir proyecto",
-        "share_text": "¡Hola! Querés jugar en rayuela? :) {name}"
+        "share_text": "¡Hola! Querés jugar en rayuela? :) {name}",
+        "badge_graph_title": "Mapa de dependencias de insignias",
+        "badge_graph_toggle": "Vista de grafo",
+        "badge_grid_toggle": "Vista de grilla",
+        "badge_graph_empty": "Aún no hay insignias configuradas",
+        "badge_graph_preview": "Vista previa de dependencias",
+        "badge_graph_admin_section": "Grafo de dependencias de insignias",
+        "badge_requirements": "Requisitos",
+        "badge_earned": "¡Obtenida!",
+        "badge_not_earned": "Aún no obtenida"
     },
     "common": {
         "actions": "Acciones",
