@@ -12,7 +12,6 @@
           :items-per-page="5"
           :search="search"
           class="elevation-1"
-          :no-data-text="$t('leaderboard.no_data')"
           :sort-by="sortBy"
           :sort-desc="sortDesc"
           dense
