@@ -81,8 +81,28 @@
                 :items="props.taskTypes"
                 outlined
             ></v-select>
+
+            <!-- Sección: Imagen (Opcional) -->
+            <h4 class="mt-4">{{ $t('checkin.image_label') || 'Fotos de evidencia (máx. 3)' }}</h4>
+            <v-file-input
+                :label="$t('checkin.image_placeholder') || 'Selecciona o toma hasta 3 fotos'"
+                v-model="imageFiles"
+                accept="image/*"
+                prepend-icon="mdi-camera"
+                multiple
+                @update:modelValue="onImagesSelected"
+                :error-messages="imageError ? [$t('checkin.max_images_error') || 'Puedes subir un máximo de 3 imágenes'] : []"
+                outlined
+            ></v-file-input>
+            
+            <v-row v-if="imagePreviews.length > 0" class="mt-2">
+              <v-col v-for="(preview, index) in imagePreviews" :key="index" cols="4">
+                <v-img :src="preview" max-height="150" contain></v-img>
+              </v-col>
+            </v-row>
           </v-form>
         </v-card-text>
+
 
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -90,7 +110,7 @@
           <v-btn
               color="primary"
               @click="submitForm"
-              :disabled="loadingCheckin"
+              :disabled="loadingCheckin || imageError"
           >
             <template v-if="loadingCheckin">
               <v-progress-circular indeterminate color="white" size="20" class="mr-2"></v-progress-circular>
@@ -150,11 +170,12 @@
 </template>
 
 <script setup>
-import {ref, watch} from 'vue';
+import {ref, watch, computed} from 'vue';
 import {useRoute} from 'vue-router';
 import {toast} from "vue3-toastify";
 import { useI18n } from 'vue-i18n';
 import GamificationService from "@/services/GamificationService";
+import { MAX_IMAGES } from '@/utils/constants';
 import LocationPicker from "@/components/LocationPicker.vue";
 
 const { t } = useI18n();
@@ -164,9 +185,18 @@ const emit = defineEmits(['modalClosed']);
 const route = useRoute();
 
 const showModal = ref(false);
+/** @type {import('vue').Ref<any>} */
 const serviceResponse = ref(null);
 const loadingLocation = ref(false);
-const loadingCheckin = ref(false);
+const loadingCheckin = ref(false); // Spinner para el registro de check-in
+
+/** @type {import('vue').Ref<File[]>} */
+const imageFiles = ref([]);
+/** @type {import('vue').Ref<string[]>} */
+const imagePreviews = ref([]);
+
+const imageError = computed(() => imageFiles.value.length > MAX_IMAGES);
+
 const props = defineProps({
   taskTypes: Array,
   manualLocationEnabled: { type: Boolean, default: true },
@@ -174,6 +204,18 @@ const props = defineProps({
 });
 
 const showMapPicker = ref(false);
+
+const onImagesSelected = (files) => {
+  // Clear existing previews
+  imagePreviews.value.forEach(url => URL.revokeObjectURL(url));
+  imagePreviews.value = [];
+
+  if (files && files.length > 0) {
+    const filesToPreview = files.slice(0, MAX_IMAGES); // Preview only up to MAX_IMAGES
+    imagePreviews.value = filesToPreview.map(file => URL.createObjectURL(file));
+  }
+};
+
 
 const form = ref({
   latitude: '',
@@ -224,12 +266,19 @@ const resetForm = () => {
     datetime: new Date().toISOString().slice(0, 16),
     taskType: '',
   };
+  imageFiles.value = [];
+  imagePreviews.value.forEach(url => URL.revokeObjectURL(url));
+  imagePreviews.value = [];
 };
 
 const closeModal = () => {
   showModal.value = false;
   loadingCheckin.value = false;
+  imageFiles.value = [];
+  imagePreviews.value.forEach(url => URL.revokeObjectURL(url));
+  imagePreviews.value = [];
 };
+
 
 const closeConfirmationModal = async () => {
   if (serviceResponse.value.contributesTo) {
@@ -245,9 +294,27 @@ const submitForm = () => {
     return;
   }
 
+  if (imageError.value) {
+    toast.error(t('checkin.max_images_error'));
+    return;
+  }
+
   loadingCheckin.value = true; // Inicia el spinner
 
-  GamificationService.registerCheckin({...form.value, projectId: route.params.projectId})
+  const payload = new FormData();
+  payload.append('latitude', form.value.latitude);
+  payload.append('longitude', form.value.longitude);
+  payload.append('datetime', form.value.datetime);
+  payload.append('taskType', form.value.taskType);
+  payload.append('projectId', route.params.projectId);
+
+  if (imageFiles.value && imageFiles.value.length > 0) {
+    imageFiles.value.forEach(file => {
+      payload.append('image', file);
+    });
+  }
+
+  GamificationService.registerCheckin(payload)
       .then((res) => {
         serviceResponse.value = res;
       })
@@ -257,6 +324,7 @@ const submitForm = () => {
         closeModal();
       });
 };
+
 
 watch(showModal, (isVisible) => {
   if (isVisible) {

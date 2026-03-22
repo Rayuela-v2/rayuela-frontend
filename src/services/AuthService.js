@@ -2,7 +2,7 @@ import RayuelaService from "@/services/RayuelaService";
 
 class AuthService extends RayuelaService {
     loginWithPw(user) {
-        return this.post("/auth/login/", user)
+        return this.post("/auth/login", user)
             .then((data) => {
                 localStorage.setItem("msg_login", "1")
                 localStorage.setItem("token", data.access_token)
@@ -12,7 +12,7 @@ class AuthService extends RayuelaService {
     }
 
     register(user) {
-        return this.post("/auth/register/", user);
+        return this.post("/auth/register", user);
     }
 
     getUser() {

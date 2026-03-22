@@ -14,10 +14,19 @@ export default class RayuelaService {
         }
     }
 
-    post(url, body) {
+    post(url, body, extraConfig = {}) {
         loadingService.show();
-        return axios.post(this.baseUrl + url, body, this.getHeaders())
+        const config = {
+            ...this.getHeaders(),
+            ...extraConfig,
+            headers: {
+                ...this.getHeaders().headers,
+                ...(extraConfig.headers || {})
+            }
+        };
+        return axios.post(this.baseUrl + url, body, config)
             .then(res => {
+
                 if (res.status === 401) {
                     localStorage.clear();
                     router.push("/login")

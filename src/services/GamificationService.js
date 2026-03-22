@@ -47,6 +47,7 @@ class GamificationService extends RayuelaService {
         return this.post('/checkin', body);
     }
 
+
     rate(rate, checkinId) {
         return this.post('/checkin/rate', {rate, checkinId});
     }
