@@ -90,7 +90,16 @@
         "subscribe_success": "Registration successful",
         "button_subscribe": "Subscribe",
         "button_share": "Share project",
-        "share_text": "Hello! Do you want to play Rayuela? :) {name}"
+        "share_text": "Hello! Do you want to play Rayuela? :) {name}",
+        "badge_graph_title": "Badge Dependency Map",
+        "badge_graph_toggle": "Graph View",
+        "badge_grid_toggle": "Grid View",
+        "badge_graph_empty": "No badges configured yet",
+        "badge_graph_preview": "Badge Dependencies Preview",
+        "badge_graph_admin_section": "Badge Dependency Graph",
+        "badge_requirements": "Requirements",
+        "badge_earned": "Earned!",
+        "badge_not_earned": "Not earned yet"
     },
     "common": {
         "actions": "Actions",

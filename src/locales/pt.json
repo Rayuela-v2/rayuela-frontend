@@ -90,7 +90,16 @@
         "subscribe_success": "Inscrição bem-sucedida",
         "button_subscribe": "Inscrever-se",
         "button_share": "Compartilhar projeto",
-        "share_text": "Olá! Quer jogar Rayuela? :) {name}"
+        "share_text": "Olá! Quer jogar Rayuela? :) {name}",
+        "badge_graph_title": "Mapa de dependências de medalhas",
+        "badge_graph_toggle": "Vista de grafo",
+        "badge_grid_toggle": "Vista de grade",
+        "badge_graph_empty": "Ainda não há medalhas configuradas",
+        "badge_graph_preview": "Pré-visualização de dependências",
+        "badge_graph_admin_section": "Grafo de dependências de medalhas",
+        "badge_requirements": "Requisitos",
+        "badge_earned": "Conquistada!",
+        "badge_not_earned": "Ainda não conquistada"
     },
     "common": {
         "actions": "Ações",

@@ -6,6 +6,7 @@ import {toast} from 'vue3-toastify';
 import GamificationService from "@/services/GamificationService";
 import router from "@/router";
 import BreadCrumb from "@/components/utils/BreadCrumb.vue";
+import BadgeDependencyGraph from '@/components/BadgeDependencyGraph.vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -43,6 +44,13 @@ const badgeOptions = computed(() =>
         .map((b) => b.name)
 );
 
+// All badges with the current badge's draft state merged in (for graph preview)
+const allBadgesForGraph = computed(() => {
+  const others = store.state.currentGamification.badgesRules
+      .filter((b) => b._id !== badge.value._id);
+  return [...others, { ...badge.value }];
+});
+
 const validateBadge = () => {
   const requiredFields = [
     'name',
@@ -60,7 +68,7 @@ const validateBadge = () => {
       return false;
     }
   }
-  console.log(isNew.value)
+
 
   if (isNew.value && store.state.currentGamification.badgesRules.find(b => b.name === badge.value.name)) {
     toast.error(t('admin.badge_name_exists'));
@@ -146,6 +154,16 @@ onMounted(() => {
             multiple
             chips
         />
+
+        <!-- Badge dependency graph preview -->
+        <v-card variant="outlined" class="pa-3 mb-4" v-if="allBadgesForGraph.length > 0">
+          <h4 class="mb-2">{{ $t('project.badge_graph_preview') }}</h4>
+          <BadgeDependencyGraph
+              :badges="allBadgesForGraph"
+              :readonly="true"
+              :highlight-badge-id="badge._id"
+          />
+        </v-card>
         <v-select
             :label="$t('admin.task_type')"
             v-model="badge.taskType"

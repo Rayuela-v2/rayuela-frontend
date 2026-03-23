@@ -6,19 +6,25 @@ import {toast} from "vue3-toastify";
 import {store} from "@/vuex/state";
 import GamificationService from "@/services/GamificationService";
 import BreadCrumb from "@/components/utils/BreadCrumb.vue";
+import BadgeDependencyGraph from '@/components/BadgeDependencyGraph.vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const badges = ref([]);
 const scoreRules = ref([]);
 
 const badgeHeaders = ref([
-  {title: 'Nombre de la insignia', value: 'name', sortable: true},
-  {title: 'Acciones', value: 'actions', sortable: false}
+  {title: t('admin.badge_name_label'), value: 'name', sortable: true},
+  {title: t('common.actions'), value: 'actions', sortable: false}
 ]);
 
 const scoreRuleHeaders = ref([
-  {title: 'Nombre de la regla', value: 'label', sortable: true},
-  {title: 'Acciones', value: 'actions', sortable: false}
+  {title: t('admin.score_label'), value: 'label', sortable: true},
+  {title: t('common.actions'), value: 'actions', sortable: false}
 ]);
+
+const showBadgeGraph = ref(false);
 
 const selectedBadge = ref(null);
 const selectedScoreRule = ref(null);
@@ -55,10 +61,14 @@ const deleteBadge = async () => {
   selectedBadge.value.available = !selectedBadge.value.available;
   await GamificationService.deleteBadge(selectedBadge.value._id)
       .then((res) => {
-        toast.success('Insignia eliminada :)');
+        toast.success(t('admin.badge_deleted_success'));
         dialogDisableBadge.value = false;
         badges.value = res.badges;
       });
+};
+
+const onGraphBadgeClick = (badge) => {
+  editBadge(badge);
 };
 
 const editScoreRule = (scoreRule) => {
@@ -89,9 +99,9 @@ const deleteScoreRule = async () => {
   <main>
     <!-- Sección de Insignias -->
     <BreadCrumb items="gamificationPath" />
-    <h1>Insignias</h1>
+    <h1>{{ $t('admin.badges') }}</h1>
     <div style="display: flex; justify-content: flex-end;">
-      <v-btn color="black" @click="addBadge">Agregar Insignia</v-btn>
+      <v-btn color="black" @click="addBadge">{{ $t('admin.add_badge') }}</v-btn>
     </div>
     <v-container>
       <v-data-table
@@ -109,10 +119,10 @@ const deleteScoreRule = async () => {
             </template>
             <v-list>
               <v-list-item @click="editBadge(item)">
-                <v-list-item-title>Editar insignia</v-list-item-title>
+                <v-list-item-title>{{ $t('admin.edit_badge') }}</v-list-item-title>
               </v-list-item>
               <v-list-item @click="confirmDeleteBadge(item)">
-                <v-list-item-title>Eliminar</v-list-item-title>
+                <v-list-item-title>{{ $t('common.delete') }}</v-list-item-title>
               </v-list-item>
             </v-list>
           </v-menu>
@@ -121,24 +131,43 @@ const deleteScoreRule = async () => {
 
       <v-dialog v-model="dialogDisableBadge" max-width="400px">
         <v-card>
-          <v-card-title class="headline">¿Estás seguro?</v-card-title>
+          <v-card-title class="headline">{{ $t('admin.confirm_title') }}</v-card-title>
           <v-card-text>
-            ¿Estás seguro que quieres eliminar la insignia
-            <strong>{{ selectedBadge?.name }}</strong>?
+            {{ $t('admin.confirm_message', { action: $t('common.delete').toLowerCase(), name: selectedBadge?.name }) }}
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="primary" text @click="dialogDisableBadge = false">Cancelar</v-btn>
-            <v-btn color="warning" text @click="deleteBadge">Eliminar</v-btn>
+            <v-btn color="primary" text @click="dialogDisableBadge = false">{{ $t('common.cancel') }}</v-btn>
+            <v-btn color="warning" text @click="deleteBadge">{{ $t('common.delete') }}</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
+
+      <!-- Badge Dependency Graph -->
+      <v-btn
+          variant="text"
+          class="mt-4"
+          @click="showBadgeGraph = !showBadgeGraph"
+          prepend-icon="mdi-graph-outline"
+      >
+        {{ $t('project.badge_graph_admin_section') }}
+        <v-icon end>{{ showBadgeGraph ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+      </v-btn>
+      <v-expand-transition>
+        <div v-show="showBadgeGraph" class="mt-2">
+          <BadgeDependencyGraph
+              :badges="badges"
+              :readonly="false"
+              @badge-click="onGraphBadgeClick"
+          />
+        </div>
+      </v-expand-transition>
     </v-container>
 
     <!-- Sección de Reglas de Puntaje -->
-    <h1>Reglas de Puntaje</h1>
+    <h1>{{ $t('admin.score_rules') }}</h1>
     <div style="display: flex; justify-content: flex-end;">
-      <v-btn color="black" @click="addScoreRule">Agregar Regla de Puntaje</v-btn>
+      <v-btn color="black" @click="addScoreRule">{{ $t('admin.add_score_rule') }}</v-btn>
     </div>
     <v-container>
       <v-data-table
@@ -159,10 +188,10 @@ const deleteScoreRule = async () => {
             </template>
             <v-list>
               <v-list-item @click="editScoreRule(item)">
-                <v-list-item-title>Editar regla de puntaje</v-list-item-title>
+                <v-list-item-title>{{ $t('admin.edit_score_rule') }}</v-list-item-title>
               </v-list-item>
               <v-list-item @click="confirmDisableScoreRule(item)">
-                <v-list-item-title>Eliminar</v-list-item-title>
+                <v-list-item-title>{{ $t('common.delete') }}</v-list-item-title>
               </v-list-item>
             </v-list>
           </v-menu>
@@ -171,15 +200,14 @@ const deleteScoreRule = async () => {
 
       <v-dialog v-model="dialogDisableScoreRule" max-width="400px">
         <v-card>
-          <v-card-title class="headline">¿Estás seguro?</v-card-title>
+          <v-card-title class="headline">{{ $t('admin.confirm_title') }}</v-card-title>
           <v-card-text>
-            ¿Estás seguro que quieres eliminar la regla de puntaje
-            <strong>{{ selectedScoreRule?.name }}</strong>?
+            {{ $t('admin.confirm_message', { action: $t('common.delete').toLowerCase(), name: selectedScoreRule?.name }) }}
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="primary" text @click="dialogDisableScoreRule = false">Cancelar</v-btn>
-            <v-btn color="warning" text @click="deleteScoreRule">Eliminar</v-btn>
+            <v-btn color="primary" text @click="dialogDisableScoreRule = false">{{ $t('common.cancel') }}</v-btn>
+            <v-btn color="warning" text @click="deleteScoreRule">{{ $t('common.delete') }}</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>

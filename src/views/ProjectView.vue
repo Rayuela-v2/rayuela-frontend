@@ -71,22 +71,44 @@
                      class="floating-button"
     />
 
-    <h2>{{ $t('project.badges_title') }}</h2>
-    <div class="pa-4 mb-6 badges-container">
-      <v-alert :title="$t('project.no_badges_title')"
-               color="gray"
-               variant="tonal"
-               v-if="project.user.badges.length === 0">{{ $t('project.no_badges_message') }}
-      </v-alert>
-      <div v-for="(badge, index) in project.user.badges" :key="index" class="badge-item">
-        <img
-            :src="badge.imageUrl"
-            :alt="$t('project.image_alt')"
-            :class="{ 'grayscale': !badge.active }"
-            @click="toggleTooltip(index)"
-        />
-        <h6>{{ badge.name }}</h6>
+    <div class="badges-header">
+      <h2>{{ $t('project.badges_title') }}</h2>
+      <v-btn-toggle v-model="badgeViewMode" mandatory density="compact" class="ml-4">
+        <v-btn value="grid" size="small">
+          <v-icon start>mdi-view-grid</v-icon>
+          {{ $t('project.badge_grid_toggle') }}
+        </v-btn>
+        <v-btn value="graph" size="small">
+          <v-icon start>mdi-graph-outline</v-icon>
+          {{ $t('project.badge_graph_toggle') }}
+        </v-btn>
+      </v-btn-toggle>
+    </div>
+    <div class="pa-4 mb-6">
+      <!-- Grid view -->
+      <div v-if="badgeViewMode === 'grid'" class="badges-container">
+        <v-alert :title="$t('project.no_badges_title')"
+                 color="gray"
+                 variant="tonal"
+                 v-if="project.user.badges.length === 0">{{ $t('project.no_badges_message') }}
+        </v-alert>
+        <div v-for="(badge, index) in project.user.badges" :key="index" class="badge-item">
+          <img
+              :src="badge.imageUrl"
+              :alt="$t('project.image_alt')"
+              :class="{ 'grayscale': !badge.active }"
+              @click="toggleTooltip(index)"
+          />
+          <h6>{{ badge.name }}</h6>
+        </div>
       </div>
+      <!-- Graph view -->
+      <BadgeDependencyGraph
+          v-if="badgeViewMode === 'graph'"
+          :badges="project.user.badges"
+          :readonly="true"
+          @badge-click="onGraphBadgeClick"
+      />
       <v-dialog v-model="taskDetailDialog" max-width="500">
         <v-card v-if="taskDetail">
           <v-card-title class="headline">{{ $t('project.task_detail_title') }}</v-card-title>
@@ -230,6 +252,7 @@ import {toast} from "vue3-toastify";
 import GamificationService from "@/services/GamificationService";
 import CheckinService from "@/services/CheckinService";
 import UserCheckins from "@/components/UserCheckins.vue";
+import BadgeDependencyGraph from '@/components/BadgeDependencyGraph.vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -242,6 +265,7 @@ const tableSearch = ref('');
 const taskDetailDialog = ref(false);
 const taskDetail = ref(null);
 const badgeTooltip = ref(-1);
+const badgeViewMode = ref('grid');
 
 const toggleTooltip = (index) => {
   badgeTooltip.value = index;
@@ -262,6 +286,11 @@ function showTaskDetail(item) {
 const selectedBadge = computed(() => {
   return badgeTooltip.value === -1 ? null : project.value.user?.badges?.[badgeTooltip.value] ?? null;
 });
+
+const onGraphBadgeClick = (badge) => {
+  const index = project.value.user?.badges?.findIndex(b => b._id === badge._id) ?? -1;
+  if (index !== -1) toggleTooltip(index);
+};
 
 const project = ref({
   name: '',
@@ -345,6 +374,13 @@ onMounted(async () => {
 .text-subtitle-1 {
   font-size: 16px;
   color: #555;
+}
+
+.badges-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .badges-container {
