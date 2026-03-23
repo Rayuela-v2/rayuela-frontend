@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { computeBadgeLayout, DEFAULT_NODE_RADIUS as NODE_RADIUS } from '@/utils/badgeGraphLayout';
 
 const { t } = useI18n();
 
@@ -15,114 +16,9 @@ const emit = defineEmits(['badge-click']);
 const hoveredBadge = ref(null);
 const tooltipPos = ref({ x: 0, y: 0 });
 
-// --- DAG Layout ---
+// --- DAG Layout (delegated to utility) ---
 
-const NODE_RADIUS = 30;
-const LAYER_GAP_Y = 120;
-const NODE_GAP_X = 140;
-const PADDING = 60;
-
-/**
- * Build a name→badge lookup and compute layers via BFS (topological layering).
- * Layer 0 = badges with no previousBadges (roots).
- */
-const layoutData = computed(() => {
-  const badges = props.badges;
-  if (!badges || badges.length === 0) return { nodes: [], edges: [], width: 0, height: 0 };
-
-  const byName = {};
-  badges.forEach((b) => { byName[b.name] = b; });
-
-  // Compute depth per badge (layer index)
-  const depth = {};
-  const visited = new Set();
-
-  function calcDepth(badge) {
-    if (depth[badge.name] !== undefined) return depth[badge.name];
-    if (visited.has(badge.name)) return 0; // cycle guard
-    visited.add(badge.name);
-
-    if (!badge.previousBadges || badge.previousBadges.length === 0) {
-      depth[badge.name] = 0;
-      return 0;
-    }
-    let maxParent = 0;
-    for (const parentName of badge.previousBadges) {
-      const parent = byName[parentName];
-      if (parent) {
-        maxParent = Math.max(maxParent, calcDepth(parent) + 1);
-      }
-    }
-    depth[badge.name] = maxParent;
-    return maxParent;
-  }
-
-  badges.forEach((b) => calcDepth(b));
-
-  // Group badges by layer
-  const layers = {};
-  let maxLayer = 0;
-  badges.forEach((b) => {
-    const d = depth[b.name] || 0;
-    if (!layers[d]) layers[d] = [];
-    layers[d].push(b);
-    maxLayer = Math.max(maxLayer, d);
-  });
-
-  // Position nodes
-  const nodes = [];
-  const posMap = {};
-  let maxCols = 0;
-
-  for (let layer = 0; layer <= maxLayer; layer++) {
-    const row = layers[layer] || [];
-    maxCols = Math.max(maxCols, row.length);
-    row.forEach((b, col) => {
-      const x = PADDING + col * NODE_GAP_X + NODE_GAP_X / 2;
-      const y = PADDING + layer * LAYER_GAP_Y + NODE_RADIUS;
-      nodes.push({ ...b, x, y, layer });
-      posMap[b.name] = { x, y };
-    });
-  }
-
-  // Center each layer horizontally
-  const totalWidth = PADDING * 2 + maxCols * NODE_GAP_X;
-  for (let layer = 0; layer <= maxLayer; layer++) {
-    const row = layers[layer] || [];
-    const rowWidth = row.length * NODE_GAP_X;
-    const offset = (totalWidth - rowWidth) / 2;
-    row.forEach((b, col) => {
-      const newX = offset + col * NODE_GAP_X + NODE_GAP_X / 2;
-      const node = nodes.find((n) => n.name === b.name);
-      if (node) {
-        node.x = newX;
-        posMap[b.name].x = newX;
-      }
-    });
-  }
-
-  // Build edges
-  const edges = [];
-  badges.forEach((b) => {
-    if (b.previousBadges) {
-      b.previousBadges.forEach((parentName) => {
-        if (posMap[parentName] && posMap[b.name]) {
-          edges.push({
-            from: posMap[parentName],
-            to: posMap[b.name],
-            fromName: parentName,
-            toName: b.name,
-          });
-        }
-      });
-    }
-  });
-
-  const width = totalWidth;
-  const height = PADDING * 2 + (maxLayer + 1) * LAYER_GAP_Y;
-
-  return { nodes, edges, width, height };
-});
+const layoutData = computed(() => computeBadgeLayout(props.badges));
 
 // --- Edge path (curved) ---
 function edgePath(edge) {
