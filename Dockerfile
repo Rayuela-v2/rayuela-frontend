@@ -1,20 +1,13 @@
-# Usa una imagen base de Node.js
-FROM node:20
-
-# Establece el directorio de trabajo
+# Stage 1: Build
+FROM node:20-alpine AS build-stage
 WORKDIR /app
-
-# Copia los archivos de dependencias
 COPY package*.json ./
-
-# Instala las dependencias
 RUN npm install
-
-# Copia el resto del código fuente
 COPY . .
+RUN npm run build
 
-# Expone el puerto 3000
-EXPOSE 5173
-
-# Comando para iniciar la app
-CMD ["npm", "run", "dev"]
+# Stage 2: Serve
+FROM nginx:stable-alpine AS production-stage
+COPY --from=build-stage /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
