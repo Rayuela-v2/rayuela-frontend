@@ -154,7 +154,7 @@
               v-for="(day, idx) in daysOfWeek"
               :key="day.value"
               v-model="interval.days"
-              :label="$t('common.days')[idx + 1] === undefined ? $t('common.days')[0] : $t('common.days')[idx + 1]"
+              :label="$t(`common.days[${idx + 1}]`)"
               :value="day.value"
               hide-details
           />

@@ -127,7 +127,7 @@
             <p v-if="taskDetail.timeInterval?.days">
               <strong>{{ $t('project.days_label') }}</strong>
               <span v-for="(day, idx) in taskDetail.timeInterval.days" :key="day">
-          {{ $t('common.days')[day - 1] }}<span v-if="idx < taskDetail.timeInterval.days.length - 1">, </span>
+          {{ $t(`common.days[${day}]`) }}<span v-if="idx < taskDetail.timeInterval.days.length - 1">, </span>
         </span>
             </p>
           </v-card-text>
@@ -185,7 +185,7 @@
                 {{ $t('project.time_range', { start: interval.time.start, end: interval.time.end, suffix: $t('common.hours_suffix') }) }},
                 {{ $t('project.days_label').toLowerCase() }}
                 <span v-for="(day, idx) in interval.days" :key="day">
-                  {{ $t('common.days')[day - 1] }}<span v-if="idx < interval.days.length - 1">, </span>
+                  {{ $t(`common.days[${day}]`) }}<span v-if="idx < interval.days.length - 1">, </span>
                 </span>
               </span>
         </li>

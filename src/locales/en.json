@@ -130,13 +130,14 @@
         "complete_all_fields": "Please complete all fields.",
         "important": "Important",
         "days": [
-            "Sunday",
+            "",
             "Monday",
             "Tuesday",
             "Wednesday",
             "Thursday",
             "Friday",
-            "Saturday"
+            "Saturday",
+            "Sunday"
         ],
         "confirm": "Confirm",
         "accept": "Accept",
