@@ -149,15 +149,52 @@
               />
             </v-col>
           </v-row>
-          <h4>{{ $t('admin.days_of_week') }}</h4>
-          <v-checkbox
-              v-for="(day, idx) in daysOfWeek"
-              :key="day.value"
-              v-model="interval.days"
-              :label="$t(`common.days[${idx + 1}]`)"
-              :value="day.value"
-              hide-details
-          />
+          <h4 class="mb-2">{{ $t('admin.days_of_week') }}</h4>
+
+          <!-- Quick-select presets -->
+          <div class="d-flex flex-wrap ga-2 mb-3">
+            <v-btn
+                size="small"
+                variant="tonal"
+                color="primary"
+                prepend-icon="mdi-calendar-week"
+                @click="setDaysPreset(interval, 'every_day')"
+            >{{ $t('admin.days_preset_every_day') }}</v-btn>
+            <v-btn
+                size="small"
+                variant="tonal"
+                color="indigo"
+                prepend-icon="mdi-briefcase-outline"
+                @click="setDaysPreset(interval, 'weekdays')"
+            >{{ $t('admin.days_preset_weekdays') }}</v-btn>
+            <v-btn
+                size="small"
+                variant="tonal"
+                color="teal"
+                prepend-icon="mdi-weather-sunny"
+                @click="setDaysPreset(interval, 'weekends')"
+            >{{ $t('admin.days_preset_weekends') }}</v-btn>
+            <v-btn
+                size="small"
+                variant="outlined"
+                color="grey"
+                prepend-icon="mdi-close-circle-outline"
+                @click="setDaysPreset(interval, 'clear')"
+            >{{ $t('admin.days_preset_clear') }}</v-btn>
+          </div>
+
+          <!-- Individual day chips -->
+          <div class="d-flex flex-wrap ga-2 mb-4">
+            <v-btn
+                v-for="(day, idx) in daysOfWeek"
+                :key="day.value"
+                :variant="interval.days.includes(day.value) ? 'flat' : 'outlined'"
+                :color="interval.days.includes(day.value) ? 'primary' : 'grey'"
+                size="small"
+                rounded="pill"
+                @click="toggleDay(interval, day.value)"
+            >{{ $t(`common.days[${idx + 1}]`) }}</v-btn>
+          </div>
 
           <v-btn color="red" @click="removeTimeInterval(index)">{{ $t('admin.remove_interval') }}</v-btn>
 
@@ -275,6 +312,33 @@ const addNewTimeInterval = () => {
     startDate: new Date(),
     endDate: nextYear,
   });
+};
+
+const setDaysPreset = (interval, preset) => {
+  switch (preset) {
+    case 'every_day':
+      interval.days = [1, 2, 3, 4, 5, 6, 7];
+      break;
+    case 'weekdays':
+      interval.days = [1, 2, 3, 4, 5];
+      break;
+    case 'weekends':
+      interval.days = [6, 7];
+      break;
+    case 'clear':
+      interval.days = [];
+      break;
+  }
+};
+
+const toggleDay = (interval, dayValue) => {
+  const idx = interval.days.indexOf(dayValue);
+  if (idx === -1) {
+    interval.days.push(dayValue);
+    interval.days.sort((a, b) => a - b);
+  } else {
+    interval.days.splice(idx, 1);
+  }
 };
 
 const removeTimeInterval = (index) => {
