@@ -53,14 +53,17 @@ const adaptationStrategyOptions = computed(() => ([
   {
     title: t('admin.adaptation_option_none'),
     value: ADAPTATION_STRATEGIES.NO_ADAPTATION,
+    description: t('admin.adaptation_option_none_description'),
   },
   {
     title: t('admin.adaptation_option_elastic'),
     value: ADAPTATION_STRATEGIES.ELASTIC_POINTS,
+    description: t('admin.adaptation_option_elastic_description'),
   },
   {
     title: t('admin.adaptation_option_recommendation'),
     value: ADAPTATION_STRATEGIES.CHALLENGE_RECOMMENDATION,
+    description: t('admin.adaptation_option_recommendation_description'),
   },
 ]));
 
@@ -74,6 +77,14 @@ const leaderboardOptions = computed(() => ([
     value: 'MEDALLAS PRIMERO',
   },
 ]));
+
+const selectedAdaptationDescription = computed(() => {
+  const selectedOption = adaptationStrategyOptions.value.find(
+    ({ value }) => value === selectedAdaptationStrategy.value,
+  );
+
+  return selectedOption?.description || '';
+});
 
 const resolveAdaptationStrategy = (project) => {
   if (project.recommendationStrategy === 'ADAPTATIVO') {
@@ -213,8 +224,11 @@ const saveGamificationSettings = async () => {
             v-model="selectedAdaptationStrategy"
             :label="$t('admin.adaptation_type_label')"
             :items="adaptationStrategyOptions"
+            :hint="selectedAdaptationDescription"
+            class="mb-4"
             item-title="title"
             item-value="value"
+            persistent-hint
             required
         />
         <v-select
@@ -225,11 +239,6 @@ const saveGamificationSettings = async () => {
             item-value="value"
             required
         />
-        <ul class="pl-6 mb-4">
-          <li><strong>{{ $t('admin.adaptation_option_none') }}:</strong> {{ $t('admin.adaptation_option_none_description') }}</li>
-          <li><strong>{{ $t('admin.adaptation_option_elastic') }}:</strong> {{ $t('admin.adaptation_option_elastic_description') }}</li>
-          <li><strong>{{ $t('admin.adaptation_option_recommendation') }}:</strong> {{ $t('admin.adaptation_option_recommendation_description') }}</li>
-        </ul>
         <div style="display: flex; justify-content: flex-end;">
           <v-btn color="primary" :loading="savingSettings" @click="saveGamificationSettings">
             {{ $t('common.save') }}
