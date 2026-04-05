@@ -11,49 +11,9 @@
         <v-textarea :label="$t('admin.project_description_label')" v-model="project.description" required/>
         <v-text-field :label="$t('admin.project_image_label')" v-model="project.image"/>
         <v-text-field :label="$t('admin.project_website_label')" v-model="project.web"/>
-        <v-select
-            :label="$t('admin.adaptation_type_label')"
-            v-model="project.gamificationStrategy"
-            :items="['ELASTICA', 'SIN ADAPTACION']"
-            required
-        >
-          <template v-slot:append>
-            <v-icon @click="showGamificationInfo">mdi-information</v-icon>
-          </template>
-        </v-select>
-        <v-select
-            :label="$t('admin.leaderboard_type_label')"
-            v-model="project.leaderboardStrategy"
-            :items="['PUNTOS PRIMERO', 'MEDALLAS PRIMERO']"
-            required
-        ></v-select>
-        <v-select
-            :label="$t('admin.recommendation_algorithm_label')"
-            v-model="project.recommendationStrategy"
-            :items="['SIMPLE', 'ADAPTATIVO']"
-            required
-        ></v-select>
         <v-switch :label="$t('project.status_available')" v-model="project.available" color="green"/>
         <v-switch :label="$t('admin.manual_location_switch')" v-model="project.manualLocation" color="green"/>
       </v-card>
-
-      <v-dialog v-model="gamificationDialog" max-width="500px">
-        <v-card>
-          <v-card-title>{{ $t('admin.gamification_info_title') }}</v-card-title>
-          <v-card-text>
-            <p>{{ $t('admin.gamification_info_text') }}</p>
-            <ul>
-              <li><strong>{{ $t('admin.basic') }}:</strong> Aplica reglas predefinidas sin adaptación dinámica.</li>
-              <li><strong>{{ $t('admin.elastic') }}:</strong> El cálculo de retribución de puntos es relativo a la posición de cada
-                persona en la tabla de posiciones. Si está más lejos, el puntaje es mayor que si está cerca.
-              </li>
-            </ul>
-          </v-card-text>
-          <v-card-actions>
-            <v-btn color="primary" @click="gamificationDialog = false">{{ $t('common.close') }}</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
 
       <!-- Áreas -->
       <CollapsableSection :title="$t('admin.areas_title')">
@@ -256,7 +216,6 @@ const daysOfWeek = [
 
 const newTaskType = ref('');
 const isNew = ref(false);
-const gamificationDialog = ref(false);
 
 const taskSectionClick = () => {
   saveProject().then((project) => {
@@ -272,10 +231,6 @@ const updateProjectAreas = (newAreas) => {
 const hasInvalidTimeIntervals = computed(() => {
   return project.value.timeIntervals.some(interval => !isValidInterval(interval));
 });
-
-const showGamificationInfo = () => {
-  gamificationDialog.value = true;
-};
 
 const addNewTaskType = () => {
   const taskType = newTaskType.value.trim();
