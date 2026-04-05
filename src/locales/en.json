@@ -130,13 +130,14 @@
         "complete_all_fields": "Please complete all fields.",
         "important": "Important",
         "days": [
-            "Sunday",
+            "",
             "Monday",
             "Tuesday",
             "Wednesday",
             "Thursday",
             "Friday",
-            "Saturday"
+            "Saturday",
+            "Sunday"
         ],
         "confirm": "Confirm",
         "accept": "Accept",
@@ -210,6 +211,10 @@
         "task_type": "Task Type",
         "define_intervals": "Define time intervals and applicable days",
         "days_of_week": "Days of the week",
+        "days_preset_every_day": "Every day",
+        "days_preset_weekdays": "Weekdays",
+        "days_preset_weekends": "Weekends",
+        "days_preset_clear": "Clear",
         "remove_interval": "Remove interval",
         "my_projects": "My projects",
         "add_project": "Add project",

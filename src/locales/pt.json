@@ -130,13 +130,14 @@
         "complete_all_fields": "Por favor, preencha todos os campos.",
         "important": "Importante",
         "days": [
-            "Domingo",
+            "",
             "Segunda-feira",
             "Terça-feira",
             "Quarta-feira",
             "Quinta-feira",
             "Sexta-feira",
-            "Sábado"
+            "Sábado",
+            "Domingo"
         ],
         "confirm": "Confirmar",
         "accept": "Aceitar",
@@ -210,6 +211,10 @@
         "task_type": "Tipo de Tarefa",
         "define_intervals": "Defina os intervalos de tempo e os días aplicáveis",
         "days_of_week": "Dias da semana",
+        "days_preset_every_day": "Todos os dias",
+        "days_preset_weekdays": "Dias úteis",
+        "days_preset_weekends": "Fins de semana",
+        "days_preset_clear": "Limpar",
         "remove_interval": "Remover intervalo",
         "my_projects": "Meus projetos",
         "add_project": "Adicionar proyecto",
