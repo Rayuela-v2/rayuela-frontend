@@ -1,18 +1,33 @@
 <script setup>
-import {onMounted, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import BadgesService from "@/services/GamificationService";
 import {useRoute, useRouter} from "vue-router";
 import {toast} from "vue3-toastify";
 import {store} from "@/vuex/state";
 import GamificationService from "@/services/GamificationService";
+import ProjectsService from "@/services/ProjectsService";
 import BreadCrumb from "@/components/utils/BreadCrumb.vue";
 import BadgeDependencyGraph from '@/components/BadgeDependencyGraph.vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 
+const ADAPTATION_STRATEGIES = {
+  NO_ADAPTATION: 'NO_ADAPTATION',
+  ELASTIC_POINTS: 'ELASTIC_POINTS',
+  CHALLENGE_RECOMMENDATION: 'CHALLENGE_RECOMMENDATION',
+};
+
 const badges = ref([]);
 const scoreRules = ref([]);
+const projectSettings = ref({
+  id: null,
+  gamificationStrategy: 'SIN ADAPTACION',
+  leaderboardStrategy: 'PUNTOS PRIMERO',
+  recommendationStrategy: 'SIMPLE',
+});
+const selectedAdaptationStrategy = ref(ADAPTATION_STRATEGIES.NO_ADAPTATION);
+const savingSettings = ref(false);
 
 const badgeHeaders = ref([
   {title: t('admin.badge_name_label'), value: 'name', sortable: true},
@@ -34,13 +49,81 @@ const dialogDisableScoreRule = ref(false);
 const router = useRouter();
 const route = useRoute();
 
+const adaptationStrategyOptions = computed(() => ([
+  {
+    title: t('admin.adaptation_option_none'),
+    value: ADAPTATION_STRATEGIES.NO_ADAPTATION,
+  },
+  {
+    title: t('admin.adaptation_option_elastic'),
+    value: ADAPTATION_STRATEGIES.ELASTIC_POINTS,
+  },
+  {
+    title: t('admin.adaptation_option_recommendation'),
+    value: ADAPTATION_STRATEGIES.CHALLENGE_RECOMMENDATION,
+  },
+]));
+
+const leaderboardOptions = computed(() => ([
+  {
+    title: t('admin.leaderboard_option_points_first'),
+    value: 'PUNTOS PRIMERO',
+  },
+  {
+    title: t('admin.leaderboard_option_badges_first'),
+    value: 'MEDALLAS PRIMERO',
+  },
+]));
+
+const resolveAdaptationStrategy = (project) => {
+  if (project.recommendationStrategy === 'ADAPTATIVO') {
+    return ADAPTATION_STRATEGIES.CHALLENGE_RECOMMENDATION;
+  }
+
+  if (project.gamificationStrategy === 'ELASTICA') {
+    return ADAPTATION_STRATEGIES.ELASTIC_POINTS;
+  }
+
+  return ADAPTATION_STRATEGIES.NO_ADAPTATION;
+};
+
+const getAdaptationPayload = (adaptationStrategy) => {
+  switch (adaptationStrategy) {
+    case ADAPTATION_STRATEGIES.ELASTIC_POINTS:
+      return {
+        gamificationStrategy: 'ELASTICA',
+        recommendationStrategy: 'SIMPLE',
+      };
+    case ADAPTATION_STRATEGIES.CHALLENGE_RECOMMENDATION:
+      return {
+        gamificationStrategy: 'SIN ADAPTACION',
+        recommendationStrategy: 'ADAPTATIVO',
+      };
+    default:
+      return {
+        gamificationStrategy: 'SIN ADAPTACION',
+        recommendationStrategy: 'SIMPLE',
+      };
+  }
+};
+
 onMounted(async () => {
   store.commit('setCurrentBadge', null)
   store.commit('setScoreRule', null)
-  const gamification = await BadgesService.getGamification(route.params.projectId);
+  const [gamification, project] = await Promise.all([
+    BadgesService.getGamification(route.params.projectId),
+    ProjectsService.getProjectById(route.params.projectId),
+  ]);
   store.commit('setCurrentGamification', gamification)
   badges.value = gamification.badgesRules;
   scoreRules.value = gamification.pointRules;
+  projectSettings.value = {
+    id: project.id || project._id,
+    gamificationStrategy: project.gamificationStrategy || 'SIN ADAPTACION',
+    leaderboardStrategy: project.leaderboardStrategy || 'PUNTOS PRIMERO',
+    recommendationStrategy: project.recommendationStrategy || 'SIMPLE',
+  };
+  selectedAdaptationStrategy.value = resolveAdaptationStrategy(projectSettings.value);
 });
 
 const editBadge = (badge) => {
@@ -93,12 +176,69 @@ const deleteScoreRule = async () => {
         scoreRules.value = res.pointRules;
       });
 };
+
+const saveGamificationSettings = async () => {
+  savingSettings.value = true;
+
+  try {
+    const adaptationPayload = getAdaptationPayload(selectedAdaptationStrategy.value);
+    await ProjectsService.updateProject({
+      id: projectSettings.value.id,
+      leaderboardStrategy: projectSettings.value.leaderboardStrategy,
+      ...adaptationPayload,
+    });
+
+    projectSettings.value = {
+      ...projectSettings.value,
+      ...adaptationPayload,
+    };
+
+    toast.success(t('admin.gamification_settings_updated_success'));
+  } finally {
+    savingSettings.value = false;
+  }
+};
 </script>
 
 <template>
   <main>
-    <!-- Sección de Insignias -->
     <BreadCrumb items="gamificationPath" />
+    <h1 class="mb-6">{{ $t('admin.edit_gamification') }}</h1>
+
+    <v-container class="px-0">
+      <v-card class="pa-4 mb-6">
+        <h2>{{ $t('admin.gamification_settings_title') }}</h2>
+        <p class="text-body-2 mb-4">{{ $t('admin.gamification_info_text') }}</p>
+        <v-select
+            v-model="selectedAdaptationStrategy"
+            :label="$t('admin.adaptation_type_label')"
+            :items="adaptationStrategyOptions"
+            item-title="title"
+            item-value="value"
+            required
+        />
+        <v-select
+            v-model="projectSettings.leaderboardStrategy"
+            :label="$t('admin.leaderboard_type_label')"
+            :items="leaderboardOptions"
+            item-title="title"
+            item-value="value"
+            required
+        />
+        <ul class="pl-6 mb-4">
+          <li><strong>{{ $t('admin.adaptation_option_none') }}:</strong> {{ $t('admin.adaptation_option_none_description') }}</li>
+          <li><strong>{{ $t('admin.adaptation_option_elastic') }}:</strong> {{ $t('admin.adaptation_option_elastic_description') }}</li>
+          <li><strong>{{ $t('admin.adaptation_option_recommendation') }}:</strong> {{ $t('admin.adaptation_option_recommendation_description') }}</li>
+        </ul>
+        <div style="display: flex; justify-content: flex-end;">
+          <v-btn color="primary" :loading="savingSettings" @click="saveGamificationSettings">
+            {{ $t('common.save') }}
+          </v-btn>
+        </div>
+      </v-card>
+    </v-container>
+
+    <!-- Sección de Insignias -->
     <h1>{{ $t('admin.badges') }}</h1>
     <div style="display: flex; justify-content: flex-end;">
       <v-btn color="black" @click="addBadge">{{ $t('admin.add_badge') }}</v-btn>
