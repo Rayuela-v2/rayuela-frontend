@@ -11,49 +11,9 @@
         <v-textarea :label="$t('admin.project_description_label')" v-model="project.description" required/>
         <v-text-field :label="$t('admin.project_image_label')" v-model="project.image"/>
         <v-text-field :label="$t('admin.project_website_label')" v-model="project.web"/>
-        <v-select
-            :label="$t('admin.adaptation_type_label')"
-            v-model="project.gamificationStrategy"
-            :items="['ELASTICA', 'SIN ADAPTACION']"
-            required
-        >
-          <template v-slot:append>
-            <v-icon @click="showGamificationInfo">mdi-information</v-icon>
-          </template>
-        </v-select>
-        <v-select
-            :label="$t('admin.leaderboard_type_label')"
-            v-model="project.leaderboardStrategy"
-            :items="['PUNTOS PRIMERO', 'MEDALLAS PRIMERO']"
-            required
-        ></v-select>
-        <v-select
-            :label="$t('admin.recommendation_algorithm_label')"
-            v-model="project.recommendationStrategy"
-            :items="['SIMPLE', 'ADAPTATIVO']"
-            required
-        ></v-select>
         <v-switch :label="$t('project.status_available')" v-model="project.available" color="green"/>
         <v-switch :label="$t('admin.manual_location_switch')" v-model="project.manualLocation" color="green"/>
       </v-card>
-
-      <v-dialog v-model="gamificationDialog" max-width="500px">
-        <v-card>
-          <v-card-title>{{ $t('admin.gamification_info_title') }}</v-card-title>
-          <v-card-text>
-            <p>{{ $t('admin.gamification_info_text') }}</p>
-            <ul>
-              <li><strong>{{ $t('admin.basic') }}:</strong> Aplica reglas predefinidas sin adaptación dinámica.</li>
-              <li><strong>{{ $t('admin.elastic') }}:</strong> El cálculo de retribución de puntos es relativo a la posición de cada
-                persona en la tabla de posiciones. Si está más lejos, el puntaje es mayor que si está cerca.
-              </li>
-            </ul>
-          </v-card-text>
-          <v-card-actions>
-            <v-btn color="primary" @click="gamificationDialog = false">{{ $t('common.close') }}</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
 
       <!-- Áreas -->
       <CollapsableSection :title="$t('admin.areas_title')">
@@ -149,15 +109,52 @@
               />
             </v-col>
           </v-row>
-          <h4>{{ $t('admin.days_of_week') }}</h4>
-          <v-checkbox
-              v-for="(day, idx) in daysOfWeek"
-              :key="day.value"
-              v-model="interval.days"
-              :label="$t('common.days')[idx + 1] === undefined ? $t('common.days')[0] : $t('common.days')[idx + 1]"
-              :value="day.value"
-              hide-details
-          />
+          <h4 class="mb-2">{{ $t('admin.days_of_week') }}</h4>
+
+          <!-- Quick-select presets -->
+          <div class="d-flex flex-wrap ga-2 mb-3">
+            <v-btn
+                size="small"
+                variant="tonal"
+                color="primary"
+                prepend-icon="mdi-calendar-week"
+                @click="setDaysPreset(interval, 'every_day')"
+            >{{ $t('admin.days_preset_every_day') }}</v-btn>
+            <v-btn
+                size="small"
+                variant="tonal"
+                color="indigo"
+                prepend-icon="mdi-briefcase-outline"
+                @click="setDaysPreset(interval, 'weekdays')"
+            >{{ $t('admin.days_preset_weekdays') }}</v-btn>
+            <v-btn
+                size="small"
+                variant="tonal"
+                color="teal"
+                prepend-icon="mdi-weather-sunny"
+                @click="setDaysPreset(interval, 'weekends')"
+            >{{ $t('admin.days_preset_weekends') }}</v-btn>
+            <v-btn
+                size="small"
+                variant="outlined"
+                color="grey"
+                prepend-icon="mdi-close-circle-outline"
+                @click="setDaysPreset(interval, 'clear')"
+            >{{ $t('admin.days_preset_clear') }}</v-btn>
+          </div>
+
+          <!-- Individual day chips -->
+          <div class="d-flex flex-wrap ga-2 mb-4">
+            <v-btn
+                v-for="(day, idx) in daysOfWeek"
+                :key="day.value"
+                :variant="interval.days.includes(day.value) ? 'flat' : 'outlined'"
+                :color="interval.days.includes(day.value) ? 'primary' : 'grey'"
+                size="small"
+                rounded="pill"
+                @click="toggleDay(interval, day.value)"
+            >{{ $t(`common.days[${idx + 1}]`) }}</v-btn>
+          </div>
 
           <v-btn color="red" @click="removeTimeInterval(index)">{{ $t('admin.remove_interval') }}</v-btn>
 
@@ -219,7 +216,6 @@ const daysOfWeek = [
 
 const newTaskType = ref('');
 const isNew = ref(false);
-const gamificationDialog = ref(false);
 
 const taskSectionClick = () => {
   saveProject().then((project) => {
@@ -235,10 +231,6 @@ const updateProjectAreas = (newAreas) => {
 const hasInvalidTimeIntervals = computed(() => {
   return project.value.timeIntervals.some(interval => !isValidInterval(interval));
 });
-
-const showGamificationInfo = () => {
-  gamificationDialog.value = true;
-};
 
 const addNewTaskType = () => {
   const taskType = newTaskType.value.trim();
@@ -275,6 +267,33 @@ const addNewTimeInterval = () => {
     startDate: new Date(),
     endDate: nextYear,
   });
+};
+
+const setDaysPreset = (interval, preset) => {
+  switch (preset) {
+    case 'every_day':
+      interval.days = [1, 2, 3, 4, 5, 6, 7];
+      break;
+    case 'weekdays':
+      interval.days = [1, 2, 3, 4, 5];
+      break;
+    case 'weekends':
+      interval.days = [6, 7];
+      break;
+    case 'clear':
+      interval.days = [];
+      break;
+  }
+};
+
+const toggleDay = (interval, dayValue) => {
+  const idx = interval.days.indexOf(dayValue);
+  if (idx === -1) {
+    interval.days.push(dayValue);
+    interval.days.sort((a, b) => a - b);
+  } else {
+    interval.days.splice(idx, 1);
+  }
 };
 
 const removeTimeInterval = (index) => {
