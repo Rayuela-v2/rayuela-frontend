@@ -201,7 +201,8 @@
         "medals": "{n} medalla | {n} medallas"
     },
     "admin": {
-        "badge_info": "Información de la Insignia",
+        "analytics_dashboard": "Panel de Analíticas",
+        "badge_info": "Información de la insignia",
         "project_detail": "Detalle del proyecto",
         "project_info": "Información del Proyecto",
         "basic": "Básica",

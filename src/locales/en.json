@@ -201,6 +201,7 @@
         "medals": "{n} medal | {n} medals"
     },
     "admin": {
+        "analytics_dashboard": "Analytics Dashboard",
         "badge_info": "Badge Information",
         "project_detail": "Project Details",
         "project_info": "Project Information",
