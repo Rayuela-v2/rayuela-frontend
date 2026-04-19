@@ -1,11 +1,9 @@
 <template>
-  <v-card class="mx-auto" variant="outlined">
-    <v-list-item>
-      <v-list-item-title class="text-overline mb-4">{{ title }}</v-list-item-title>
-      <v-list-item-subtitle class="text-h4 mb-1">
-        {{ formattedValue }}
-      </v-list-item-subtitle>
-    </v-list-item>
+  <v-card class="mx-auto pa-2" variant="outlined" min-height="100">
+    <div class="text-overline mb-1 text-grey-darken-1 text-truncate">{{ title }}</div>
+    <div class="text-h5 font-weight-bold">
+      {{ formattedValue }}
+    </div>
   </v-card>
 </template>
 
@@ -23,7 +21,7 @@ const props = defineProps({
 
 const formattedValue = computed(() => {
   if (props.format === 'percent') {
-    return `${(props.value * 100).toFixed(1)}%`;
+    return `${((props.value || 0) * 100).toFixed(1)}%`;
   }
   if (typeof props.value === 'number') {
     return props.value.toLocaleString();
