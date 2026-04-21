@@ -21,12 +21,14 @@ const router = createRouter({
         {
             path: '/register',
             name: 'register',
-            component: () => import('../views/RegisterView.vue')
+            component: () => import('../views/RegisterView.vue'),
+            meta: { guestOnly: true },
         },
         {
             path: '/login',
             name: 'login',
-            component: () => import('../views/LoginView.vue')
+            component: () => import('../views/LoginView.vue'),
+            meta: { guestOnly: true },
         },
         {
             path: '/forgot-password',
@@ -46,12 +48,14 @@ const router = createRouter({
         {
             path: '/dashboard',
             name: 'dashboard',
-            component: () => import('../views/DashboardView.vue')
+            component: () => import('../views/DashboardView.vue'),
+            meta: { requiresAuth: true },
         },
         {
             path: '/project/:projectId/view',
             name: 'ProjectView',
-            component: () => import('../views/ProjectView.vue')
+            component: () => import('../views/ProjectView.vue'),
+            meta: { requiresAuth: true },
         },
         {
             path: '/public/project/:projectId/view',
@@ -67,40 +71,61 @@ const router = createRouter({
             path: '/admin/project/:projectId/data',
             name: 'ProjectDetails',
             component: () => import('../views/Admin/ProjectDetails.vue'),
-            props: true
+            props: true,
+            meta: { requiresAuth: true },
         },
         {
             path: '/admin/project/:projectId/tasks',
             name: 'TaskManager',
             component: () => import('../views/Admin/TaskManager.vue'),
-            props: true
+            props: true,
+            meta: { requiresAuth: true },
         },
         {
             path: '/admin/project/:projectId/gamification/',
             name: 'GamificationConfig',
             component: () => import('../views/Admin/GamificationConfig.vue'),
-            props: true
+            props: true,
+            meta: { requiresAuth: true },
         },
         {
             path: '/admin/project/:projectId/gamification/badge/:id',
             name: 'BadgeConfig',
             component: () => import('../views/Admin/AddEditBadge.vue'),
-            props: true
+            props: true,
+            meta: { requiresAuth: true },
         },
         {
             path: '/admin/project/:projectId/gamification/score-rule/:id',
             name: 'ScoreRuleConfig',
             component: () => import('../views/Admin/AddEditScoreRule.vue'),
-            props: true
+            props: true,
+            meta: { requiresAuth: true },
         },
         {
             path: '/admin',
             name: 'admin',
             component: () => import('../views/Admin/AdminView.vue'),
             exact: true,
+            meta: { requiresAuth: true },
         },
     ]
 })
 
+router.beforeEach((to, from, next) => {
+    const hasToken = Boolean(localStorage.getItem('token'));
+
+    if (to.meta.requiresAuth && !hasToken) {
+        next({ name: 'login' });
+        return;
+    }
+
+    if (to.meta.guestOnly && hasToken) {
+        next({ name: 'dashboard' });
+        return;
+    }
+
+    next();
+});
 
 export default router

@@ -5,6 +5,7 @@ import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 import AuthService from "@/services/AuthService";
 import { useI18n } from 'vue-i18n';
+import GoogleAuthButton from "@/components/GoogleAuthButton.vue";
 
 const { t } = useI18n();
 
@@ -21,20 +22,37 @@ onMounted(() => {
 
 async function login() {
   const user = { username: username.value, password: password.value };
-  AuthService.loginWithPw(user)
-      .then(() => {
-        AuthService.getUser()
-            .then(() => {
-              router.push("/dashboard");
-              location.reload();
-            })
-            .catch(error => {
-              console.log(error);
-            });
-      })
-      .catch(() => {
-        toast.error(t("login.error_credentials"), { autoClose: 3000 });
-      });
+  await finishAuthentication(
+      AuthService.loginWithPw(user),
+      t("login.error_credentials"),
+  );
+}
+
+async function loginWithGoogle(credential) {
+  await finishAuthentication(
+      AuthService.loginWithGoogle(credential),
+      t("auth.google_error"),
+  );
+}
+
+async function finishAuthentication(authRequest, fallbackMessage) {
+  try {
+    await authRequest;
+    await AuthService.getUser();
+    await router.push("/dashboard");
+    window.location.reload();
+  } catch (error) {
+    const errorMessage = error?.response?.data?.message || fallbackMessage;
+    toast.error(errorMessage, { autoClose: 3000 });
+  }
+}
+
+function handleGoogleRenderError(error) {
+  if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
+    return;
+  }
+
+  toast.error(error?.message || t("auth.google_error"), { autoClose: 3000 });
 }
 </script>
 
@@ -76,6 +94,13 @@ async function login() {
             {{ $t("login.button_login") }}
           </v-btn>
         </v-form>
+        <v-divider class="my-4" />
+        <p class="google-copy">{{ $t("auth.or_continue_with_google") }}</p>
+        <GoogleAuthButton
+            text="signin_with"
+            @success="loginWithGoogle"
+            @error="handleGoogleRenderError"
+        />
       </v-card-text>
       <v-divider></v-divider>
       <v-card-actions class="actions">
@@ -124,5 +149,11 @@ async function login() {
 .forgot-password-link {
   font-size: 14px;
   text-decoration: none;
+}
+
+.google-copy {
+  margin-bottom: 16px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.6);
 }
 </style>

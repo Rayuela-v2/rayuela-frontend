@@ -38,7 +38,11 @@
         "error_password_required": "A senha é obrigatória",
         "error_passwords_mismatch": "As senhas não coincidem",
         "error_agreement_required": "Você deve aceitar os termos e condições",
-        "success_registration": "Registro bem-sucedido, verifique seu e-mail para verificá-lo antes de fazer o login"
+        "success_registration": "Registro bem-sucedido, verifique seu e-mail para verificá-lo antes de fazer o login",
+        "google_username_required": "Escolha um nome de usuário e aceite os termos antes de se registrar com o Google",
+        "google_username_title": "Escolha seu nome de usuário",
+        "google_username_description": "Precisamos de um nome de usuário antes de criar sua conta Rayuela com o Google.",
+        "google_username_confirm": "Continuar"
     },
     "about": {
         "subtitle": "Ciência cidadã"
@@ -154,6 +158,7 @@
         "longitude": "Longitude",
         "use_auto_location": "Usar localização automática",
         "use_manual_location": "Inserir localização manualmente",
+        "geo_denied": "A geolocalização foi negada. Por favor, ative-a nas configurações do seu navegador para ver sua localização no mapa.",
         "date_time": "Data e Hora",
         "timestamp": "Timestamp",
         "task_type_label": "Tipo de tarefa",
@@ -344,6 +349,10 @@
     "auth": {
         "reset_password": "Redefinir Senha",
         "send_link": "Enviar Link",
-        "verifying_email": "Verificando seu e-mail..."
+        "verifying_email": "Verificando seu e-mail...",
+        "or_continue_with_google": "Ou continue com o Google",
+        "google_error": "Nao foi possivel concluir o login com o Google",
+        "google_success": "A conta do Google foi vinculada com sucesso",
+        "google_unavailable": "O login com o Google fica indisponivel ate configurar VITE_GOOGLE_CLIENT_ID."
     }
 }

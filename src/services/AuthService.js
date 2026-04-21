@@ -1,14 +1,23 @@
 import RayuelaService from "@/services/RayuelaService";
 
 class AuthService extends RayuelaService {
+    persistSession(data) {
+        localStorage.setItem("msg_login", "1");
+        localStorage.setItem("token", data.access_token);
+        if (data.username) {
+            localStorage.setItem("username", data.username);
+        }
+        return data;
+    }
+
     loginWithPw(user) {
         return this.post("/auth/login", user)
-            .then((data) => {
-                localStorage.setItem("msg_login", "1")
-                localStorage.setItem("token", data.access_token)
-                localStorage.setItem("username", user.username)
-                return data;
-            });
+            .then((data) => this.persistSession(data));
+    }
+
+    loginWithGoogle(credential, extraData = {}) {
+        return this.post("/auth/google", { credential, ...extraData })
+            .then((data) => this.persistSession(data));
     }
 
     register(user) {
