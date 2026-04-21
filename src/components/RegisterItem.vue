@@ -63,19 +63,10 @@ async function signup() {
 
 async function signupWithGoogle(credential) {
   pendingGoogleCredential.value = credential;
-
-  if (!readAgreement.value) {
-    errors.value = {
-      ...errors.value,
-      readAgreement: t('register.error_agreement_required'),
-    };
-    toast.error(t('register.error_agreement_required'), {autoClose: 3000});
-    return;
-  }
-
+  errors.value = {};
   await finishGoogleSignup({
     credential,
-    usernameOverride: username.value.trim(),
+    usernameOverride: undefined,
   });
 }
 
@@ -99,6 +90,7 @@ async function finishGoogleSignup({ credential, usernameOverride }) {
     await router.push("/dashboard");
     window.location.reload();
   } catch (error) {
+    AuthService.clearSession();
     const responseData = error?.response?.data;
 
     if (responseData?.requiresUsername) {

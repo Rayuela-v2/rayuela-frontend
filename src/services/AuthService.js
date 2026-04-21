@@ -1,6 +1,20 @@
 import RayuelaService from "@/services/RayuelaService";
 
 class AuthService extends RayuelaService {
+    clearSession() {
+        [
+            "msg_login",
+            "token",
+            "username",
+            "user_id",
+            "complete_name",
+            "profile_image",
+            "role",
+            "badges",
+            "points",
+        ].forEach((key) => localStorage.removeItem(key));
+    }
+
     persistSession(data) {
         localStorage.setItem("msg_login", "1");
         localStorage.setItem("token", data.access_token);
@@ -34,8 +48,6 @@ class AuthService extends RayuelaService {
                 localStorage.setItem("badges", data._badges)
                 localStorage.setItem("points", data._points)
                 return data
-            }).catch(() => {
-                console.log('Unable to get user')
             })
     }
 

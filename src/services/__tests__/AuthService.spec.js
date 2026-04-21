@@ -20,6 +20,30 @@ describe('AuthService', () => {
     vi.restoreAllMocks();
   });
 
+  it('clears the persisted session', () => {
+    localStorage.setItem('msg_login', '1');
+    localStorage.setItem('token', 'token');
+    localStorage.setItem('username', 'user');
+    localStorage.setItem('user_id', '1');
+    localStorage.setItem('complete_name', 'User Name');
+    localStorage.setItem('profile_image', 'image.png');
+    localStorage.setItem('role', 'Volunteer');
+    localStorage.setItem('badges', '[]');
+    localStorage.setItem('points', '10');
+
+    AuthService.clearSession();
+
+    expect(localStorage.getItem('msg_login')).toBeNull();
+    expect(localStorage.getItem('token')).toBeNull();
+    expect(localStorage.getItem('username')).toBeNull();
+    expect(localStorage.getItem('user_id')).toBeNull();
+    expect(localStorage.getItem('complete_name')).toBeNull();
+    expect(localStorage.getItem('profile_image')).toBeNull();
+    expect(localStorage.getItem('role')).toBeNull();
+    expect(localStorage.getItem('badges')).toBeNull();
+    expect(localStorage.getItem('points')).toBeNull();
+  });
+
   it('stores the session after password login', async () => {
     const response = { access_token: 'pw-token', username: 'rayuela-user' };
     const postSpy = vi.spyOn(AuthService, 'post').mockResolvedValue(response);

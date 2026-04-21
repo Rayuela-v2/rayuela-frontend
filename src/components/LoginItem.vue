@@ -42,6 +42,7 @@ async function finishAuthentication(authRequest, fallbackMessage) {
     await router.push("/dashboard");
     window.location.reload();
   } catch (error) {
+    AuthService.clearSession();
     const errorMessage = error?.response?.data?.message || fallbackMessage;
     toast.error(errorMessage, { autoClose: 3000 });
   }
