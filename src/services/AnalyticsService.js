@@ -1,50 +1,49 @@
-import axios from 'axios';
+import RayuelaService from "@/services/RayuelaService";
 
-const BASE = `${import.meta.env.VITE_ROOT_API}/analytics`;
+class AnalyticsService extends RayuelaService {
+  getCheckinsOverTime({ projectId, granularity } = {}) {
+    return this.get(`/analytics/checkins-over-time?${new URLSearchParams({
+      ...(projectId && { projectId }),
+      ...(granularity && { granularity }),
+    })}`);
+  }
 
-function authHeader(token) {
-  return { headers: { Authorization: `Bearer ${token}` } };
+  getActiveUsersOverTime({ projectId, granularity } = {}) {
+    return this.get(`/analytics/active-users-over-time?${new URLSearchParams({
+      ...(projectId && { projectId }),
+      ...(granularity && { granularity }),
+    })}`);
+  }
+
+  getByStrategy() {
+    return this.get(`/analytics/by-strategy`);
+  }
+
+  getPointsOverTime({ projectId, granularity } = {}) {
+    return this.get(`/analytics/points-over-time?${new URLSearchParams({
+      ...(projectId && { projectId }),
+      ...(granularity && { granularity }),
+    })}`);
+  }
+
+  getContributionRate({ projectId } = {}) {
+    return this.get(`/analytics/contribution-rate?${new URLSearchParams({
+      ...(projectId && { projectId }),
+    })}`);
+  }
+
+  getBadgeAcquisitionOverTime({ projectId, granularity } = {}) {
+    return this.get(`/analytics/badge-acquisition-over-time?${new URLSearchParams({
+      ...(projectId && { projectId }),
+      ...(granularity && { granularity }),
+    })}`);
+  }
+
+  getSummary({ projectId } = {}) {
+    return this.get(`/analytics/summary?${new URLSearchParams({
+      ...(projectId && { projectId }),
+    })}`);
+  }
 }
 
-export function getCheckinsOverTime(token, { projectId, granularity } = {}) {
-  return axios.get(`${BASE}/checkins-over-time`, {
-    ...authHeader(token),
-    params: { projectId, granularity },
-  });
-}
-
-export function getActiveUsersOverTime(token, { projectId, granularity } = {}) {
-  return axios.get(`${BASE}/active-users-over-time`, {
-    ...authHeader(token),
-    params: { projectId, granularity },
-  });
-}
-
-export function getByStrategy(token) {
-  return axios.get(`${BASE}/by-strategy`, authHeader(token));
-}
-
-export function getPointsOverTime(token, { projectId, granularity } = {}) {
-  return axios.get(`${BASE}/points-over-time`, {
-    ...authHeader(token),
-    params: { projectId, granularity },
-  });
-}
-
-export function getContributionRate(token, { projectId } = {}) {
-  return axios.get(`${BASE}/contribution-rate`, {
-    ...authHeader(token),
-    params: { projectId },
-  });
-}
-
-export function getBadgeAcquisitionOverTime(token, { projectId, granularity } = {}) {
-  return axios.get(`${BASE}/badge-acquisition-over-time`, {
-    ...authHeader(token),
-    params: { projectId, granularity },
-  });
-}
-
-export function getSummary(token) {
-  return axios.get(`${BASE}/summary`, authHeader(token));
-}
+export default new AnalyticsService();

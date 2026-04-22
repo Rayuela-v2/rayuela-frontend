@@ -75,14 +75,14 @@
 <script setup>
 import { ref, watch, onMounted, computed } from 'vue';
 import { useStore } from 'vuex';
-import * as AnalyticsService from '@/services/AnalyticsService';
+import { useRouter } from 'vue-router';
+import AnalyticsService from '@/services/AnalyticsService';
 import ProjectsService from '@/services/ProjectsService';
 import SummaryCard from '@/components/analytics/SummaryCard.vue';
 import LineChart from '@/components/analytics/LineChart.vue';
 import BarChart from '@/components/analytics/BarChart.vue';
 
 const store = useStore();
-const token = computed(() => store.state.token);
 
 // Filter state
 const selectedProject = ref(null);
@@ -110,26 +110,25 @@ async function loadProjects() {
 async function loadAnalytics() {
   const pid = selectedProject.value;
   const g = granularity.value;
-  const t = token.value;
 
   try {
     const [s, c, a, p, b, st, cr] = await Promise.all([
-      AnalyticsService.getSummary(t),
-      AnalyticsService.getCheckinsOverTime(t, { projectId: pid, granularity: g }),
-      AnalyticsService.getActiveUsersOverTime(t, { projectId: pid, granularity: g }),
-      AnalyticsService.getPointsOverTime(t, { projectId: pid, granularity: g }),
-      AnalyticsService.getBadgeAcquisitionOverTime(t, { projectId: pid, granularity: g }),
-      AnalyticsService.getByStrategy(t),
-      AnalyticsService.getContributionRate(t, { projectId: pid }),
+      AnalyticsService.getSummary({ projectId: pid }),
+      AnalyticsService.getCheckinsOverTime({ projectId: pid, granularity: g }),
+      AnalyticsService.getActiveUsersOverTime({ projectId: pid, granularity: g }),
+      AnalyticsService.getPointsOverTime({ projectId: pid, granularity: g }),
+      AnalyticsService.getBadgeAcquisitionOverTime({ projectId: pid, granularity: g }),
+      AnalyticsService.getByStrategy(),
+      AnalyticsService.getContributionRate({ projectId: pid }),
     ]);
 
-    summary.value = s.data;
-    checkinsRaw.value = c.data;
-    activeUsersRaw.value = a.data;
-    pointsRaw.value = p.data;
-    badgesRaw.value = b.data;
-    strategyRaw.value = st.data;
-    contributionRaw.value = cr.data;
+    summary.value = s;
+    checkinsRaw.value = c;
+    activeUsersRaw.value = a;
+    pointsRaw.value = p;
+    badgesRaw.value = b;
+    strategyRaw.value = st;
+    contributionRaw.value = cr;
   } catch (error) {
     console.error('Failed to load analytics data:', error);
   }
