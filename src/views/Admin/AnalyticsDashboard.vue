@@ -89,6 +89,32 @@ const selectedProject = ref(null);
 const granularity = ref('week');
 const projects = ref([]);
 
+// Date range state
+const datePreset = ref('last30days'); // 'last7days' | 'last30days' | 'last3months' | 'alltime' | 'custom'
+const customStart = ref(null); // ISO date string 'YYYY-MM-DD' or null
+const customEnd = ref(null);   // ISO date string 'YYYY-MM-DD' or null
+
+const PRESETS = {
+  last7days:    () => { const e = new Date(); const s = new Date(); s.setDate(s.getDate() - 6); return { s, e }; },
+  last30days:   () => { const e = new Date(); const s = new Date(); s.setDate(s.getDate() - 29); return { s, e }; },
+  last3months:  () => { const e = new Date(); const s = new Date(); s.setMonth(s.getMonth() - 3); return { s, e }; },
+  alltime:      () => null,
+};
+
+function toISODate(d) {
+  return d.toISOString().slice(0, 10);
+}
+
+const dateRange = computed(() => {
+  if (datePreset.value === 'custom') {
+    return { startDate: customStart.value || undefined, endDate: customEnd.value || undefined };
+  }
+  if (datePreset.value === 'alltime') return {};
+  const range = PRESETS[datePreset.value]?.();
+  if (!range) return {};
+  return { startDate: toISODate(range.s), endDate: toISODate(range.e) };
+});
+
 const projectItems = computed(() => [
   { title: 'All Projects', value: null },
   ...projects.value.map(p => ({ title: p.name, value: p._id }))
@@ -110,14 +136,15 @@ async function loadProjects() {
 async function loadAnalytics() {
   const pid = selectedProject.value;
   const g = granularity.value;
+  const dr = dateRange.value;
 
   try {
     const [s, c, a, p, b, st, cr] = await Promise.all([
-      AnalyticsService.getSummary({ projectId: pid }),
-      AnalyticsService.getCheckinsOverTime({ projectId: pid, granularity: g }),
-      AnalyticsService.getActiveUsersOverTime({ projectId: pid, granularity: g }),
-      AnalyticsService.getPointsOverTime({ projectId: pid, granularity: g }),
-      AnalyticsService.getBadgeAcquisitionOverTime({ projectId: pid, granularity: g }),
+      AnalyticsService.getSummary({ projectId: pid, ...dr }),
+      AnalyticsService.getCheckinsOverTime({ projectId: pid, granularity: g, ...dr }),
+      AnalyticsService.getActiveUsersOverTime({ projectId: pid, granularity: g, ...dr }),
+      AnalyticsService.getPointsOverTime({ projectId: pid, granularity: g, ...dr }),
+      AnalyticsService.getBadgeAcquisitionOverTime({ projectId: pid, granularity: g, ...dr }),
       AnalyticsService.getByStrategy(),
       AnalyticsService.getContributionRate({ projectId: pid }),
     ]);
@@ -145,7 +172,7 @@ onMounted(() => {
   loadAnalytics();
 });
 
-watch([selectedProject, granularity], loadAnalytics);
+watch([selectedProject, granularity, datePreset, customStart, customEnd], loadAnalytics);
 
 const summaryCards = computed(() => [
   { title: 'Total Check-ins', value: summary.value.totalCheckins },
