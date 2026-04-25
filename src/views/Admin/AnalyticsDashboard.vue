@@ -82,18 +82,18 @@
     <!-- Time Series Charts -->
     <v-row>
       <v-col cols="12" md="6">
-        <LineChart title="Check-ins Over Time" :data="checkinsData" />
+        <LineChart title="Check-ins Over Time" :data="checkinsData" :granularity="granularity" />
       </v-col>
       <v-col cols="12" md="6">
-        <LineChart title="Active Users Over Time" :data="activeUsersData" />
+        <LineChart title="Active Users Over Time" :data="activeUsersData" :granularity="granularity" />
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12" md="6">
-        <LineChart title="Points Awarded Over Time" :data="pointsData" />
+        <LineChart title="Points Awarded Over Time" :data="pointsData" :granularity="granularity" />
       </v-col>
       <v-col cols="12" md="6">
-        <LineChart title="Badges Earned Over Time" :data="badgesData" />
+        <LineChart title="Badges Earned Over Time" :data="badgesData" :granularity="granularity" />
       </v-col>
     </v-row>
 
