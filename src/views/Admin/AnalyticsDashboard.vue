@@ -1,6 +1,6 @@
 <template>
   <v-container fluid>
-    <v-row align="center" class="mb-4">
+    <v-row align="center" class="mb-2">
       <v-col cols="12" md="4">
         <h1 class="text-h4">{{ $t('admin.analytics_dashboard') }}</h1>
       </v-col>
@@ -27,6 +27,48 @@
           <v-btn value="week">Week</v-btn>
           <v-btn value="month">Month</v-btn>
         </v-btn-toggle>
+      </v-col>
+    </v-row>
+
+    <!-- Date range row -->
+    <v-row align="center" class="mb-4">
+      <v-col cols="12">
+        <v-btn-toggle
+          v-model="datePreset"
+          mandatory
+          color="secondary"
+          variant="outlined"
+          density="compact"
+          class="flex-wrap"
+        >
+          <v-btn value="last7days">Last 7 days</v-btn>
+          <v-btn value="last30days">Last 30 days</v-btn>
+          <v-btn value="last3months">Last 3 months</v-btn>
+          <v-btn value="alltime">All time</v-btn>
+          <v-btn value="custom">Custom</v-btn>
+        </v-btn-toggle>
+
+        <!-- Custom date inputs — visible only when preset is 'custom' -->
+        <span v-if="datePreset === 'custom'" class="ml-4 d-inline-flex align-center ga-2">
+          <v-text-field
+            v-model="customStart"
+            label="From"
+            type="date"
+            density="compact"
+            variant="outlined"
+            hide-details
+            style="max-width: 160px"
+          />
+          <v-text-field
+            v-model="customEnd"
+            label="To"
+            type="date"
+            density="compact"
+            variant="outlined"
+            hide-details
+            style="max-width: 160px"
+          />
+        </span>
       </v-col>
     </v-row>
 
