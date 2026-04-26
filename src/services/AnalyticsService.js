@@ -1,17 +1,21 @@
 import RayuelaService from "@/services/RayuelaService";
 
 class AnalyticsService extends RayuelaService {
-  getCheckinsOverTime({ projectId, granularity } = {}) {
+  getCheckinsOverTime({ projectId, granularity, startDate, endDate } = {}) {
     return this.get(`/analytics/checkins-over-time?${new URLSearchParams({
       ...(projectId && { projectId }),
       ...(granularity && { granularity }),
+      ...(startDate && { startDate }),
+      ...(endDate && { endDate }),
     })}`);
   }
 
-  getActiveUsersOverTime({ projectId, granularity } = {}) {
+  getActiveUsersOverTime({ projectId, granularity, startDate, endDate } = {}) {
     return this.get(`/analytics/active-users-over-time?${new URLSearchParams({
       ...(projectId && { projectId }),
       ...(granularity && { granularity }),
+      ...(startDate && { startDate }),
+      ...(endDate && { endDate }),
     })}`);
   }
 
@@ -19,10 +23,12 @@ class AnalyticsService extends RayuelaService {
     return this.get(`/analytics/by-strategy`);
   }
 
-  getPointsOverTime({ projectId, granularity } = {}) {
+  getPointsOverTime({ projectId, granularity, startDate, endDate } = {}) {
     return this.get(`/analytics/points-over-time?${new URLSearchParams({
       ...(projectId && { projectId }),
       ...(granularity && { granularity }),
+      ...(startDate && { startDate }),
+      ...(endDate && { endDate }),
     })}`);
   }
 
@@ -32,16 +38,20 @@ class AnalyticsService extends RayuelaService {
     })}`);
   }
 
-  getBadgeAcquisitionOverTime({ projectId, granularity } = {}) {
+  getBadgeAcquisitionOverTime({ projectId, granularity, startDate, endDate } = {}) {
     return this.get(`/analytics/badge-acquisition-over-time?${new URLSearchParams({
       ...(projectId && { projectId }),
       ...(granularity && { granularity }),
+      ...(startDate && { startDate }),
+      ...(endDate && { endDate }),
     })}`);
   }
 
-  getSummary({ projectId } = {}) {
+  getSummary({ projectId, startDate, endDate } = {}) {
     return this.get(`/analytics/summary?${new URLSearchParams({
       ...(projectId && { projectId }),
+      ...(startDate && { startDate }),
+      ...(endDate && { endDate }),
     })}`);
   }
 }

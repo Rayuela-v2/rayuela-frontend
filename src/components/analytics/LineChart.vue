@@ -8,6 +8,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { Line } from 'vue-chartjs';
 import {
   Chart as ChartJS,
@@ -33,32 +34,46 @@ ChartJS.register(
   TimeScale
 );
 
-defineProps({
+const props = defineProps({
   title: String,
   data: {
     type: Object,
     required: true,
   },
+  granularity: {
+    type: String,
+    default: 'week',
+    validator: (v) => ['day', 'week', 'month'].includes(v),
+  },
 });
 
-const chartOptions = {
+const DISPLAY_FORMATS = {
+  day:   { day: 'MMM d', week: 'MMM d', month: 'MMM yyyy' },
+  week:  { day: 'MMM d', week: 'MMM d', month: 'MMM yyyy' },
+  month: { day: 'MMM d', week: 'MMM d', month: 'MMM yyyy' },
+};
+
+const TOOLTIP_FORMATS = {
+  day:   'PP',
+  week:  'PP',
+  month: 'MMM yyyy',
+};
+
+const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   scales: {
     x: {
       type: 'time',
       time: {
-        tooltipFormat: 'PP',
-        displayFormats: {
-          day: 'MMM d',
-          week: 'MMM d',
-          month: 'MMM yyyy',
-        },
+        unit: props.granularity,
+        tooltipFormat: TOOLTIP_FORMATS[props.granularity] ?? 'PP',
+        displayFormats: DISPLAY_FORMATS[props.granularity],
       },
     },
     y: {
       beginAtZero: true,
     },
   },
-};
+}));
 </script>
