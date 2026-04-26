@@ -99,6 +99,11 @@ const router = createRouter({
             component: () => import('../views/Admin/AdminView.vue'),
             exact: true,
         },
+        {
+            path: '/admin/analytics',
+            name: 'analytics-dashboard',
+            component: () => import('../views/Admin/AnalyticsDashboard.vue'),
+        },
     ]
 })
 

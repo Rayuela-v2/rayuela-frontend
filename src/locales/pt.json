@@ -201,6 +201,7 @@
         "medals": "{n} medalha | {n} medalhas"
     },
     "admin": {
+        "analytics_dashboard": "Painel de Análise",
         "badge_info": "Informação da Insígnia",
         "project_detail": "Detalhes do projeto",
         "project_info": "Informação do Proyecto",

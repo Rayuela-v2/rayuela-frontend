@@ -102,6 +102,7 @@ const disableProject = async () => {
   <main>
     <h1>{{ $t('admin.my_projects') }}</h1>
     <div style="display: flex; justify-content: flex-end;">
+      <v-btn color="primary" class="mr-2" @click="router.push('/admin/analytics')">{{ $t('admin.analytics_dashboard') }}</v-btn>
       <v-btn color="black" @click="addProject">{{ $t('admin.add_project') }}</v-btn>
     </div>
     <v-container>
