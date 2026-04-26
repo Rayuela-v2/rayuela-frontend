@@ -38,3 +38,5 @@ coverage
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+CLAUDE.md
+GEMINI.md
