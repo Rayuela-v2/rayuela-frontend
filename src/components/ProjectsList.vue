@@ -1,24 +1,47 @@
 <script setup>
 import {useRouter} from 'vue-router';
 import {ref, onMounted} from 'vue'
-import {toast} from 'vue3-toastify';
-import 'vue3-toastify/dist/index.css';
-import ProjectCard from "@/components/ProjectCard.vue";
-import ViewMoreButton from "@/components/ViewMoreButton.vue";
 import ProjectsService from "@/services/ProjectsService";
 
 const router = useRouter()
 const projects = ref([])
 const errors = []
 
-onMounted(async () => {
+function hasActiveSession() {
+  return Boolean(localStorage.getItem('token'));
+}
+
+function isAdmin() {
+  return localStorage.getItem('role') === 'Admin';
+}
+
+function getProjectRoute(projectId) {
+  if (!hasActiveSession()) {
+    return `/public/project/${projectId}/view`;
+  }
+
+  if (isAdmin()) {
+    return `/admin/project/${projectId}/data`;
+  }
+
+  return `/project/${projectId}/view`;
+}
+
+async function loadProjects() {
   try {
-    const response = await ProjectsService.getPublicrojects()
-    projects.value = response.slice(0, 4)
+    const response = hasActiveSession()
+        ? (isAdmin()
+            ? await ProjectsService.getAdminProjects()
+            : await ProjectsService.getProjects())
+        : await ProjectsService.getPublicrojects();
+    projects.value = (response || []).slice(0, 4)
   } catch (e) {
     errors.push(e)
   }
+}
 
+onMounted(async () => {
+  await loadProjects();
 })
 
 </script>
@@ -39,7 +62,7 @@ onMounted(async () => {
         <v-card
           class="mx-auto"
           max-width="344"
-          @click="router.push('/public/project/' + project._id + '/view')"
+          @click="router.push(getProjectRoute(project._id))"
           style="cursor: pointer;"
         >
           <v-img

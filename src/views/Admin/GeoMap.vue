@@ -143,6 +143,19 @@ const addCurrentLocationToMap = (features) => {
     return;
   }
 
+  const handleError = (error) => {
+    // Si el error es por permisos denegados, no seguir intentando.
+    if (error.code === error.PERMISSION_DENIED) {
+      toast.warning(t("checkin.geo_denied"));
+      if (addCurrentLocationToMap.intervalId) {
+        clearInterval(addCurrentLocationToMap.intervalId);
+        addCurrentLocationToMap.intervalId = null;
+      }
+    } else {
+      toast.warning(t("checkin.geo_failed"));
+    }
+  };
+
   const updateLocation = () => {
     navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -173,23 +186,53 @@ const addCurrentLocationToMap = (features) => {
 
           map.value.addLayer(marker);
           setTimeout(() => {
-            map.value.getLayers().removeAt(map.value.getLayers().getLength() - 1);
+            if (map.value.getLayers().getLength() > 0) {
+              map.value.getLayers().removeAt(map.value.getLayers().getLength() - 1);
+            }
           }, UPDATE_LOCATION_TIMEOUT);
         },
-        () => {
-          toast.warning(t("checkin.geo_failed"));
-        }
+        handleError
     );
   };
 
-  updateLocation();
-
-  // Actualiza la ubicación cada 15 segundos si está en modo visualización
+  // Si está en modo visualización, intentar actualizar periódicamente.
   if (props.visualization) {
+    // Limpiar cualquier intervalo anterior para evitar duplicados.
     if (addCurrentLocationToMap.intervalId) {
       clearInterval(addCurrentLocationToMap.intervalId);
     }
-    addCurrentLocationToMap.intervalId = setInterval(updateLocation, UPDATE_LOCATION_TIMEOUT);
+
+    // Comprobar permisos antes de configurar el intervalo.
+    if (navigator.permissions) {
+      navigator.permissions.query({name: 'geolocation'}).then(permissionStatus => {
+        if (permissionStatus.state === 'granted') {
+          updateLocation(); // Primera actualización inmediata.
+          addCurrentLocationToMap.intervalId = setInterval(updateLocation, UPDATE_LOCATION_TIMEOUT);
+        } else if (permissionStatus.state === 'prompt') {
+          // Intentar una vez. Si el usuario concede, el intervalo se podría iniciar en la próxima recarga o acción.
+          updateLocation();
+        } else { // 'denied'
+          toast.warning(t("checkin.geo_denied"));
+        }
+        // Escuchar cambios en el permiso.
+        permissionStatus.onchange = () => {
+          if (permissionStatus.state === 'granted' && !addCurrentLocationToMap.intervalId) {
+            updateLocation();
+            addCurrentLocationToMap.intervalId = setInterval(updateLocation, UPDATE_LOCATION_TIMEOUT);
+          } else if (permissionStatus.state === 'denied' && addCurrentLocationToMap.intervalId) {
+            clearInterval(addCurrentLocationToMap.intervalId);
+            addCurrentLocationToMap.intervalId = null;
+          }
+        };
+      });
+    } else {
+      // Fallback para navegadores sin API de Permisos: comportamiento anterior.
+      updateLocation();
+      addCurrentLocationToMap.intervalId = setInterval(updateLocation, UPDATE_LOCATION_TIMEOUT);
+    }
+  } else {
+    // Si no es visualización, solo obtener la ubicación una vez.
+    updateLocation();
   }
 };
 

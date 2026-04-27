@@ -16,10 +16,12 @@ const props = defineProps({
 
 // Computed para mapear el leaderboard con la posición
 const leaderboardData = computed(() =>
-    props.leaderboard.map((user, index) => ({
-      position: index + 1,
-      ...user,
-    }))
+    [...props.leaderboard]
+      .sort((a, b) => (b.points || 0) - (a.points || 0))
+      .map((user, index) => ({
+        position: index + 1,
+        ...user,
+      }))
 );
 </script>
 

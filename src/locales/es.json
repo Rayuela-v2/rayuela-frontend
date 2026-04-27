@@ -38,7 +38,11 @@
         "error_password_required": "La contraseña es requerida",
         "error_passwords_mismatch": "Las contraseñas no coinciden",
         "error_agreement_required": "Debe aceptar los términos y condiciones",
-        "success_registration": "Registro exitoso, por favor revise su casilla de correo para verificarlo antes de iniciar sesión"
+        "success_registration": "Registro exitoso, por favor revise su casilla de correo para verificarlo antes de iniciar sesión",
+        "google_username_required": "Elegí un nombre de usuario y aceptá los términos antes de registrarte con Google",
+        "google_username_title": "Elegí tu nombre de usuario",
+        "google_username_description": "Necesitamos un nombre de usuario antes de crear tu cuenta de Rayuela con Google.",
+        "google_username_confirm": "Continuar"
     },
     "about": {
         "subtitle": "Ciencia ciudadana"
@@ -157,6 +161,7 @@
         "date_time": "Fecha y Hora",
         "timestamp": "Timestamp",
         "task_type_label": "Tipo de tarea",
+        "geo_denied": "La geolocalización ha sido denegada. Por favor, actívala en la configuración de tu navegador para ver tu ubicación en el mapa.",
         "image_label": "Fotos de evidencia (máx. 3)",
         "image_placeholder": "Selecciona o toma hasta 3 fotos",
         "max_images_error": "Puedes subir un máximo de 3 imágenes",
@@ -345,6 +350,10 @@
     "auth": {
         "reset_password": "Restablecer Contraseña",
         "send_link": "Enviar Enlace",
-        "verifying_email": "Verificando tu correo..."
+        "verifying_email": "Verificando tu correo...",
+        "or_continue_with_google": "O continuá con Google",
+        "google_error": "No se pudo completar el ingreso con Google",
+        "google_success": "La cuenta de Google se vinculó correctamente",
+        "google_unavailable": "El ingreso con Google no estará disponible hasta configurar VITE_GOOGLE_CLIENT_ID."
     }
 }

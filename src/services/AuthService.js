@@ -1,14 +1,37 @@
 import RayuelaService from "@/services/RayuelaService";
 
 class AuthService extends RayuelaService {
+    clearSession() {
+        [
+            "msg_login",
+            "token",
+            "username",
+            "user_id",
+            "complete_name",
+            "profile_image",
+            "role",
+            "badges",
+            "points",
+        ].forEach((key) => localStorage.removeItem(key));
+    }
+
+    persistSession(data) {
+        localStorage.setItem("msg_login", "1");
+        localStorage.setItem("token", data.access_token);
+        if (data.username) {
+            localStorage.setItem("username", data.username);
+        }
+        return data;
+    }
+
     loginWithPw(user) {
         return this.post("/auth/login", user)
-            .then((data) => {
-                localStorage.setItem("msg_login", "1")
-                localStorage.setItem("token", data.access_token)
-                localStorage.setItem("username", user.username)
-                return data;
-            });
+            .then((data) => this.persistSession(data));
+    }
+
+    loginWithGoogle(credential, extraData = {}) {
+        return this.post("/auth/google", { credential, ...extraData })
+            .then((data) => this.persistSession(data));
     }
 
     register(user) {
@@ -25,8 +48,6 @@ class AuthService extends RayuelaService {
                 localStorage.setItem("badges", data._badges)
                 localStorage.setItem("points", data._points)
                 return data
-            }).catch(() => {
-                console.log('Unable to get user')
             })
     }
 

@@ -65,6 +65,7 @@ npm install
 1. Copiar el archivo _env.example_ y llamarlo **.env** (o **.env.production** en producción)
 2. Completar las variables dentro del archivo con los datos para trabajar en local o producción
 3. Para hacer uso de este archivo de configuración en el código, usar ```import.meta.env.<CLAVE>```. Ej: ```import.meta.env.VITE_ROOT_API```
+4. Para habilitar el login y registro con Google, configurar también ```VITE_GOOGLE_CLIENT_ID``` con el Client ID Web generado en Google Cloud.
 
 ## Despliegue de la aplicación
 ```

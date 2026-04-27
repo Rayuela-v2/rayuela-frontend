@@ -38,7 +38,11 @@
         "error_password_required": "Password is required",
         "error_passwords_mismatch": "Passwords do not match",
         "error_agreement_required": "You must accept the terms and conditions",
-        "success_registration": "Successful registration, please check your email to verify it before logging in"
+        "success_registration": "Successful registration, please check your email to verify it before logging in",
+        "google_username_required": "Choose a username and accept the terms before signing up with Google",
+        "google_username_title": "Choose your username",
+        "google_username_description": "We need a username before creating your Rayuela account with Google.",
+        "google_username_confirm": "Continue"
     },
     "about": {
         "subtitle": "Citizen science"
@@ -183,6 +187,7 @@
         "pick_location_hint": "Tap on the map to mark your location. Project areas are shown in blue.",
         "selected_location": "Selected location",
         "use_current_location": "Use my location",
+        "geo_denied": "Geolocation has been denied. Please enable it in your browser settings to see your location on the map.",
         "manual_location_disabled_project": "Manual location is disabled for this project"
     },
     "home": {
@@ -345,6 +350,10 @@
     "auth": {
         "reset_password": "Reset Password",
         "send_link": "Send Link",
-        "verifying_email": "Verifying your email..."
+        "verifying_email": "Verifying your email...",
+        "or_continue_with_google": "Or continue with Google",
+        "google_error": "Google login could not be completed",
+        "google_success": "Google account linked successfully",
+        "google_unavailable": "Google login is unavailable until VITE_GOOGLE_CLIENT_ID is configured."
     }
 }
