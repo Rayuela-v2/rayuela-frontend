@@ -1,5 +1,6 @@
 <template>
   <v-container>
+    <BreadCrumb items="checkinsPath"/>
     <h1 class="mb-4">{{ $t('admin.checkins_title') }}</h1>
 
     <v-card class="pa-4 mb-4">
@@ -144,7 +145,6 @@
         :loading="loading"
         :items-per-page-options="[10, 20, 50, 100]"
         :no-data-text="$t('admin.no_checkins')"
-        @update:options="onTableOptionsUpdate"
       >
         <template v-slot:[`item.datetime`]="{ item }">
           {{ formatDate(item.datetime) }}
@@ -235,6 +235,7 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import CheckinService from '@/services/CheckinService';
 import ProjectsService from '@/services/ProjectsService';
+import BreadCrumb from '@/components/utils/BreadCrumb.vue';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -356,25 +357,29 @@ const reload = async () => {
   }
 };
 
-// vuetify's `<v-data-table-server>` re-emits options on every interaction
-// (sort, page, page-size). We translate those into our own page/limit refs.
-const onTableOptionsUpdate = ({ page: p, itemsPerPage }) => {
-  let changed = false;
-  if (p && p !== page.value) {
-    page.value = p;
-    changed = true;
+// React to page / page-size changes the table emits via v-model. A combined
+// watcher avoids duplicate reloads when a page-size change also forces a
+// page reset. We hold off on watching until the initial onMounted load
+// finished so the first paint doesn't fire two requests.
+const ready = ref(false);
+watch([page, limit], ([newPage, newLimit], [, oldLimit]) => {
+  if (!ready.value) return;
+  // Limit changed → reset to page 1 (the watcher will fire again with the
+  // new page) so the user doesn't land on an out-of-range page.
+  if (newLimit !== oldLimit && newPage !== 1) {
+    page.value = 1;
+    return;
   }
-  if (itemsPerPage && itemsPerPage !== limit.value) {
-    limit.value = itemsPerPage;
-    changed = true;
-  }
-  if (changed) reload();
-};
+  reload();
+});
 
 const applyFilters = () => {
   Object.assign(appliedFilters, filters);
-  page.value = 1;
-  reload();
+  if (page.value !== 1) {
+    page.value = 1; // triggers the watcher which calls reload()
+  } else {
+    reload();
+  }
 };
 
 const resetFilters = () => {
@@ -391,10 +396,13 @@ const resetFilters = () => {
 };
 
 // Reload whenever the project changes (e.g. user navigates between projects).
+// Pause the page/limit watcher while we reset so we don't fire two reloads.
 watch(projectId, async () => {
+  ready.value = false;
   page.value = 1;
   await loadProjectMetadata();
   await reload();
+  ready.value = true;
 });
 
 const loadProjectMetadata = async () => {
@@ -411,6 +419,7 @@ const loadProjectMetadata = async () => {
 onMounted(async () => {
   await loadProjectMetadata();
   await reload();
+  ready.value = true;
 });
 </script>
 

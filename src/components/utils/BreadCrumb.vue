@@ -46,6 +46,10 @@ const taskManager = {
   href: `/admin/project/${route.params.projectId}/data`,
 };
 
+const projectCheckins = {
+  title: 'Check-ins del proyecto',
+};
+
 const pointRulesPaths = [
   admin,gamification,pointRule
 ];
@@ -66,12 +70,17 @@ const taskManagerPath = [
     admin, projectDetails, taskManager
 ];
 
+const checkinsPath = [
+    admin, projectCheckins
+];
+
 const rules = {
   pointRulesPaths,
   badgePath,
   gamificationPath,
   projectDetailsPath,
   taskManagerPath,
+  checkinsPath,
 }
 
 const props = defineProps({
