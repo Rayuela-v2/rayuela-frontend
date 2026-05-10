@@ -82,6 +82,13 @@ const router = createRouter({
             meta: { requiresAuth: true },
         },
         {
+            path: '/admin/project/:projectId/checkins',
+            name: 'AdminCheckins',
+            component: () => import('../views/Admin/AdminCheckins.vue'),
+            props: true,
+            meta: { requiresAuth: true },
+        },
+        {
             path: '/admin/project/:projectId/gamification/',
             name: 'GamificationConfig',
             component: () => import('../views/Admin/GamificationConfig.vue'),
