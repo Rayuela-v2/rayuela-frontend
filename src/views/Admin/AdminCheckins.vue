@@ -74,45 +74,98 @@
             variant="outlined"
           />
         </v-col>
-        <v-col cols="12" md="2">
-          <v-text-field
-            v-model="filters.latitude"
-            :label="$t('admin.filter_latitude')"
-            type="number"
-            clearable
-            hide-details
-            density="compact"
-            variant="outlined"
-          />
-        </v-col>
-        <v-col cols="12" md="2">
-          <v-text-field
-            v-model="filters.longitude"
-            :label="$t('admin.filter_longitude')"
-            type="number"
-            clearable
-            hide-details
-            density="compact"
-            variant="outlined"
-          />
-        </v-col>
-        <v-col cols="12" md="2">
+      </v-row>
+
+      <!-- Location filter: instead of typing lat/lng by hand, the admin
+           picks a center on the map. Radius sits right next to the
+           picker so the two read as a single "within X km of Y" unit. -->
+      <div class="location-filter mt-4">
+        <div class="d-flex align-center mb-2">
+          <v-icon size="small" class="mr-2">mdi-map-marker-radius-outline</v-icon>
+          <strong>{{ $t('admin.filter_location_title') }}</strong>
+        </div>
+
+        <!-- No center yet → single CTA button + hint. -->
+        <div v-if="!locationCenter">
+          <v-btn
+            variant="tonal"
+            color="primary"
+            prepend-icon="mdi-map-marker-plus"
+            @click="locationPickerOpen = true"
+          >
+            {{ $t('admin.filter_location_pick') }}
+          </v-btn>
+          <div class="text-caption text-disabled mt-1">
+            {{ $t('admin.filter_location_pick_hint') }}
+          </div>
+        </div>
+
+        <!-- Center selected → coord chip, radius input, and edit/clear
+             actions all aligned in a single row so they look connected. -->
+        <div v-else class="d-flex align-center ga-2 flex-wrap">
+          <v-chip color="primary" variant="tonal" prepend-icon="mdi-map-marker">
+            {{ locationCenter.latitude }}, {{ locationCenter.longitude }}
+          </v-chip>
+          <span class="text-body-2">{{ $t('admin.filter_location_within') }}</span>
           <v-text-field
             v-model="filters.radiusKm"
-            :label="$t('admin.filter_radius_km')"
             type="number"
             min="0"
-            clearable
+            :placeholder="$t('admin.filter_radius_km_placeholder')"
+            :suffix="$t('admin.filter_radius_km_suffix')"
             hide-details
             density="compact"
             variant="outlined"
+            style="max-width: 140px"
           />
-        </v-col>
-      </v-row>
+          <v-btn
+            variant="text"
+            size="small"
+            prepend-icon="mdi-map-marker-plus"
+            @click="locationPickerOpen = true"
+          >
+            {{ $t('admin.filter_location_change') }}
+          </v-btn>
+          <v-btn
+            variant="text"
+            size="small"
+            color="error"
+            prepend-icon="mdi-close"
+            @click="clearLocation"
+          >
+            {{ $t('admin.filter_location_clear') }}
+          </v-btn>
+        </div>
+
+        <v-alert
+          v-if="locationFilterError"
+          type="warning"
+          variant="tonal"
+          density="compact"
+          class="mt-2"
+        >
+          {{ locationFilterError }}
+        </v-alert>
+      </div>
+
+      <LocationPicker
+        v-model="locationPickerOpen"
+        :areas="projectAreas"
+        :initial-latitude="filters.latitude"
+        :initial-longitude="filters.longitude"
+        @location-selected="onLocationPicked"
+      />
+
       <v-row dense class="mt-2">
         <v-col cols="12" class="d-flex justify-end ga-2">
           <v-btn variant="text" @click="resetFilters">{{ $t('admin.filter_reset') }}</v-btn>
-          <v-btn color="primary" @click="applyFilters">{{ $t('admin.filter_apply') }}</v-btn>
+          <v-btn
+            color="primary"
+            :disabled="Boolean(locationFilterError)"
+            @click="applyFilters"
+          >
+            {{ $t('admin.filter_apply') }}
+          </v-btn>
         </v-col>
       </v-row>
     </v-card>
@@ -236,6 +289,7 @@ import { useI18n } from 'vue-i18n';
 import CheckinService from '@/services/CheckinService';
 import ProjectsService from '@/services/ProjectsService';
 import BreadCrumb from '@/components/utils/BreadCrumb.vue';
+import LocationPicker from '@/components/LocationPicker.vue';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -270,6 +324,28 @@ const items = ref([]);
 const loading = ref(false);
 
 const taskTypeItems = ref([]);
+const projectAreas = ref(null);
+const locationPickerOpen = ref(false);
+
+// Convenience accessor for the "is a center selected?" check. The picker
+// always returns both lat and lng together, so checking lat is enough.
+const locationCenter = computed(() => {
+  if (filters.latitude !== '' && filters.longitude !== '') {
+    return { latitude: filters.latitude, longitude: filters.longitude };
+  }
+  return null;
+});
+
+const onLocationPicked = ({ latitude, longitude }) => {
+  filters.latitude = latitude;
+  filters.longitude = longitude;
+};
+
+const clearLocation = () => {
+  filters.latitude = '';
+  filters.longitude = '';
+  filters.radiusKm = '';
+};
 
 const hasPhotosItems = computed(() => [
   { title: t('common.any'), value: null },
@@ -288,9 +364,25 @@ const sortItems = computed(() => [
   { title: t('admin.sort_oldest'), value: 'asc' },
 ]);
 
+// The picker always sets lat+lng together, so the only partial state we
+// have to guard against is "center selected but no (valid) radius". A
+// radius without a center is impossible because the field is disabled
+// in that case.
+const locationFilterError = computed(() => {
+  if (!locationCenter.value) return null;
+  const radius = Number(filters.radiusKm);
+  if (filters.radiusKm === '' || filters.radiusKm === null) {
+    return t('admin.filter_location_missing_radius');
+  }
+  if (!Number.isFinite(radius) || radius <= 0) {
+    return t('admin.filter_location_invalid_radius');
+  }
+  return null;
+});
+
 // All columns are non-sortable because we control sort order through the
 // explicit "Order" dropdown in the toolbar. Letting users click headers
-// would imply a server-side column sort we don't implement yet.
+// would imply a server-side column sort I don't wanna add.
 const headers = computed(() => [
   { title: t('common.datetime'), key: 'datetime', sortable: false },
   { title: t('admin.task_name_header'), key: 'taskName', sortable: false },
@@ -415,9 +507,11 @@ const loadProjectMetadata = async () => {
   try {
     const project = await ProjectsService.getProjectById(projectId.value);
     taskTypeItems.value = project?.taskTypes || [];
+    projectAreas.value = project?.areas || null;
   } catch (e) {
     console.warn('Could not load project metadata for filters', e);
     taskTypeItems.value = [];
+    projectAreas.value = null;
   }
 };
 

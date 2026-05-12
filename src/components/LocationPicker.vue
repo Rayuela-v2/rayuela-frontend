@@ -187,7 +187,7 @@ watch(show, async (visible) => {
 </script>
 
 <template>
-  <v-dialog v-model="show" max-width="700px" persistent @opened="onDialogOpened">
+  <v-dialog v-model="show" max-width="700px" persistent>
     <v-card>
       <v-card-title class="d-flex align-center">
         <v-icon class="mr-2">mdi-map-marker</v-icon>
