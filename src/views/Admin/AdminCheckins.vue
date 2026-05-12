@@ -195,17 +195,17 @@
         <v-card-text>
           <v-row dense>
             <v-col
-              v-for="(ref, idx) in gallery"
+              v-for="(key, idx) in gallery"
               :key="idx"
               cols="6"
               sm="4"
               md="3"
             >
               <v-img
-                :src="getImageUrl(ref)"
+                :src="getImageUrl(key)"
                 aspect-ratio="1"
                 class="rounded-lg cursor-pointer"
-                @click="zoom(ref)"
+                @click="zoom(key)"
               />
             </v-col>
           </v-row>
@@ -288,10 +288,13 @@ const sortItems = computed(() => [
   { title: t('admin.sort_oldest'), value: 'asc' },
 ]);
 
+// All columns are non-sortable because we control sort order through the
+// explicit "Order" dropdown in the toolbar. Letting users click headers
+// would imply a server-side column sort we don't implement yet.
 const headers = computed(() => [
-  { title: t('common.datetime'), key: 'datetime' },
-  { title: t('admin.task_name_header'), key: 'taskName' },
-  { title: t('admin.task_type'), key: 'taskType' },
+  { title: t('common.datetime'), key: 'datetime', sortable: false },
+  { title: t('admin.task_name_header'), key: 'taskName', sortable: false },
+  { title: t('admin.task_type'), key: 'taskType', sortable: false },
   { title: t('admin.location_header'), key: 'location', sortable: false },
   { title: t('admin.images_header'), key: 'imageRefs', sortable: false },
   { title: t('common.contributes_to'), key: 'contributesTo', sortable: false },
@@ -303,11 +306,13 @@ const gallery = ref([]);
 const zoomOpen = ref(false);
 const zoomImage = ref('');
 
-const getImageUrl = (ref) => {
-  if (!ref) return '';
-  if (ref.startsWith && ref.startsWith('http')) return ref;
+// Matches the URL builder in `UserCheckins.vue`. Param renamed from `ref`
+// to `key` to avoid shadowing Vue's `ref` import in this file.
+const getImageUrl = (key) => {
+  if (!key) return '';
+  if (key.startsWith('http')) return key;
   const baseUrl = import.meta.env.VITE_ROOT_API || 'http://localhost:3000/v1';
-  return `${baseUrl}/storage/file?key=${ref}`;
+  return `${baseUrl}/storage/file?key=${key}`;
 };
 
 const openImages = (checkin) => {
@@ -315,8 +320,8 @@ const openImages = (checkin) => {
   galleryOpen.value = true;
 };
 
-const zoom = (ref) => {
-  zoomImage.value = ref;
+const zoom = (key) => {
+  zoomImage.value = key;
   zoomOpen.value = true;
 };
 
