@@ -110,7 +110,7 @@
           <v-text-field
             v-model="filters.radiusKm"
             type="number"
-            min="0"
+            min="0.001"
             :placeholder="$t('admin.filter_radius_km_placeholder')"
             :suffix="$t('admin.filter_radius_km_suffix')"
             hide-details
@@ -248,8 +248,8 @@
         <v-card-text>
           <v-row dense>
             <v-col
-              v-for="(key, idx) in gallery"
-              :key="idx"
+              v-for="key in gallery"
+              :key="key"
               cols="6"
               sm="4"
               md="3"

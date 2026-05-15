@@ -8,8 +8,10 @@
 
 <script setup>
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 const route = useRoute();
+const { t } = useI18n();
 
 function addDisabledToLast(arr) {
   if (Array.isArray(arr) && arr.length > 0) {
@@ -47,7 +49,7 @@ const taskManager = {
 };
 
 const projectCheckins = {
-  title: 'Check-ins del proyecto',
+  title: t('admin.checkins_title'),
 };
 
 const pointRulesPaths = [
