@@ -34,6 +34,10 @@ const editGamification = (project) => {
   router.push(`/admin/project/${project._id}/gamification`);
 };
 
+const viewCheckins = (project) => {
+  router.push(`/admin/project/${project._id}/checkins`);
+};
+
 const addProject = async () => {
   const newP = await ProjectsService.createProject({
     name: t("admin.new_project_default_name"),
@@ -125,6 +129,9 @@ const disableProject = async () => {
               </v-list-item>
               <v-list-item @click="editGamification(item)">
                 <v-list-item-title>{{ $t('admin.edit_gamification') }}</v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="viewCheckins(item)">
+                <v-list-item-title>{{ $t('admin.view_checkins') }}</v-list-item-title>
               </v-list-item>
               <v-list-item @click="confirmDisable(item)">
                 <v-list-item-title>{{ item.available ? $t('admin.hide') : $t('admin.show') }}</v-list-item-title>

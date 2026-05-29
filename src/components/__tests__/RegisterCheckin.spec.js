@@ -88,6 +88,11 @@ const vuetifyStub = {
         props: { modelValue: {}, loading: {}, disabled: {}, items: {}, label: {}, color: {}, type: {}, variant: {}, block: {}, size: {}, text: {} },
       })
     })
+    app.component('v-tooltip', {
+      name: 'v-tooltip',
+      template: `<div class="v-tooltip"><slot name="activator" :props="{}"/><slot /></div>`,
+      props: { text: {}, location: {} },
+    })
   }
 }
 
@@ -218,14 +223,14 @@ describe('RegisterCheckin', () => {
 
       wrapper.vm.submitForm()
 
-      expect(GamificationService.registerCheckin).toHaveBeenCalledWith({
-        latitude: '-34.603722',
-        longitude: '-58.381592',
-        taskType: 'Observation',
-        datetime: '2026-03-14T12:00',
-        rating: 0,
-        projectId: 'project-1',
-      })
+      expect(GamificationService.registerCheckin).toHaveBeenCalledOnce()
+      const payload = GamificationService.registerCheckin.mock.calls[0][0]
+      expect(payload).toBeInstanceOf(FormData)
+      expect(payload.get('latitude')).toBe('-34.603722')
+      expect(payload.get('longitude')).toBe('-58.381592')
+      expect(payload.get('taskType')).toBe('Observation')
+      expect(payload.get('datetime')).toBe('2026-03-14T12:00')
+      expect(payload.get('projectId')).toBe('project-1')
     })
   })
 

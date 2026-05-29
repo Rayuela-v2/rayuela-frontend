@@ -8,8 +8,10 @@
 
 <script setup>
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 const route = useRoute();
+const { t } = useI18n();
 
 function addDisabledToLast(arr) {
   if (Array.isArray(arr) && arr.length > 0) {
@@ -46,6 +48,10 @@ const taskManager = {
   href: `/admin/project/${route.params.projectId}/data`,
 };
 
+const projectCheckins = {
+  title: t('admin.checkins_title'),
+};
+
 const pointRulesPaths = [
   admin,gamification,pointRule
 ];
@@ -66,12 +72,17 @@ const taskManagerPath = [
     admin, projectDetails, taskManager
 ];
 
+const checkinsPath = [
+    admin, projectCheckins
+];
+
 const rules = {
   pointRulesPaths,
   badgePath,
   gamificationPath,
   projectDetailsPath,
   taskManagerPath,
+  checkinsPath,
 }
 
 const props = defineProps({
