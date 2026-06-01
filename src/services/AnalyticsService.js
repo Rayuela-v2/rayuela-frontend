@@ -54,6 +54,10 @@ class AnalyticsService extends RayuelaService {
       ...(endDate && { endDate }),
     })}`);
   }
+
+  getCommunityStats(projectId) {
+    return this.get(`/analytics/project/${projectId}/community-stats`);
+  }
 }
 
 export default new AnalyticsService();

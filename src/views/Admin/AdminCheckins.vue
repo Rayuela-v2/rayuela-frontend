@@ -3,7 +3,14 @@
     <BreadCrumb items="checkinsPath"/>
     <h1 class="mb-4">{{ $t('admin.checkins_title') }}</h1>
 
-    <v-card class="pa-4 mb-4">
+    <v-tabs v-model="activeTab" color="primary" class="mb-4">
+      <v-tab value="logs">{{ $t('admin.checkin_records') || 'Registro de Check-ins' }}</v-tab>
+      <v-tab value="stats">{{ $t('admin.statistics_title') || 'Estadísticas' }}</v-tab>
+    </v-tabs>
+
+    <v-window v-model="activeTab">
+      <v-window-item value="logs">
+        <v-card class="pa-4 mb-4">
       <h3 class="mb-3">{{ $t('admin.filters_title') }}</h3>
       <v-row dense>
         <v-col cols="12" md="4">
@@ -68,6 +75,19 @@
             v-model="filters.dateTo"
             :label="$t('admin.filter_date_to')"
             type="date"
+            clearable
+            hide-details
+            density="compact"
+            variant="outlined"
+          />
+        </v-col>
+        <v-col cols="12" md="3">
+          <v-select
+            v-model="filters.badgeName"
+            :items="gamificationBadges"
+            item-title="name"
+            item-value="name"
+            :label="$t('admin.filter_badge_name') || 'Medalla desbloqueada'"
             clearable
             hide-details
             density="compact"
@@ -230,6 +250,29 @@
           <span v-else class="text-disabled">—</span>
         </template>
 
+        <template v-slot:[`item.newPoints`]="{ item }">
+          <v-chip v-if="item.newPoints > 0" color="green" size="small" variant="tonal" class="font-weight-medium">
+            +{{ item.newPoints }} pts
+          </v-chip>
+          <span v-else class="text-disabled">—</span>
+        </template>
+
+        <template v-slot:[`item.newBadges`]="{ item }">
+          <div v-if="(item.newBadges || []).length > 0" class="d-flex flex-wrap ga-1">
+            <v-chip
+              v-for="badge in item.newBadges"
+              :key="badge"
+              color="purple"
+              size="small"
+              variant="tonal"
+              prepend-icon="mdi-medal"
+            >
+              {{ badge }}
+            </v-chip>
+          </div>
+          <span v-else class="text-disabled">—</span>
+        </template>
+
         <template v-slot:[`item.contributesTo`]="{ item }">
           <v-chip v-if="item.contributesTo" color="green" variant="outlined" size="small">
             {{ $t('checkin.task_solved') }}
@@ -240,6 +283,103 @@
         </template>
       </v-data-table-server>
     </v-card>
+  </v-window-item>
+
+  <v-window-item value="stats">
+    <v-row v-if="statsLoading" justify="center" class="my-6">
+      <v-progress-circular indeterminate color="primary" />
+    </v-row>
+    <div v-else class="stats-panel pa-2">
+      <!-- KPI Summary Cards -->
+      <v-row class="mb-4">
+        <v-col cols="12" sm="4">
+          <v-card class="pa-4 d-flex align-center ga-3">
+            <v-avatar color="blue-lighten-5" size="56" class="text-primary">
+              <v-icon size="32">mdi-check-bold</v-icon>
+            </v-avatar>
+            <div>
+              <div class="text-h4 font-weight-bold">{{ statsSummary.totalCheckins }}</div>
+              <div class="text-caption text-secondary">Check-ins Totales</div>
+            </div>
+          </v-card>
+        </v-col>
+        <v-col cols="12" sm="4">
+          <v-card class="pa-4 d-flex align-center ga-3">
+            <v-avatar color="amber-lighten-5" size="56" class="text-warning">
+              <v-icon size="32">mdi-star</v-icon>
+            </v-avatar>
+            <div>
+              <div class="text-h4 font-weight-bold">{{ statsSummary.totalPoints }}</div>
+              <div class="text-caption text-secondary">Puntos de Comunidad</div>
+            </div>
+          </v-card>
+        </v-col>
+        <v-col cols="12" sm="4">
+          <v-card class="pa-4 d-flex align-center ga-3">
+            <v-avatar color="purple-lighten-5" size="56" class="text-purple">
+              <v-icon size="32">mdi-medal</v-icon>
+            </v-avatar>
+            <div>
+              <div class="text-h4 font-weight-bold">{{ statsSummary.totalBadges }}</div>
+              <div class="text-caption text-secondary">Medallas Otorgadas</div>
+            </div>
+          </v-card>
+        </v-col>
+      </v-row>
+
+      <!-- Charts -->
+      <v-row class="mb-4">
+        <v-col cols="12" md="6">
+          <BarChart title="Colaboraciones por Área" :data="areaCheckinsChartData" />
+        </v-col>
+        <v-col cols="12" md="6">
+          <BarChart title="Recompensas por Área" :data="areaRewardsChartData" />
+        </v-col>
+      </v-row>
+
+      <!-- Breakdown Tables -->
+      <v-card class="pa-4 mt-4">
+        <h3 class="mb-3">Desglose de Colaboraciones</h3>
+        <v-row>
+          <v-col cols="12" md="6">
+            <h4 class="mb-2">Por Área</h4>
+            <v-data-table
+              :headers="areaBreakdownHeaders"
+              :items="statsData.byArea"
+              hide-default-footer
+              density="compact"
+              class="border rounded"
+            />
+          </v-col>
+          <v-col cols="12" md="6">
+            <v-row dense>
+              <v-col cols="12">
+                <h4 class="mb-2">Por Tipo de Tarea</h4>
+                <v-data-table
+                  :headers="taskTypeBreakdownHeaders"
+                  :items="statsData.byTaskType"
+                  hide-default-footer
+                  density="compact"
+                  class="border rounded"
+                />
+              </v-col>
+              <v-col cols="12" class="mt-4">
+                <h4 class="mb-2">Por Intervalo de Tiempo</h4>
+                <v-data-table
+                  :headers="intervalBreakdownHeaders"
+                  :items="statsData.byInterval"
+                  hide-default-footer
+                  density="compact"
+                  class="border rounded"
+                />
+              </v-col>
+            </v-row>
+          </v-col>
+        </v-row>
+      </v-card>
+    </div>
+  </v-window-item>
+</v-window>
 
     <!-- Image gallery dialog -->
     <v-dialog v-model="galleryOpen" max-width="90vw">
@@ -288,13 +428,20 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import CheckinService from '@/services/CheckinService';
 import ProjectsService from '@/services/ProjectsService';
+import GamificationService from '@/services/GamificationService';
+import AnalyticsService from '@/services/AnalyticsService';
 import BreadCrumb from '@/components/utils/BreadCrumb.vue';
 import LocationPicker from '@/components/LocationPicker.vue';
+import BarChart from '@/components/analytics/BarChart.vue';
 
 const { t } = useI18n();
 const route = useRoute();
 
 const projectId = computed(() => route.params.projectId);
+
+// --- Tabs and Gamification config ------------------------------------------
+const activeTab = ref('logs');
+const gamificationBadges = ref([]);
 
 // --- Filter state -----------------------------------------------------------
 // `filters` is the *draft* the user is editing in the form. It is only
@@ -303,6 +450,7 @@ const projectId = computed(() => route.params.projectId);
 const filters = reactive({
   taskName: '',
   taskType: null,
+  badgeName: null,
   hasPhotos: null,
   contributed: null,
   dateFrom: '',
@@ -389,6 +537,8 @@ const headers = computed(() => [
   { title: t('admin.task_type'), key: 'taskType', sortable: false },
   { title: t('admin.location_header'), key: 'location', sortable: false },
   { title: t('admin.images_header'), key: 'imageRefs', sortable: false },
+  { title: t('admin.points_earned_header') || 'Puntos', key: 'newPoints', sortable: false },
+  { title: t('admin.badges_earned_header') || 'Medallas', key: 'newBadges', sortable: false },
   { title: t('common.contributes_to'), key: 'contributesTo', sortable: false },
 ]);
 
@@ -427,6 +577,7 @@ const formatDate = (iso) => {
 const buildQuery = () => ({
   taskName: appliedFilters.taskName || undefined,
   taskType: appliedFilters.taskType || undefined,
+  badgeName: appliedFilters.badgeName || undefined,
   hasPhotos: appliedFilters.hasPhotos || undefined,
   contributed: appliedFilters.contributed || undefined,
   dateFrom: appliedFilters.dateFrom ? new Date(appliedFilters.dateFrom).toISOString() : undefined,
@@ -482,6 +633,7 @@ const applyFilters = () => {
 const resetFilters = () => {
   filters.taskName = '';
   filters.taskType = null;
+  filters.badgeName = null;
   filters.hasPhotos = null;
   filters.contributed = null;
   filters.dateFrom = '';
@@ -492,13 +644,104 @@ const resetFilters = () => {
   applyFilters();
 };
 
+// --- Statistics state -------------------------------------------------------
+const statsLoading = ref(false);
+const statsData = ref({ byArea: [], byTaskType: [], byInterval: [] });
+
+const loadStats = async () => {
+  if (!projectId.value) return;
+  statsLoading.value = true;
+  try {
+    const data = await AnalyticsService.getCommunityStats(projectId.value);
+    statsData.value = data || { byArea: [], byTaskType: [], byInterval: [] };
+  } catch (e) {
+    console.error('Failed to load community statistics', e);
+    statsData.value = { byArea: [], byTaskType: [], byInterval: [] };
+  } finally {
+    statsLoading.value = false;
+  }
+};
+
+const statsSummary = computed(() => {
+  const byArea = statsData.value.byArea || [];
+  let totalCheckins = 0;
+  let totalPoints = 0;
+  let totalBadges = 0;
+  for (const item of byArea) {
+    totalCheckins += item.checkinsCount || 0;
+    totalPoints += item.totalPoints || 0;
+    totalBadges += item.totalBadges || 0;
+  }
+  return { totalCheckins, totalPoints, totalBadges };
+});
+
+const areaCheckinsChartData = computed(() => {
+  const byArea = statsData.value.byArea || [];
+  return {
+    labels: byArea.map(a => a.areaName),
+    datasets: [{
+      label: t('admin.checkins_count') || 'Check-ins',
+      data: byArea.map(a => a.checkinsCount),
+      backgroundColor: '#1976D2',
+    }],
+  };
+});
+
+const areaRewardsChartData = computed(() => {
+  const byArea = statsData.value.byArea || [];
+  return {
+    labels: byArea.map(a => a.areaName),
+    datasets: [
+      {
+        label: t('admin.points_awarded') || 'Puntos',
+        data: byArea.map(a => a.totalPoints),
+        backgroundColor: '#F57C00',
+      },
+      {
+        label: t('admin.badges_earned') || 'Medallas',
+        data: byArea.map(a => a.totalBadges),
+        backgroundColor: '#7B1FA2',
+      }
+    ],
+  };
+});
+
+const areaBreakdownHeaders = computed(() => [
+  { title: t('admin.area') || 'Área', key: 'areaName' },
+  { title: t('admin.checkins_count') || 'Colaboraciones', key: 'checkinsCount' },
+  { title: t('admin.points_awarded') || 'Puntos Otorgados', key: 'totalPoints' },
+  { title: t('admin.badges_earned') || 'Medallas Otorgadas', key: 'totalBadges' },
+]);
+
+const taskTypeBreakdownHeaders = computed(() => [
+  { title: t('admin.task_type') || 'Tipo de Tarea', key: 'taskType' },
+  { title: t('admin.checkins_count') || 'Colaboraciones', key: 'checkinsCount' },
+]);
+
+const intervalBreakdownHeaders = computed(() => [
+  { title: t('admin.interval') || 'Intervalo', key: 'timeIntervalId' },
+  { title: t('admin.checkins_count') || 'Colaboraciones', key: 'checkinsCount' },
+]);
+
+// Reload when activeTab switches to 'stats'
+watch(activeTab, (newTab) => {
+  if (newTab === 'stats') {
+    loadStats();
+  }
+});
+
 // Reload whenever the project changes (e.g. user navigates between projects).
 // Pause the page/limit watcher while we reset so we don't fire two reloads.
 watch(projectId, async () => {
   ready.value = false;
   page.value = 1;
   await loadProjectMetadata();
-  await reload();
+  await loadGamificationMetadata();
+  if (activeTab.value === 'stats') {
+    await loadStats();
+  } else {
+    await reload();
+  }
   ready.value = true;
 });
 
@@ -515,9 +758,25 @@ const loadProjectMetadata = async () => {
   }
 };
 
+const loadGamificationMetadata = async () => {
+  if (!projectId.value) return;
+  try {
+    const config = await GamificationService.getGamification(projectId.value);
+    gamificationBadges.value = config?.badges || [];
+  } catch (e) {
+    console.warn('Could not load gamification config for filters', e);
+    gamificationBadges.value = [];
+  }
+};
+
 onMounted(async () => {
   await loadProjectMetadata();
-  await reload();
+  await loadGamificationMetadata();
+  if (activeTab.value === 'stats') {
+    await loadStats();
+  } else {
+    await reload();
+  }
   ready.value = true;
 });
 </script>
