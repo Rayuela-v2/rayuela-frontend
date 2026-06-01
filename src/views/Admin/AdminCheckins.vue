@@ -3,14 +3,7 @@
     <BreadCrumb items="checkinsPath"/>
     <h1 class="mb-4">{{ $t('admin.checkins_title') }}</h1>
 
-    <v-tabs v-model="activeTab" color="primary" class="mb-4">
-      <v-tab value="logs">{{ $t('admin.checkin_records') || 'Registro de Check-ins' }}</v-tab>
-      <v-tab value="stats">{{ $t('admin.statistics_title') || 'Estadísticas' }}</v-tab>
-    </v-tabs>
-
-    <v-window v-model="activeTab">
-      <v-window-item value="logs">
-        <v-card class="pa-4 mb-4">
+    <v-card class="pa-4 mb-4">
       <h3 class="mb-3">{{ $t('admin.filters_title') }}</h3>
       <v-row dense>
         <v-col cols="12" md="4">
@@ -190,6 +183,14 @@
       </v-row>
     </v-card>
 
+    <v-tabs v-model="activeTab" color="primary" class="mb-4">
+      <v-tab value="logs">{{ $t('admin.checkin_records') || 'Registro de Check-ins' }}</v-tab>
+      <v-tab value="stats">{{ $t('admin.statistics_title') || 'Estadísticas' }}</v-tab>
+    </v-tabs>
+
+    <v-window v-model="activeTab">
+      <v-window-item value="logs">
+
     <v-card>
       <v-card-title class="d-flex align-center">
         <span>{{ $t('admin.checkin_records') }}</span>
@@ -299,7 +300,7 @@
             </v-avatar>
             <div>
               <div class="text-h4 font-weight-bold">{{ statsSummary.totalCheckins }}</div>
-              <div class="text-caption text-secondary">Check-ins Totales</div>
+              <div class="text-caption text-secondary">{{ $t('admin.checkins_total_stats') }}</div>
             </div>
           </v-card>
         </v-col>
@@ -310,7 +311,7 @@
             </v-avatar>
             <div>
               <div class="text-h4 font-weight-bold">{{ statsSummary.totalPoints }}</div>
-              <div class="text-caption text-secondary">Puntos de Comunidad</div>
+              <div class="text-caption text-secondary">{{ $t('admin.community_points') }}</div>
             </div>
           </v-card>
         </v-col>
@@ -321,28 +322,31 @@
             </v-avatar>
             <div>
               <div class="text-h4 font-weight-bold">{{ statsSummary.totalBadges }}</div>
-              <div class="text-caption text-secondary">Medallas Otorgadas</div>
+              <div class="text-caption text-secondary">{{ $t('admin.badges_awarded') }}</div>
             </div>
           </v-card>
         </v-col>
       </v-row>
-
+ 
       <!-- Charts -->
       <v-row class="mb-4">
-        <v-col cols="12" md="6">
-          <BarChart title="Colaboraciones por Área" :data="areaCheckinsChartData" />
+        <v-col cols="12" md="4">
+          <BarChart :title="$t('admin.collaborations_by_area') || 'Colaboraciones por Área'" :data="areaCheckinsChartData" />
         </v-col>
-        <v-col cols="12" md="6">
-          <BarChart title="Recompensas por Área" :data="areaRewardsChartData" />
+        <v-col cols="12" md="4">
+          <BarChart :title="$t('admin.points_by_area') || 'Puntos por Área'" :data="areaPointsChartData" />
+        </v-col>
+        <v-col cols="12" md="4">
+          <BarChart :title="$t('admin.badges_by_area') || 'Medallas por Área'" :data="areaBadgesChartData" />
         </v-col>
       </v-row>
-
+ 
       <!-- Breakdown Tables -->
       <v-card class="pa-4 mt-4">
-        <h3 class="mb-3">Desglose de Colaboraciones</h3>
+        <h3 class="mb-3">{{ $t('admin.collaborations_breakdown') }}</h3>
         <v-row>
           <v-col cols="12" md="6">
-            <h4 class="mb-2">Por Área</h4>
+            <h4 class="mb-2">{{ $t('admin.by_area') }}</h4>
             <v-data-table
               :headers="areaBreakdownHeaders"
               :items="statsData.byArea"
@@ -354,7 +358,7 @@
           <v-col cols="12" md="6">
             <v-row dense>
               <v-col cols="12">
-                <h4 class="mb-2">Por Tipo de Tarea</h4>
+                <h4 class="mb-2">{{ $t('admin.by_task_type') }}</h4>
                 <v-data-table
                   :headers="taskTypeBreakdownHeaders"
                   :items="statsData.byTaskType"
@@ -364,7 +368,7 @@
                 />
               </v-col>
               <v-col cols="12" class="mt-4">
-                <h4 class="mb-2">Por Intervalo de Tiempo</h4>
+                <h4 class="mb-2">{{ $t('admin.by_time_interval') }}</h4>
                 <v-data-table
                   :headers="intervalBreakdownHeaders"
                   :items="statsData.byInterval"
@@ -623,10 +627,14 @@ watch([page, limit], ([newPage, newLimit], [, oldLimit]) => {
 
 const applyFilters = () => {
   Object.assign(appliedFilters, filters);
-  if (page.value !== 1) {
-    page.value = 1; // triggers the watcher which calls reload()
+  if (activeTab.value === 'stats') {
+    loadStats();
   } else {
-    reload();
+    if (page.value !== 1) {
+      page.value = 1; // triggers the watcher which calls reload()
+    } else {
+      reload();
+    }
   }
 };
 
@@ -652,7 +660,8 @@ const loadStats = async () => {
   if (!projectId.value) return;
   statsLoading.value = true;
   try {
-    const data = await AnalyticsService.getCommunityStats(projectId.value);
+    const query = buildQuery();
+    const data = await AnalyticsService.getCommunityStats(projectId.value, query);
     statsData.value = data || { byArea: [], byTaskType: [], byInterval: [] };
   } catch (e) {
     console.error('Failed to load community statistics', e);
@@ -687,18 +696,27 @@ const areaCheckinsChartData = computed(() => {
   };
 });
 
-const areaRewardsChartData = computed(() => {
+const areaPointsChartData = computed(() => {
   const byArea = statsData.value.byArea || [];
   return {
     labels: byArea.map(a => a.areaName),
     datasets: [
       {
-        label: t('admin.points_awarded') || 'Puntos',
+        label: t('admin.points_by_area') || 'Puntos por Área',
         data: byArea.map(a => a.totalPoints),
         backgroundColor: '#F57C00',
-      },
+      }
+    ],
+  };
+});
+
+const areaBadgesChartData = computed(() => {
+  const byArea = statsData.value.byArea || [];
+  return {
+    labels: byArea.map(a => a.areaName),
+    datasets: [
       {
-        label: t('admin.badges_earned') || 'Medallas',
+        label: t('admin.badges_by_area') || 'Medallas por Área',
         data: byArea.map(a => a.totalBadges),
         backgroundColor: '#7B1FA2',
       }
@@ -723,10 +741,12 @@ const intervalBreakdownHeaders = computed(() => [
   { title: t('admin.checkins_count') || 'Colaboraciones', key: 'checkinsCount' },
 ]);
 
-// Reload when activeTab switches to 'stats'
+// Reload when activeTab switches
 watch(activeTab, (newTab) => {
   if (newTab === 'stats') {
     loadStats();
+  } else if (newTab === 'logs') {
+    reload();
   }
 });
 

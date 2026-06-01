@@ -55,8 +55,16 @@ class AnalyticsService extends RayuelaService {
     })}`);
   }
 
-  getCommunityStats(projectId) {
-    return this.get(`/analytics/project/${projectId}/community-stats`);
+  getCommunityStats(projectId, query = {}) {
+    const cleanQuery = {};
+    for (const [key, val] of Object.entries(query)) {
+      if (val !== undefined && val !== null) {
+        cleanQuery[key] = val;
+      }
+    }
+    const params = new URLSearchParams(cleanQuery).toString();
+    const url = `/analytics/project/${projectId}/community-stats${params ? '?' + params : ''}`;
+    return this.get(url);
   }
 }
 
