@@ -31,4 +31,8 @@ jobs:
           # overrides any other credentials for github.com — unset it first.
           git config --unset-all http.https://github.com/.extraheader || true
           git remote add personal "https://lucas-matw-unq:${TOKEN}@github.com/lucas-matw-unq/rayuela-frontend.git"
-          git push personal HEAD:refs/heads/main
+          # The fork is a one-way deploy mirror of org main — no development
+          # happens there. Force the mirror to match org main exactly.
+          # --force-with-lease still aborts if the fork changes mid-run.
+          git fetch personal main
+          git push --force-with-lease personal HEAD:refs/heads/main
