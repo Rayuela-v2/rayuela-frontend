@@ -22,5 +22,10 @@ jobs:
         env:
           TOKEN: ${{ secrets.PERSONAL_FORK_SYNC_TOKEN }}
         run: |
-          git remote add personal "https://x-access-token:${TOKEN}@github.com/lucas-matw-unq/rayuela-frontend.git"
+          if [ -z "${TOKEN}" ]; then
+            echo "::error::PERSONAL_FORK_SYNC_TOKEN secret is empty or missing"
+            exit 1
+          fi
+          echo "Token present (length: ${#TOKEN})"
+          git remote add personal "https://lucas-matw-unq:${TOKEN}@github.com/lucas-matw-unq/rayuela-frontend.git"
           git push personal HEAD:refs/heads/main
