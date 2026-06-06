@@ -1,0 +1,26 @@
+name: Sync main to personal fork
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: sync-personal-fork
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout org repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push main to personal fork
+        env:
+          TOKEN: ${{ secrets.PERSONAL_FORK_SYNC_TOKEN }}
+        run: |
+          git remote add personal "https://x-access-token:${TOKEN}@github.com/lucas-matw-unq/rayuela-frontend.git"
+          git push personal HEAD:refs/heads/main
