@@ -27,5 +27,8 @@ jobs:
             exit 1
           fi
           echo "Token present (length: ${#TOKEN})"
+          # actions/checkout injects a GITHUB_TOKEN credential helper that
+          # overrides any other credentials for github.com — unset it first.
+          git config --unset-all http.https://github.com/.extraheader || true
           git remote add personal "https://lucas-matw-unq:${TOKEN}@github.com/lucas-matw-unq/rayuela-frontend.git"
           git push personal HEAD:refs/heads/main
