@@ -107,3 +107,5 @@ Rayuela is a free software and content project:
 - The site content is licensed under the **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)**. See the [CONTENT-LICENSE.md](CONTENT-LICENSE.md) file for details.
 
 <!-- test-sync -->
+
+<!-- sync test 2026-06-07T00:45:57Z -->
