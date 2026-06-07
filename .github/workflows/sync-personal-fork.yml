@@ -12,6 +12,10 @@ concurrency:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    # This workflow file is mirrored to the personal fork along with the rest
+    # of the repo. Guard so it only ever runs on the org repo — on the fork
+    # (which lacks the secret) the job is skipped instead of failing.
+    if: github.repository == 'Rayuela-v2/rayuela-frontend'
     steps:
       - name: Checkout org repo
         uses: actions/checkout@v4
