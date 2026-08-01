@@ -161,13 +161,9 @@ const confirmDeleteBadge = (badge) => {
 const deleteBadge = async () => {
   if (!selectedBadge.value?._id) return;
   try {
-    const projectId =
-      route.params.projectId ||
-      store.state.project?._id ||
-      store.state.project?.id;
     const res = await GamificationService.deleteBadge(
       selectedBadge.value._id,
-      projectId
+      route.params.projectId
     );
     toast.success(t("admin.badge_deleted_success"));
     dialogDisableBadge.value = false;
@@ -180,7 +176,7 @@ const deleteBadge = async () => {
     }
   } catch (error) {
     console.error("Error al eliminar la insignia:", error);
-    toast.error(t("admin.badge_delete_error") || "Error al eliminar la insignia");
+    toast.error(t("admin.badge_delete_error"));
   }
 };
 
@@ -209,15 +205,11 @@ const confirmDisableScoreRule = (scoreRule) => {
 const deleteScoreRule = async () => {
   if (!selectedScoreRule.value?._id) return;
   try {
-    const projectId =
-      route.params.projectId ||
-      store.state.project?._id ||
-      store.state.project?.id;
     const res = await GamificationService.deleteScoreRule(
       selectedScoreRule.value._id,
-      projectId
+      route.params.projectId
     );
-    toast.success(t("admin.score_rule_deleted_success") || "Regla de puntaje eliminada :)");
+    toast.success(t("admin.score_rule_deleted_success"));
     dialogDisableScoreRule.value = false;
     scoreRules.value = res.pointRules || [];
     if (store.state.currentGamification) {
