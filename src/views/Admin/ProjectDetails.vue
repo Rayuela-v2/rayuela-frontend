@@ -271,19 +271,21 @@ const hasInvalidTimeIntervals = computed(() => {
 const addNewTaskType = () => {
   const name = newTaskType.value.trim();
   const description = newTaskTypeDescription.value.trim();
-  if (name) {
-    const exists = project.value.taskTypes.some((t) => {
-      const existingName = typeof t === 'string' ? t : t.name;
-      return existingName.toLowerCase() === name.toLowerCase();
-    });
-    if (!exists) {
-      project.value.taskTypes.push({ name, description });
-      toast.success(t("admin.task_type_added_success", { type: name }));
-      newTaskType.value = '';
-      newTaskTypeDescription.value = '';
-    } else {
-      toast.error(t("admin.task_type_exists_error") || "El tipo de tarea ya existe");
-    }
+  if (!name) {
+    toast.error(t("admin.task_type_name_required"));
+    return;
+  }
+  const exists = project.value.taskTypes.some((t) => {
+    const existingName = typeof t === 'string' ? t : t.name;
+    return existingName.toLowerCase() === name.toLowerCase();
+  });
+  if (!exists) {
+    project.value.taskTypes.push({ name, description });
+    toast.success(t("admin.task_type_added_success", { type: name }));
+    newTaskType.value = '';
+    newTaskTypeDescription.value = '';
+  } else {
+    toast.error(t("admin.task_type_exists_error"));
   }
 };
 
