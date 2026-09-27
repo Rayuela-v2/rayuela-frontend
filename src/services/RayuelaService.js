@@ -59,16 +59,24 @@ export default class RayuelaService {
             }).finally(() => loadingService.hide())
     }
 
-    get(path) {
+    get(path, extraConfig = {}) {
         loadingService.show();
-        return axios.get(this.baseUrl + path, this.getHeaders())
+        const config = {
+            ...this.getHeaders(),
+            ...extraConfig,
+            headers: {
+                ...this.getHeaders().headers,
+                ...(extraConfig.headers || {})
+            }
+        };
+        return axios.get(this.baseUrl + path, config)
             .then(res => res.data)
             .catch(err => {
-                if (err.response.status === 401) {
+                if (err?.response?.status === 401) {
                     localStorage.clear();
                     router.push("/login");
                 }
-                return err.data;
+                throw err;
             }).finally(() => loadingService.hide())
     }
 }

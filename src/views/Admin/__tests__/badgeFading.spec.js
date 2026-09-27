@@ -8,6 +8,7 @@ import {
   isAwardable,
   msRemaining,
   pickRandomCandidate,
+  resolveSuggestedCandidate,
 } from '../badgeFading';
 
 const now = new Date('2026-06-15T12:00:00.000Z');
@@ -154,3 +155,66 @@ describe('pickRandomCandidate', () => {
     expect(pickRandomCandidate(badges, now, () => 0.99)._id).toBe('c');
   });
 });
+
+describe('resolveSuggestedCandidate', () => {
+  const b1 = badge({ _id: 'b1', name: 'Badge 1' });
+  const b2 = badge({ _id: 'b2', name: 'Badge 2' });
+  const bFading = badge({ _id: 'bf', name: 'Fading Badge', status: 'faded', expiresAt: inDays(3) });
+
+  it('returns null if indicators object is null or empty', () => {
+    expect(resolveSuggestedCandidate(null, [b1])).toBeNull();
+    expect(resolveSuggestedCandidate({}, [b1])).toBeNull();
+  });
+
+  it('prioritizes adaptationCandidateBadge when active', () => {
+    const indicators = {
+      isTriggered: true,
+      adaptationCandidateBadge: {
+        badgeId: 'b1',
+        badgeName: 'Badge 1',
+        status: 'active',
+        CII: 0.125,
+        eligibleCount: 3,
+        isLowestCII: true,
+      },
+    };
+
+    const res = resolveSuggestedCandidate(indicators, [b1, b2], now);
+    expect(res).not.toBeNull();
+    expect(res.badge._id).toBe('b1');
+    expect(res.cii).toBe(0.125);
+    expect(res.eligibleCount).toBe(3);
+    expect(res.isTriggered).toBe(true);
+  });
+
+  it('ignores candidate if already fading', () => {
+    const indicators = {
+      isTriggered: true,
+      adaptationCandidateBadge: {
+        badgeId: 'bf',
+        badgeName: 'Fading Badge',
+        status: 'active', // stored was active, but effective is faded
+        CII: 0.1,
+        eligibleCount: 2,
+      },
+    };
+
+    expect(resolveSuggestedCandidate(indicators, [bFading], now)).toBeNull();
+  });
+
+  it('falls back to lowest active candidate from badges list', () => {
+    const indicators = {
+      isTriggered: true,
+      badges: [
+        { badgeId: 'b2', badgeName: 'Badge 2', isCandidate: true, CII: 0.35, eligibleCount: 5 },
+        { badgeId: 'b1', badgeName: 'Badge 1', isCandidate: true, CII: 0.15, eligibleCount: 2 },
+      ],
+    };
+
+    const res = resolveSuggestedCandidate(indicators, [b1, b2], now);
+    expect(res).not.toBeNull();
+    expect(res.badge._id).toBe('b1');
+    expect(res.cii).toBe(0.15);
+  });
+});
+
