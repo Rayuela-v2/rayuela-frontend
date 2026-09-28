@@ -109,11 +109,7 @@ export function expiryFromNow(minutes, now = new Date()) {
 }
 
 /**
- * Picks a badge at random among those still awardable.
- *
- * Stands in for the detection engine that isn't written yet, so the rest of
- * the flow can be exercised. Deliberately excludes badges already fading:
- * re-fading one moves its deadline, which re-notifies every volunteer.
+ * Picks a badge at random among those still awardable (legacy fallback).
  */
 export function pickRandomCandidate(badges, now = new Date(), random = Math.random) {
   const candidates = (badges || []).filter(
@@ -122,3 +118,57 @@ export function pickRandomCandidate(badges, now = new Date(), random = Math.rand
   if (candidates.length === 0) return null;
   return candidates[Math.floor(random() * candidates.length)];
 }
+
+/**
+ * Resolves the suggested badge for fading based on calculated community indicators.
+ * Prioritizes the adaptationCandidateBadge (§4.2.2 lowest CII candidate).
+ * Fallback to lowest CII active candidate from badges list if adaptationCandidateBadge is not explicitly present.
+ */
+export function resolveSuggestedCandidate(indicators, badges = [], now = new Date()) {
+  if (!indicators) return null;
+
+  if (indicators.adaptationCandidateBadge) {
+    const candidate = indicators.adaptationCandidateBadge;
+    const matched = (badges || []).find(
+      (b) =>
+        String(b._id) === String(candidate.badgeId) ||
+        b.name === candidate.badgeName,
+    );
+    if (matched && effectiveStatus(matched, now) === BADGE_STATUS.ACTIVE) {
+      return {
+        badge: matched,
+        cii: candidate.CII,
+        eligibleCount: candidate.eligibleCount,
+        isTriggered: Boolean(indicators.isTriggered),
+        reason: 'lowest_cii',
+      };
+    }
+  }
+
+  // Fallback: search badges array in indicator result
+  if (Array.isArray(indicators.badges) && indicators.badges.length > 0) {
+    const activeCandidates = indicators.badges
+      .filter((b) => b.isCandidate && b.CII !== null)
+      .sort((a, b) => (a.CII ?? 999) - (b.CII ?? 999));
+
+    for (const top of activeCandidates) {
+      const matched = (badges || []).find(
+        (b) =>
+          String(b._id) === String(top.badgeId) ||
+          b.name === top.badgeName,
+      );
+      if (matched && effectiveStatus(matched, now) === BADGE_STATUS.ACTIVE) {
+        return {
+          badge: matched,
+          cii: top.CII,
+          eligibleCount: top.eligibleCount,
+          isTriggered: Boolean(indicators.isTriggered),
+          reason: 'lowest_cii',
+        };
+      }
+    }
+  }
+
+  return null;
+}
+

@@ -7,6 +7,7 @@ import { useI18n } from "vue-i18n";
 import GamificationService from "@/services/GamificationService";
 import ProjectsService from "@/services/ProjectsService";
 import BreadCrumb from "@/components/utils/BreadCrumb.vue";
+import BadgeInterestTimeseriesChart from "@/components/BadgeInterestTimeseriesChart.vue";
 import {
   BADGE_STATUS,
   WINDOW_PRESETS,
@@ -15,7 +16,7 @@ import {
   formatInstant,
   formatRemaining,
   msRemaining,
-  pickRandomCandidate,
+  resolveSuggestedCandidate,
 } from "./badgeFading";
 
 const { t } = useI18n();
@@ -33,6 +34,17 @@ const strategyEnabled = ref(false);
 const loadFailed = ref(false);
 const loading = ref(true);
 const working = ref(false);
+
+const indicators = ref(null);
+const timeline = ref(null);
+const loadingTimeline = ref(false);
+const selectedTimeWindow = ref(30);
+const timeWindowOptions = [
+  { title: "7D", value: 7 },
+  { title: "14D", value: 14 },
+  { title: "30D", value: 30 },
+  { title: "90D", value: 90 },
+];
 
 const selectedBadgeId = ref(null);
 const selectedPreset = ref(WINDOW_PRESETS[3].minutes); // 3 días
@@ -66,12 +78,21 @@ async function load() {
   loading.value = true;
   loadFailed.value = false;
   try {
-    const [gamification, project] = await Promise.all([
+    const [gamification, project, indicatorsRes] = await Promise.all([
       GamificationService.getGamification(route.params.projectId),
       ProjectsService.getProjectById(route.params.projectId),
+      GamificationService.getIndicators(route.params.projectId).catch((err) => {
+        console.warn("Indicators fetch warning:", err);
+        return null;
+      }),
     ]);
     badges.value = gamification.badgesRules || [];
     strategyEnabled.value = project?.gamificationStrategy === "DESVANECIMIENTO";
+    indicators.value = indicatorsRes;
+
+    if (strategyEnabled.value) {
+      await fetchTimeline(selectedTimeWindow.value);
+    }
   } catch (error) {
     // Tracked separately from `strategyEnabled`: a failed request leaves that
     // flag false, and without this the admin would be told their project is
@@ -83,6 +104,26 @@ async function load() {
     );
   } finally {
     loading.value = false;
+  }
+}
+
+async function fetchTimeline(days = selectedTimeWindow.value) {
+  if (!strategyEnabled.value) return;
+  loadingTimeline.value = true;
+  try {
+    const end = new Date(now.value);
+    const start = new Date(end.getTime() - days * 24 * 60 * 60 * 1000);
+    timeline.value = await GamificationService.getIndicatorsTimeline(
+      route.params.projectId,
+      {
+        startDate: start.toISOString(),
+        endDate: end.toISOString(),
+      }
+    );
+  } catch (err) {
+    console.warn("Indicators timeline fetch warning:", err);
+  } finally {
+    loadingTimeline.value = false;
   }
 }
 
@@ -159,14 +200,31 @@ function formatDate(value) {
   return formatInstant(value);
 }
 
-function pickRandom() {
-  const badge = pickRandomCandidate(badges.value, now.value);
-  if (!badge) {
-    toast.info(t("admin.fading_no_candidates"));
+const suggestedCandidate = computed(() =>
+  resolveSuggestedCandidate(indicators.value, badges.value, now.value)
+);
+
+const selectedBadgeIndicator = computed(() => {
+  if (!indicators.value?.badges || !selectedBadgeId.value) return null;
+  return (
+    indicators.value.badges.find(
+      (b) =>
+        String(b.badgeId) === String(selectedBadgeId.value) ||
+        b.badgeName === selectedBadge.value?.name
+    ) || null
+  );
+});
+
+function pickSuggested() {
+  const suggestion = suggestedCandidate.value;
+  if (!suggestion) {
+    toast.info(t("admin.fading_no_suggested_candidates"));
     return;
   }
-  selectedBadgeId.value = badge._id;
-  toast.success(t("admin.fading_random_picked", { name: badge.name }));
+  selectedBadgeId.value = suggestion.badge._id;
+  toast.success(
+    t("admin.fading_suggested_picked", { name: suggestion.badge.name })
+  );
 }
 
 function askFade() {
@@ -335,7 +393,7 @@ async function runPendingAction() {
       <h2 class="mb-1">{{ $t("admin.fading_start_title") }}</h2>
       <p class="text-body-2 mb-4">{{ $t("admin.fading_start_hint") }}</p>
 
-      <v-row>
+      <v-row class="mb-2">
         <v-col cols="12" md="7">
           <v-select
             v-model="selectedBadgeId"
@@ -350,14 +408,48 @@ async function runPendingAction() {
         <v-col cols="12" md="5" class="d-flex align-center">
           <v-btn
             variant="tonal"
-            prepend-icon="mdi-dice-5-outline"
-            :disabled="loading"
-            @click="pickRandom"
+            color="primary"
+            prepend-icon="mdi-lightbulb-outline"
+            :disabled="loading || !suggestedCandidate"
+            @click="pickSuggested"
           >
-            {{ $t("admin.fading_pick_random") }}
+            {{ $t("admin.fading_suggest_badge") }}
           </v-btn>
         </v-col>
       </v-row>
+
+      <!-- Indicator context for selected badge -->
+      <v-alert
+        v-if="selectedBadgeIndicator"
+        variant="tonal"
+        density="compact"
+        :color="selectedBadgeIndicator.isCommunityIgnored ? 'error' : 'info'"
+        class="mb-4"
+      >
+        <div class="d-flex align-center">
+          <v-icon start size="small">
+            {{ selectedBadgeIndicator.isCommunityIgnored ? 'mdi-alert-circle-outline' : 'mdi-chart-line' }}
+          </v-icon>
+          <span class="font-weight-medium">
+            {{ $t("admin.fading_indicator_badge_title") }}
+          </span>
+          <span class="ml-2">
+            CII: <strong>{{ selectedBadgeIndicator.CII !== null ? selectedBadgeIndicator.CII : '—' }}</strong>
+            ({{ $t("admin.fading_indicator_eligible_players", { count: selectedBadgeIndicator.eligibleCount }) }})
+          </span>
+        </div>
+      </v-alert>
+
+      <!-- Alert if no candidate badges exist according to indicators -->
+      <v-alert
+        v-else-if="indicators && !suggestedCandidate && selectableBadges.length"
+        variant="tonal"
+        density="compact"
+        color="info"
+        class="mb-4"
+      >
+        {{ $t("admin.fading_all_earned_warning") }}
+      </v-alert>
 
       <v-select
         v-model="selectedPreset"
@@ -493,6 +585,40 @@ async function runPendingAction() {
           </tr>
         </tbody>
       </v-table>
+    </v-card>
+
+    <!-- Community Interest Timeseries Evolution -->
+    <v-card class="pa-4 mb-6">
+      <div class="d-flex align-center justify-space-between flex-wrap gap-2 mb-3">
+        <div>
+          <h2 class="mb-1">{{ $t("admin.fading_timeseries_title") }}</h2>
+          <p class="text-body-2 text-medium-emphasis mb-0">
+            {{ $t("admin.fading_timeseries_subtitle") }}
+          </p>
+        </div>
+        <v-btn-toggle
+          v-model="selectedTimeWindow"
+          mandatory
+          density="compact"
+          color="primary"
+          @update:model-value="fetchTimeline"
+        >
+          <v-btn
+            v-for="opt in timeWindowOptions"
+            :key="opt.value"
+            :value="opt.value"
+          >
+            {{ opt.title }}
+          </v-btn>
+        </v-btn-toggle>
+      </div>
+
+      <BadgeInterestTimeseriesChart
+        :timeline="timeline"
+        :loading="loadingTimeline"
+        :selected-badge-id="selectedBadgeId"
+        @select-badge="(id) => (selectedBadgeId = id)"
+      />
     </v-card>
 
     </template>

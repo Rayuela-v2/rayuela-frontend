@@ -25,6 +25,24 @@ class GamificationService extends RayuelaService {
     }
 
     /**
+     * Calculates and returns adaptive gamification indicators for a project.
+     * @param {string} projectId
+     * @param {Object} [query] - { asOfDate, threshold, minActiveCheckins }
+     */
+    async getIndicators(projectId, query = {}) {
+        return this.get(`/gamification-indicators/${projectId}`, { params: query });
+    }
+
+    /**
+     * Fetches historical time-series of Community Interest Indicators (CII) across a date window.
+     * @param {string} projectId
+     * @param {Object} [query] - { startDate, endDate, stepDays, threshold, badgeId, minActiveCheckins }
+     */
+    async getIndicatorsTimeline(projectId, query = {}) {
+        return this.get(`/gamification-indicators/${projectId}/timeline`, { params: query });
+    }
+
+    /**
      * Moves a badge through the fading lifecycle.
      *
      *   'faded'   opens the window — `expiresAt` (ISO, must be in the future)
