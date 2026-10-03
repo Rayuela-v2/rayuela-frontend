@@ -307,7 +307,7 @@
         "adaptation_type_label": "Estrategias de adaptación",
         "leaderboard_type_label": "Visualización de la tabla de posiciones",
         "recommendation_algorithm_label": "Algoritmo de recomendación",
-        "manual_location_switch": "Checkins con ubicación manual",
+        "manual_location_switch": "Permitir checkin diferidos (edición manual de horario y ubicación)",
         "gamification_info_title": "¿Qué es una adaptación de ludificación?",
         "gamification_info_text": "Las estrategias de adaptación permiten adecuar los elementos de juego a cada persona en un contexto determinado. En este proyecto, puedes elegir entre:",
         "gamification_settings_title": "Configuración de la ludificación",

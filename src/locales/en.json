@@ -307,7 +307,7 @@
         "adaptation_type_label": "Adaptation strategies",
         "leaderboard_type_label": "Leaderboard visualization",
         "recommendation_algorithm_label": "Recommendation algorithm",
-        "manual_location_switch": "Checkins with manual location",
+        "manual_location_switch": "Allow deferred check-ins (manual editing of time and location)",
         "gamification_info_title": "What is a gamification adaptation?",
         "gamification_info_text": "Adaptation strategies allow game elements to be adjusted to each person in a given context. In this project, you can choose between:",
         "gamification_settings_title": "Gamification settings",
