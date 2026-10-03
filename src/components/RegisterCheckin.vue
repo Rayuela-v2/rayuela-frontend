@@ -71,6 +71,7 @@
                 v-model="form.datetime"
                 type="datetime-local"
                 outlined
+                :disabled="!props.manualLocationEnabled"
             ></v-text-field>
 
             <!-- Sección: Tipo de Tarea -->
