@@ -47,6 +47,10 @@ class ProjectsService extends RayuelaService {
     async getPublicProjectById(projectId) {
         return this.get(`/projects/public/${projectId}`);
     }
+
+    async migrateImages(projectId) {
+        return this.post(`/projects/${projectId}/migrate-images`, {});
+    }
 }
 
-export default new ProjectsService(); // Sinleton pattern
+export default new ProjectsService(); // Singleton pattern

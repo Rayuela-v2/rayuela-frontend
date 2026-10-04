@@ -2,6 +2,7 @@
 import {useRouter} from 'vue-router';
 import {ref, onMounted} from 'vue'
 import ProjectsService from "@/services/ProjectsService";
+import { getImageUrl } from "@/utils/imageUrl";
 
 const router = useRouter()
 const projects = ref([])
@@ -66,7 +67,7 @@ onMounted(async () => {
           style="cursor: pointer;"
         >
           <v-img
-            :src="project.image"
+            :src="getImageUrl(project.image)"
             height="180"
             cover
             :alt="$t('project.image_alt')"
