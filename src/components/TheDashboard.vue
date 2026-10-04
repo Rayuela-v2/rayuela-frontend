@@ -1,6 +1,7 @@
 <script setup>
 import {onMounted, ref} from 'vue';
 import ProjectsService from "@/services/ProjectsService";
+import { getImageUrl } from "@/utils/imageUrl";
 import router from "@/router";
 
 const projects_user = ref([]);
@@ -31,7 +32,7 @@ const seeProjectDetails = (id) => {
                 <v-img
                     class="project-image"
                     height="200"
-                    :src="project.image || 'https://via.placeholder.com/400'"
+                    :src="getImageUrl(project.image) || 'https://via.placeholder.com/400'"
                     cover
                 />
                 <div class="image-overlay">

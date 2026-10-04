@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { computeBadgeLayout, DEFAULT_NODE_RADIUS as NODE_RADIUS } from '@/utils/badgeGraphLayout';
+import { getImageUrl } from '@/utils/imageUrl';
 
 const { t } = useI18n();
 
@@ -165,17 +166,22 @@ function requirementsList(badge) {
             fill="none"
             :filter="isHighlighted(node) ? 'url(#glow-highlight)' : isEarned(node) ? 'url(#glow-earned)' : ''"
           />
+          <!-- Background circle to support transparent badge icons -->
+          <circle
+            :r="NODE_RADIUS"
+            fill="#ffffff"
+          />
           <!-- Badge image (clipped circle) -->
-          <clipPath :id="'clip-' + node.name">
+          <clipPath :id="`clip-node-${index}`">
             <circle :r="NODE_RADIUS" />
           </clipPath>
           <image
-            :href="node.imageUrl"
+            :href="getImageUrl(node.imageUrl)"
             :x="-NODE_RADIUS"
             :y="-NODE_RADIUS"
             :width="NODE_RADIUS * 2"
             :height="NODE_RADIUS * 2"
-            :clip-path="`url(#clip-${node.name})`"
+            :clip-path="`url(#clip-node-${index})`"
             :opacity="nodeOpacity(node)"
             preserveAspectRatio="xMidYMid slice"
           />

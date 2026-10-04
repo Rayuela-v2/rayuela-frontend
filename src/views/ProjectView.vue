@@ -94,7 +94,7 @@
         </v-alert>
         <div v-for="(badge, index) in project.user.badges" :key="index" class="badge-item">
           <img
-              :src="badge.imageUrl"
+              :src="getImageUrl(badge.imageUrl)"
               :alt="$t('project.image_alt')"
               :class="{ 'grayscale': !badge.active }"
               @click="toggleTooltip(index)"
@@ -142,7 +142,7 @@
           <v-card-title class="headline">{{ selectedBadge.name }}</v-card-title>
           <v-card-text>
             <div style="display:flex; gap:16px; align-items:flex-start">
-              <img :src="selectedBadge.imageUrl" alt="" width="90" height="90"/>
+              <img :src="getImageUrl(selectedBadge.imageUrl)" alt="" width="90" height="90"/>
               <div>
                 <p><strong>{{ $t('project.badge_rules_label') }}</strong></p>
                 <ul>
@@ -214,7 +214,7 @@
     <v-card class="pa-4 mb-6">
       <v-row>
         <v-col cols="12" md="6">
-          <v-img :src="project.image" :alt="$t('project.image_alt')" class="mb-4" contain/>
+          <v-img :src="getImageUrl(project.image)" :alt="$t('project.image_alt')" class="mb-4" contain/>
         </v-col>
         <v-col cols="12" md="6">
           <h2>{{ project.name }}</h2>
@@ -261,6 +261,7 @@ import GamificationService from "@/services/GamificationService";
 import CheckinService from "@/services/CheckinService";
 import UserCheckins from "@/components/UserCheckins.vue";
 import BadgeDependencyGraph from '@/components/BadgeDependencyGraph.vue';
+import { getImageUrl } from '@/utils/imageUrl';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();

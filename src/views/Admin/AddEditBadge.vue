@@ -4,6 +4,8 @@ import {useRoute} from 'vue-router';
 import {useStore} from 'vuex';
 import {toast} from 'vue3-toastify';
 import GamificationService from "@/services/GamificationService";
+import StorageService from "@/services/StorageService";
+import { getImageUrl } from "@/utils/imageUrl";
 import router from "@/router";
 import BreadCrumb from "@/components/utils/BreadCrumb.vue";
 import BadgeDependencyGraph from '@/components/BadgeDependencyGraph.vue';
@@ -15,6 +17,26 @@ const store = useStore();
 const route = useRoute();
 
 const isNew = ref(false);
+const uploadingImage = ref(false);
+
+const onBadgeImageSelected = async (fileOrFiles) => {
+  const file = Array.isArray(fileOrFiles) ? fileOrFiles[0] : fileOrFiles;
+  if (!file) return;
+
+  uploadingImage.value = true;
+  try {
+    const res = await StorageService.uploadFile(file, 'badges');
+    if (res?.key) {
+      badge.value.imageUrl = res.key;
+      toast.success(t('admin.upload_image_success'));
+    }
+  } catch (err) {
+    console.error('Error uploading badge image:', err);
+    toast.error(t('admin.upload_image_error'));
+  } finally {
+    uploadingImage.value = false;
+  }
+};
 
 const defaultBadge = {
   projectId: route.params.projectId,
@@ -127,16 +149,38 @@ onMounted(() => {
         <h2>{{ $t('admin.badge_info') }}</h2>
         <v-text-field :label="$t('admin.badge_name_label')" v-model="badge.name" :disabled="!isNew" required/>
         <v-textarea :label="$t('admin.badge_description_label')" v-model="badge.description" required/>
-        <v-text-field :label="$t('admin.project_image_label')" v-model="badge.imageUrl" required/>
-        <v-row class="my-3" v-if="badge.imageUrl">
-          <v-col cols="12" sm="6" md="4">
-            <v-img :src="badge.imageUrl" :alt="$t('common.image_preview')" contain max-height="200">
-              <template #error>
-                <v-alert density="compact" variant="tonal" color="error" class="ma-0">
-                  {{ $t('common.image_load_error') }}
-                </v-alert>
-              </template>
-            </v-img>
+        <v-row align="center" class="mt-1 mb-2">
+          <v-col cols="12" md="8">
+            <v-file-input
+              :label="$t('admin.upload_image_btn')"
+              :hint="$t('admin.upload_image_hint')"
+              persistent-hint
+              accept="image/png, image/jpeg, image/webp"
+              prepend-icon="mdi-camera"
+              :loading="uploadingImage"
+              :disabled="uploadingImage"
+              @update:model-value="onBadgeImageSelected"
+            />
+          </v-col>
+          <v-col cols="12" md="4" v-if="badge.imageUrl">
+            <v-card variant="outlined" class="pa-2 text-center">
+              <v-img
+                :src="getImageUrl(badge.imageUrl)"
+                :alt="$t('common.image_preview')"
+                height="120"
+                contain
+                class="rounded"
+              >
+                <template #error>
+                  <v-alert density="compact" variant="tonal" color="error" class="ma-0">
+                    {{ $t('common.image_load_error') }}
+                  </v-alert>
+                </template>
+              </v-img>
+              <div class="text-caption text-truncate mt-1 text-medium-emphasis">
+                {{ badge.imageUrl }}
+              </div>
+            </v-card>
           </v-col>
         </v-row>
         <v-text-field
