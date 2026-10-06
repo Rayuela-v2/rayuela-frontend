@@ -149,7 +149,7 @@
 
         <CollapsableSection style="background: whitesmoke; padding: 2em"
                             v-for="(interval, index) in project.timeIntervals"
-                            :key="index" class="mb-4" :title="interval.name || $t('admin.new_interval_placeholder')">
+                            :key="index" class="mb-4" :title="(intervalError(interval) ? '⚠ ' : '') + (interval.name || $t('admin.new_interval_placeholder'))">
           <v-text-field :label="$t('admin.interval_name_label')" v-model="interval.name" required/>
 
           <v-row>
@@ -177,6 +177,7 @@
               <v-select
                 :items="Array.from({length: 24}, (_, i) => i)"
                 v-model="interval.time.start"
+                @update:model-value="v => { if (interval.time.end <= v) interval.time.end = v + 1 }"
                 :label="$t('admin.start_hour_label')"
                 :hint="t('admin.time_hint', { time: interval.time.start })"
                 persistent-hint
@@ -185,7 +186,7 @@
             </v-col>
             <v-col cols="6">
               <v-select
-                :items="Array.from({length: 24}, (_, i) => i + 1)"
+                :items="Array.from({length: 24 - interval.time.start}, (_, i) => interval.time.start + i + 1)"
                 v-model="interval.time.end"
                 :label="$t('admin.end_hour_label')"
                 :hint="t('admin.time_hint', { time: interval.time.end })"
@@ -244,13 +245,21 @@
           <v-btn color="red" @click="removeTimeInterval(index)">{{ $t('admin.remove_interval') }}</v-btn>
 
           <!-- Mostrar advertencias de validación -->
-          <v-alert v-if="!isValidInterval(interval) && interval.name" type="error" variant="outlined" class="mt-4">
-            {{ $t('admin.invalid_interval_alert') }}
+          <v-alert v-if="intervalError(interval)" type="error" variant="outlined" class="mt-4">
+            {{ $t(intervalError(interval)) }}
           </v-alert>
         </CollapsableSection>
       </CollapsableSection>
       <CollapsableSection :title="$t('admin.task_management') " @click="taskSectionClick">
       </CollapsableSection>
+      <v-alert v-if="hasInvalidTimeIntervals" type="warning" variant="tonal" class="mb-3">
+        <div>{{ $t('admin.fix_intervals_to_save') }}</div>
+        <ul class="ml-4">
+          <li v-for="(interval, i) in project.timeIntervals.filter(i => intervalError(i))" :key="i">
+            <b>{{ interval.name || $t('admin.new_interval_placeholder') }}</b>: {{ $t(intervalError(interval)) }}
+          </li>
+        </ul>
+      </v-alert>
       <v-btn type="submit" variant="elevated" color="primary" width="100%" :disabled="hasInvalidTimeIntervals">
         {{ isNew ? $t('common.add') : $t('admin.project_updated_success').split(' ')[1] }}
       </v-btn>
@@ -349,7 +358,8 @@ const runImageMigration = async () => {
               ? Number(interval.time.start.split(':')[0])
               : interval.time.start,
             end: typeof interval.time.end === 'string'
-              ? Number(interval.time.end.split(':')[0])
+              // ponytail: inverse of save (end-1):59:59); "23:59:59" -> 24, "17:00:00" -> 17
+              ? Math.ceil(interval.time.end.split(':').reduce((acc, v, i) => acc + Number(v) / 60 ** i, 0))
               : interval.time.end,
           }
         }));
@@ -468,14 +478,14 @@ const removeTaskType = (index) => {
 };
 
 // Validar si un intervalo de tiempo es válido
-const isValidInterval = (interval) => {
-  const start = interval.time.start;
-  const end = interval.time.end;
-  return interval.name.trim() !== '' &&
-      start < end &&
-      interval.startDate < interval.endDate &&
-      interval.days.length > 0;
+const intervalError = (interval) => {
+  if (interval.name.trim() === '') return 'admin.interval_error_name';
+  if (interval.time.start >= interval.time.end) return 'admin.interval_error_hours';
+  if (interval.startDate >= interval.endDate) return 'admin.interval_error_dates';
+  if (interval.days.length === 0) return 'admin.interval_error_days';
+  return null;
 };
+const isValidInterval = (interval) => !intervalError(interval);
 
 const addNewTimeInterval = () => {
   const nextYear = new Date();
@@ -591,7 +601,8 @@ const fetchedProject = await ProjectsService.getProjectById(projectId);
           ? Number(interval.time.start.split(':')[0])
           : interval.time.start,
         end: typeof interval.time.end === 'string'
-          ? Number(interval.time.end.split(':')[0])
+          // ponytail: inverse of save (end-1):59:59); "23:59:59" -> 24, "17:00:00" -> 17
+          ? Math.ceil(interval.time.end.split(':').reduce((acc, v, i) => acc + Number(v) / 60 ** i, 0))
           : interval.time.end,
       }
     }));
