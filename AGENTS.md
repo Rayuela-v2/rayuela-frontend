@@ -4,15 +4,19 @@ This file serves as the unified source of truth for all AI agents (Claude Code, 
 
 ## Project Overview
 
-Rayuela is a full-stack citizen science platform with adaptive gamification for crowdsourced data collection. It is a monorepo with two main packages:
+Rayuela is a full-stack citizen science platform with adaptive gamification for crowdsourced data collection. It is composed of three main packages:
 
 - `rayuela-NodeBackend/` — NestJS + TypeScript REST API (MongoDB + Garage S3)
-- `rayuela-frontend/` — Vue 3 + Vite SPA (Vuetify + Vuex)
+- `rayuela-frontend/` — Vue 3 + Vite SPA (Vuetify + Vuex) — Dedicated to **Administrator and Researcher profiles** for project setup, task configuration, gamification strategies, and analytics. *(Note: Although contributors can technically authenticate, the contributor experience is routed to the mobile app).*
+- `rayuela-mobile/` — Flutter Mobile App (Riverpod + GoRouter) — Dedicated to **Citizen Science Contributors and Volunteers** for field data collection and missions.
 
 **GitHub Project:** [Rayuela Workspace Board](https://github.com/orgs/Rayuela-v2/projects/1/views/1)
 
 ## Mandatory Development Rules
 - **ORG REPOSITORIES:** ALWAYS work exclusively in the repositories under the `Rayuela-v2` organization. NEVER perform actions in `cientopolis` source repositories.
+- **CLIENT APPLICATION SCOPES & TARGET AUDIENCE:**
+  * `rayuela-frontend` is exclusively intended for **Administrator and Researcher profiles** (project configuration, spatial/temporal task constraints, adaptive gamification setup, badge fading dashboards, and admin oversight). Do not design contributor data collection workflows for the web frontend; contributors can technically log in, but their participation experience is delegated to the mobile app.
+  * `rayuela-mobile` is the official client for **Citizen Science Contributors and Volunteers** (field observations and GPS check-ins).
 - **ISSUE TRACKING:** All issues are tracked in the GitHub Project: [Rayuela Workspace Board](https://github.com/orgs/Rayuela-v2/projects/1). Note that the Project Board view is filtered to display issues from the `Rayuela-v2/rayuela-NodeBackend` repository. Therefore, even for Mobile or Frontend tasks, always create the issue in `Rayuela-v2/rayuela-NodeBackend` and link it to the project board.
 - **NO AI SIGNATURES:** Do not include agent signatures or attribution lines in PR descriptions or commits.
 
