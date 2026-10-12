@@ -36,87 +36,36 @@ Esta plataforma propone un abordaje para incorporar ludificación adaptativa a p
 
 ### Arquitectura de la Plataforma
 
-#### Interpretación del Diagrama Histórico vs. Actual
-
-El diagrama histórico original reflejaba la arquitectura heredada (*Rayuela v1* / *Cientópolis*):
-1. **Fragmentación de interfaces**: Existían dos frontends aislados; los voluntarios interactuaban con una aplicación web en VueJS (`Frontend Web`), mientras que los investigadores y administradores utilizaban un panel generado por el servidor mediante plantillas de Django y Bootstrap (`Panel de administración`).
-2. **Doble sistema de autenticación**: Convivían dos esquemas desarticulados de usuarios: autenticación de Django (`AbstractUser`) para el perfil voluntario y una clase `User` propia por fuera de Django para los perfiles administrador y root.
-3. **Monolito relacional**: Toda la lógica residía en un backend Django/DRF contra una base de datos relacional (PostgreSQL o MySQL).
-
-En la arquitectura actual (**Rayuela v2**), los roles y componentes se encuentran claramente delimitados:
-1. **Frontend Web para Administración (`rayuela-frontend`)**: Single Page Application (SPA) en Vue 3 que consolida el panel de control para administradores e investigadores (creación de proyectos, geocercas/áreas con OpenLayers, reglas de gamificación adaptativa, analíticas y gestión de medallas). *Nota: Aunque los colaboradores conservan acceso técnico a la web, no es el cliente diseñado para su flujo de trabajo.*
-2. **Aplicación Móvil para Colaboradores (`rayuela-mobile`)**: Aplicación móvil en Flutter 3.27+ que constituye el cliente primario para voluntarios y colaboradores ciudadanos (toma de muestras geolocalizadas, fotografías, misiones y experiencia de gamificación en campo con soporte offline-first).
-3. **Backend Modular en NestJS (`rayuela-NodeBackend`)**: Expone endpoints REST normalizados bajo `/v1` consumidos por ambos clientes con DTOs fuertemente tipados.
-4. **Autenticación Centralizada**: Unificación del sistema de usuarios mediante tokens JWT y federación con Google OAuth 2.0.
-5. **Almacenamiento Dual Especializado**: **MongoDB** gestiona datos transaccionales y documentos de dominio (usuarios, proyectos, tareas, check-ins, perfiles de juego), mientras que **Garage S3** almacena imágenes de observaciones, avatares y medallas.
+En la arquitectura actual (**Rayuela v2**), `rayuela-frontend` funciona como la Single Page Application (SPA) para investigadores y administradores, comunicándose mediante la API REST con `rayuela-NodeBackend` y la capa de persistencia:
 
 ```mermaid
-flowchart TB
-    subgraph Actores["Usuarios y Roles"]
-        Investigador["🔬 Investigador / Administrador\n(Gestión, configuración y analíticas)"]
-        Voluntario["🙋‍♂️ Colaborador / Voluntario\n(Recolección en campo y misiones)"]
+flowchart LR
+    Admin["🔬 Investigador / Admin"]
+    Vol["🙋‍♂️ Colaborador (Móvil)"]
+
+    subgraph Clientes["Aplicaciones"]
+        FE["rayuela-frontend\n(Vue 3 SPA)"]
+        Mobile["rayuela-mobile\n(Flutter)"]
     end
 
-    subgraph Clientes["Aplicaciones Cliente"]
-        subgraph FrontendAdmin["rayuela-frontend (Vue 3 + Vite + Vuetify 3)"]
-            BackofficeAdmin["Panel de Administración e Investigación\n(Proyectos, tareas, ludificación y analíticas)"]
-            OLMaps["Mapas OpenLayers (ol)\n(Delimitación de áreas de estudio)"]
-            PortalSecundario["Acceso Secundario Colaboradores\n(Consulta básica opcional)"]
-        end
-        MobileApp["📱 rayuela-mobile (Flutter 3.27+)\nCliente Principal para Colaboradores (Offline-first)"]
+    subgraph Backend["rayuela-NodeBackend"]
+        API["REST API (/v1)\n(NestJS + JWT)"]
     end
 
-    subgraph ServiciosExternos["Servicios Externos"]
-        OSM["🗺️ OpenStreetMap\n(Servidor de Tiles)"]
-        GoogleAuth["🔐 Google Identity\n(Verificación OAuth 2.0)"]
-        SMTPMail["✉️ Gmail SMTP\n(Correos transaccionales)"]
+    subgraph Persistencia["Almacenamiento"]
+        DB[("MongoDB")]
+        S3[("Garage S3")]
     end
 
-    subgraph BackendApp["Backend (rayuela-NodeBackend)"]
-        Gateway["REST API Gateway (/v1)\nNestJS + TypeScript"]
-        AuthModule["Autenticación y Usuarios\n(JWT, RolesGuard, Google Sign-In)"]
-        ProjectModule["Proyectos y Tareas\n(Restricciones espaciotemporales)"]
-        CheckinModule["Ingesta de Check-ins\n(Validación de observaciones)"]
-        GamificationEngine["Motor de Ludificación Adaptativa\n(Puntos, medallas y fading)"]
-        StorageModule["Almacenamiento Multimedia\n(Gestión S3 de imágenes)"]
-    end
+    Admin --> FE
+    Vol --> Mobile
+    Vol -.->|Opcional| FE
 
-    subgraph Persistencia["Persistencia y Almacenamiento"]
-        MongoDB[("🍃 MongoDB Document Store\nUsuarios, proyectos, tareas y check-ins")]
-        GarageS3[("🪣 Garage S3 Cluster (:3900)\nFotos de observaciones, medallas y avatares")]
-    end
+    FE -->|HTTPS / REST| API
+    Mobile -->|HTTPS / REST| API
 
-    %% Relaciones de actores con clientes
-    Investigador -->|"Gestión web principal"| BackofficeAdmin
-    Voluntario -->|"Uso oficial en campo"| MobileApp
-    Voluntario -.->|"Acceso secundario / consulta"| PortalSecundario
-
-    %% Integraciones cartográficas
-    OLMaps -.->|"Tiles raster (HTTPS)"| OSM
-    MobileApp -.->|"Tiles raster (HTTPS)"| OSM
-
-    %% Conexiones HTTP hacia Backend API
-    BackofficeAdmin -->|"REST API (/v1)"| Gateway
-    PortalSecundario -->|"REST API (/v1)"| Gateway
-    MobileApp -->|"REST API (/v1)"| Gateway
-
-    %% Enrutamiento interno del Backend
-    Gateway --> AuthModule
-    Gateway --> ProjectModule
-    Gateway --> CheckinModule
-    Gateway --> GamificationEngine
-    Gateway --> StorageModule
-
-    %% Integraciones con servicios externos
-    AuthModule -.->|"Tokeninfo (HTTPS)"| GoogleAuth
-    AuthModule -.->|"SMTP (TLS)"| SMTPMail
-
-    %% Conexiones con almacenamiento
-    AuthModule --> MongoDB
-    ProjectModule --> MongoDB
-    CheckinModule --> MongoDB
-    GamificationEngine --> MongoDB
-    StorageModule --> GarageS3
+    API --> DB
+    API --> S3
 ```
 
 ## Pre-requisitos
@@ -165,7 +114,6 @@ npm install
 2. Completar las variables dentro del archivo con los datos del entorno:
    - `VITE_ROOT_API`: URL base del backend REST (ejemplo local: `http://localhost:3000/v1`).
    - `VITE_GOOGLE_CLIENT_ID`: *(Opcional)* Client ID Web generado en Google Cloud Console para habilitar inicio de sesión y registro mediante Google Identity.
-   - `VITE_UMAMI_WEBSITE_ID` / `VITE_UMAMI_SCRIPT_URL`: *(Opcional)* Identificador y script de seguimiento para analíticas con Umami.
 3. Para hacer uso de estas variables de configuración en el código de la aplicación, utilizar `import.meta.env.<CLAVE>`. Por ejemplo:
    ```javascript
    import.meta.env.VITE_ROOT_API
