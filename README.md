@@ -195,11 +195,6 @@ Ejecuta el análisis estático y corrección automática de estilo:
 npm run lint
 ```
 
-## Créditos
-
-* **Sergio** - [tarbz2](https://github.com/tarbz2).
-* **Equipo de Desarrollo Rayuela v2**.
-
 ## License
 
 Rayuela is a free software and content project:
