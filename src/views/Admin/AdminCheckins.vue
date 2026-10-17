@@ -578,21 +578,29 @@ const formatDate = (iso) => {
   return `${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
 };
 
-const buildQuery = () => ({
-  taskName: appliedFilters.taskName || undefined,
-  taskType: appliedFilters.taskType || undefined,
-  badgeName: appliedFilters.badgeName || undefined,
-  hasPhotos: appliedFilters.hasPhotos || undefined,
-  contributed: appliedFilters.contributed || undefined,
-  dateFrom: appliedFilters.dateFrom ? new Date(appliedFilters.dateFrom).toISOString() : undefined,
-  dateTo: appliedFilters.dateTo ? new Date(appliedFilters.dateTo).toISOString() : undefined,
-  latitude: appliedFilters.latitude !== '' ? appliedFilters.latitude : undefined,
-  longitude: appliedFilters.longitude !== '' ? appliedFilters.longitude : undefined,
-  radiusKm: appliedFilters.radiusKm !== '' ? appliedFilters.radiusKm : undefined,
-  page: page.value,
-  limit: limit.value,
-  sortOrder: sortOrder.value,
-});
+const buildQuery = () => {
+  let dateToIso;
+  if (appliedFilters.dateTo) {
+    const end = new Date(appliedFilters.dateTo);
+    end.setUTCHours(23, 59, 59, 999);
+    dateToIso = end.toISOString();
+  }
+  return {
+    taskName: appliedFilters.taskName || undefined,
+    taskType: appliedFilters.taskType || undefined,
+    badgeName: appliedFilters.badgeName || undefined,
+    hasPhotos: appliedFilters.hasPhotos || undefined,
+    contributed: appliedFilters.contributed || undefined,
+    dateFrom: appliedFilters.dateFrom ? new Date(appliedFilters.dateFrom).toISOString() : undefined,
+    dateTo: dateToIso,
+    latitude: appliedFilters.latitude !== '' ? appliedFilters.latitude : undefined,
+    longitude: appliedFilters.longitude !== '' ? appliedFilters.longitude : undefined,
+    radiusKm: appliedFilters.radiusKm !== '' ? appliedFilters.radiusKm : undefined,
+    page: page.value,
+    limit: limit.value,
+    sortOrder: sortOrder.value,
+  };
+};
 
 const reload = async () => {
   loading.value = true;
@@ -769,7 +777,9 @@ const loadProjectMetadata = async () => {
   if (!projectId.value) return;
   try {
     const project = await ProjectsService.getProjectById(projectId.value);
-    taskTypeItems.value = project?.taskTypes || [];
+    taskTypeItems.value = (project?.taskTypes || [])
+      .map(t => (typeof t === 'string' ? t : t?.name))
+      .filter(Boolean);
     projectAreas.value = project?.areas || null;
   } catch (e) {
     console.warn('Could not load project metadata for filters', e);
@@ -782,7 +792,7 @@ const loadGamificationMetadata = async () => {
   if (!projectId.value) return;
   try {
     const config = await GamificationService.getGamification(projectId.value);
-    gamificationBadges.value = config?.badges || [];
+    gamificationBadges.value = config?.badgesRules || config?.badges || [];
   } catch (e) {
     console.warn('Could not load gamification config for filters', e);
     gamificationBadges.value = [];
