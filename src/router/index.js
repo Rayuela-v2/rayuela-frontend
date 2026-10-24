@@ -127,6 +127,7 @@ const router = createRouter({
             path: '/admin/analytics',
             name: 'analytics-dashboard',
             component: () => import('../views/Admin/AnalyticsDashboard.vue'),
+            meta: { requiresAuth: true },
         },
     ]
 })
