@@ -19,6 +19,14 @@ Rayuela is a full-stack citizen science platform with adaptive gamification for 
   * `rayuela-mobile` is the official client for **Citizen Science Contributors and Volunteers** (field observations and GPS check-ins).
 - **ISSUE TRACKING:** All issues are tracked in the GitHub Project: [Rayuela Workspace Board](https://github.com/orgs/Rayuela-v2/projects/1). Note that the Project Board view is filtered to display issues from the `Rayuela-v2/rayuela-NodeBackend` repository. Therefore, even for Mobile or Frontend tasks, always create the issue in `Rayuela-v2/rayuela-NodeBackend` and link it to the project board.
 - **NO AI SIGNATURES:** Do not include agent signatures or attribution lines in PR descriptions or commits.
+- **LOCALIZATION / i18n (ZERO HARDCODED STRINGS):**
+  * **NEVER hardcode user-facing text** in Vue templates (`<template>`) or scripts (`<script>`)—including labels, buttons, placeholders, table headers, tooltips, snackbars/alerts, dialogs, empty states, and form validation errors.
+  * **ALWAYS use `vue-i18n`** (`$t('key')` in templates or `t('key')` / `this.$t('key')` in scripts).
+  * Every time you introduce or update user-facing text, you **MUST** add or update the corresponding translation keys in **ALL THREE** locale files: `src/locales/es.json`, `src/locales/en.json`, and `src/locales/pt.json`.
+  * Never leave un-translated strings or raw translation keys in the UI.
+- **BREADCRUMBS ON ALL PAGES:**
+  * **Every page/view in `rayuela-frontend` MUST include breadcrumbs** (using `src/components/utils/BreadCrumb.vue` or `<v-breadcrumbs>`) at the top of the view to improve hierarchical navigation and allow users to easily return to parent sections.
+  * Whenever you create or update a view (`src/views/**`), ensure its breadcrumb trail is defined in `src/components/utils/BreadCrumb.vue` with localized `t('...')` titles (defined in `es.json`, `en.json`, and `pt.json`) and rendered in the page header.
 
 ## Development Commands
 
@@ -50,7 +58,7 @@ Rayuela is a full-stack citizen science platform with adaptive gamification for 
 - UI Library: Vuetify 3
 - State: Vuex
 - API Layer: `src/services/`
-- i18n: `src/locales/` (ES primary, EN secondary)
+- i18n: `src/locales/{es,en,pt}.json` (ES, EN, PT — all mandatory)
 
 ## Environment Variables
 - Backend uses `.env.development` or `.env.production`.
