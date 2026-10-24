@@ -19,8 +19,12 @@ class AnalyticsService extends RayuelaService {
     })}`);
   }
 
-  getByStrategy() {
-    return this.get(`/analytics/by-strategy`);
+  getByStrategy({ projectId, startDate, endDate } = {}) {
+    return this.get(`/analytics/by-strategy?${new URLSearchParams({
+      ...(projectId && { projectId }),
+      ...(startDate && { startDate }),
+      ...(endDate && { endDate }),
+    })}`);
   }
 
   getPointsOverTime({ projectId, granularity, startDate, endDate } = {}) {
@@ -32,9 +36,11 @@ class AnalyticsService extends RayuelaService {
     })}`);
   }
 
-  getContributionRate({ projectId } = {}) {
+  getContributionRate({ projectId, startDate, endDate } = {}) {
     return this.get(`/analytics/contribution-rate?${new URLSearchParams({
       ...(projectId && { projectId }),
+      ...(startDate && { startDate }),
+      ...(endDate && { endDate }),
     })}`);
   }
 

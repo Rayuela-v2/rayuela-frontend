@@ -9,12 +9,14 @@
 
 <script setup>
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { Line } from 'vue-chartjs';
 import {
   Chart as ChartJS,
   Title,
   Tooltip,
   Legend,
+  Filler,
   LineElement,
   LinearScale,
   PointElement,
@@ -22,16 +24,18 @@ import {
   TimeScale,
 } from 'chart.js';
 import 'chartjs-adapter-date-fns';
+import { es, enUS, ptBR } from 'date-fns/locale';
 
 ChartJS.register(
   Title,
   Tooltip,
   Legend,
+  Filler,
   LineElement,
   LinearScale,
   PointElement,
   CategoryScale,
-  TimeScale
+  TimeScale,
 );
 
 const props = defineProps({
@@ -45,7 +49,19 @@ const props = defineProps({
     default: 'week',
     validator: (v) => ['day', 'week', 'month'].includes(v),
   },
+  integerY: {
+    type: Boolean,
+    default: true,
+  },
 });
+
+const { locale } = useI18n();
+
+const DATE_FNS_LOCALES = {
+  ES: es,
+  EN: enUS,
+  PT: ptBR,
+};
 
 const DISPLAY_FORMATS = {
   day:   { day: 'MMM d', week: 'MMM d', month: 'MMM yyyy' },
@@ -62,6 +78,11 @@ const TOOLTIP_FORMATS = {
 const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
+  adapters: {
+    date: {
+      locale: DATE_FNS_LOCALES[String(locale.value).toUpperCase()] || es,
+    },
+  },
   scales: {
     x: {
       type: 'time',
@@ -73,6 +94,7 @@ const chartOptions = computed(() => ({
     },
     y: {
       beginAtZero: true,
+      ticks: props.integerY ? { precision: 0 } : {},
     },
   },
 }));

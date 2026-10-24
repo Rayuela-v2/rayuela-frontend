@@ -1,5 +1,7 @@
 <template>
   <v-container fluid>
+    <BreadCrumb items="analyticsPath" />
+
     <v-row align="center" class="mb-2">
       <v-col cols="12" md="4">
         <h1 class="text-h4">{{ $t('admin.analytics_dashboard') }}</h1>
@@ -8,7 +10,7 @@
         <v-select
           v-model="selectedProject"
           :items="projectItems"
-          label="Project"
+          :label="$t('admin.analytics_project_label')"
           clearable
           hide-details
           variant="outlined"
@@ -23,9 +25,9 @@
           variant="outlined"
           density="compact"
         >
-          <v-btn value="day">Day</v-btn>
-          <v-btn value="week">Week</v-btn>
-          <v-btn value="month">Month</v-btn>
+          <v-btn value="day">{{ $t('admin.analytics_granularity_day') }}</v-btn>
+          <v-btn value="week">{{ $t('admin.analytics_granularity_week') }}</v-btn>
+          <v-btn value="month">{{ $t('admin.analytics_granularity_month') }}</v-btn>
         </v-btn-toggle>
       </v-col>
     </v-row>
@@ -41,18 +43,18 @@
           density="compact"
           class="flex-wrap"
         >
-          <v-btn value="last7days">Last 7 days</v-btn>
-          <v-btn value="last30days">Last 30 days</v-btn>
-          <v-btn value="last3months">Last 3 months</v-btn>
-          <v-btn value="alltime">All time</v-btn>
-          <v-btn value="custom">Custom</v-btn>
+          <v-btn value="last7days">{{ $t('admin.analytics_preset_last7days') }}</v-btn>
+          <v-btn value="last30days">{{ $t('admin.analytics_preset_last30days') }}</v-btn>
+          <v-btn value="last3months">{{ $t('admin.analytics_preset_last3months') }}</v-btn>
+          <v-btn value="alltime">{{ $t('admin.analytics_preset_alltime') }}</v-btn>
+          <v-btn value="custom">{{ $t('admin.analytics_preset_custom') }}</v-btn>
         </v-btn-toggle>
 
         <!-- Custom date inputs — visible only when preset is 'custom' -->
         <span v-if="datePreset === 'custom'" class="ml-4 d-inline-flex align-center ga-2">
           <v-text-field
             v-model="customStart"
-            label="From"
+            :label="$t('admin.filter_date_from')"
             type="date"
             density="compact"
             variant="outlined"
@@ -61,7 +63,7 @@
           />
           <v-text-field
             v-model="customEnd"
-            label="To"
+            :label="$t('admin.filter_date_to')"
             type="date"
             density="compact"
             variant="outlined"
@@ -72,43 +74,80 @@
       </v-col>
     </v-row>
 
-    <!-- Summary Cards -->
-    <v-row class="mb-6">
-      <v-col cols="12" sm="6" md="2.4" v-for="card in summaryCards" :key="card.title">
-        <SummaryCard :title="card.title" :value="card.value" :format="card.format" />
-      </v-col>
-    </v-row>
+    <!-- Summary Cards: 5 equal columns on desktop -->
+    <div class="summary-grid mb-6">
+      <SummaryCard
+        v-for="card in summaryCards"
+        :key="card.title"
+        :title="card.title"
+        :value="card.value"
+        :format="card.format"
+      />
+    </div>
 
     <!-- Time Series Charts -->
     <v-row>
       <v-col cols="12" md="6">
-        <LineChart title="Check-ins Over Time" :data="checkinsData" :granularity="granularity" />
+        <LineChart
+          :title="$t('admin.analytics_chart_checkins_over_time')"
+          :data="checkinsData"
+          :granularity="granularity"
+          :integer-y="true"
+        />
       </v-col>
       <v-col cols="12" md="6">
-        <LineChart title="Active Users Over Time" :data="activeUsersData" :granularity="granularity" />
+        <LineChart
+          :title="$t('admin.analytics_chart_active_users_over_time')"
+          :data="activeUsersData"
+          :granularity="granularity"
+          :integer-y="true"
+        />
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12" md="6">
-        <LineChart title="Points Awarded Over Time" :data="pointsData" :granularity="granularity" />
+        <LineChart
+          :title="$t('admin.analytics_chart_points_over_time')"
+          :data="pointsData"
+          :granularity="granularity"
+          :integer-y="true"
+        />
       </v-col>
       <v-col cols="12" md="6">
-        <LineChart title="Badges Earned Over Time" :data="badgesData" :granularity="granularity" />
+        <LineChart
+          :title="$t('admin.analytics_chart_badges_over_time')"
+          :data="badgesData"
+          :granularity="granularity"
+          :integer-y="true"
+        />
       </v-col>
     </v-row>
 
     <!-- Strategy and Contribution Charts -->
     <v-row>
       <v-col cols="12" md="6">
-        <BarChart title="Check-ins by Strategy" :data="strategyCheckinsData" />
+        <BarChart
+          :title="$t('admin.analytics_chart_checkins_by_strategy')"
+          :data="strategyCheckinsData"
+          :legend-items="strategyLegendItems"
+          :integer-y="true"
+        />
       </v-col>
       <v-col cols="12" md="6">
-        <BarChart title="Avg Points per Check-in by Strategy" :data="strategyPointsData" />
+        <BarChart
+          :title="$t('admin.analytics_chart_avg_points_by_strategy')"
+          :data="strategyPointsData"
+          :legend-items="strategyLegendItems"
+        />
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12">
-        <BarChart title="Contribution Rate by Project" :data="contributionData" />
+        <BarChart
+          :title="$t('admin.analytics_chart_contribution_rate')"
+          :data="contributionData"
+          :max-y="100"
+        />
       </v-col>
     </v-row>
   </v-container>
@@ -116,15 +155,23 @@
 
 <script setup>
 import { ref, watch, onMounted, computed } from 'vue';
-import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import AnalyticsService from '@/services/AnalyticsService';
 import ProjectsService from '@/services/ProjectsService';
+import BreadCrumb from '@/components/utils/BreadCrumb.vue';
 import SummaryCard from '@/components/analytics/SummaryCard.vue';
 import LineChart from '@/components/analytics/LineChart.vue';
 import BarChart from '@/components/analytics/BarChart.vue';
+import {
+  STRATEGY_METADATA,
+  fillTimeSeries,
+  getStrategyColor,
+  getStrategyLabel,
+} from '@/utils/analyticsChartUtils';
 
-const store = useStore();
+const { t } = useI18n();
+const router = useRouter();
 
 // Filter state
 const selectedProject = ref(null);
@@ -158,8 +205,8 @@ const dateRange = computed(() => {
 });
 
 const projectItems = computed(() => [
-  { title: 'All Projects', value: null },
-  ...projects.value.map(p => ({ title: p.name, value: p._id }))
+  { title: t('admin.analytics_all_projects'), value: null },
+  ...projects.value.map(p => ({ title: p.name, value: p._id })),
 ]);
 
 // Raw API data
@@ -187,8 +234,8 @@ async function loadAnalytics() {
       AnalyticsService.getActiveUsersOverTime({ projectId: pid, granularity: g, ...dr }),
       AnalyticsService.getPointsOverTime({ projectId: pid, granularity: g, ...dr }),
       AnalyticsService.getBadgeAcquisitionOverTime({ projectId: pid, granularity: g, ...dr }),
-      AnalyticsService.getByStrategy(),
-      AnalyticsService.getContributionRate({ projectId: pid }),
+      AnalyticsService.getByStrategy({ projectId: pid, ...dr }),
+      AnalyticsService.getContributionRate({ projectId: pid, ...dr }),
     ]);
 
     summary.value = s;
@@ -203,8 +250,6 @@ async function loadAnalytics() {
   }
 }
 
-const router = useRouter();
-
 onMounted(() => {
   if (localStorage.getItem('role') !== 'Admin') {
     router.push('/');
@@ -217,60 +262,92 @@ onMounted(() => {
 watch([selectedProject, granularity, datePreset, customStart, customEnd], loadAnalytics);
 
 const summaryCards = computed(() => [
-  { title: 'Total Check-ins', value: summary.value.totalCheckins },
-  { title: 'Active Users', value: summary.value.totalActiveUsers },
-  { title: 'Contribution Rate', value: summary.value.overallContributionRate, format: 'percent' },
-  { title: 'Badges Earned', value: summary.value.totalBadgesEarned },
-  { title: 'Points Awarded', value: summary.value.totalPointsAwarded },
+  { title: t('admin.analytics_kpi_total_checkins'), value: summary.value.totalCheckins },
+  { title: t('admin.analytics_kpi_active_users'), value: summary.value.totalActiveUsers },
+  { title: t('admin.analytics_kpi_contribution_rate'), value: summary.value.overallContributionRate, format: 'percent' },
+  { title: t('admin.analytics_kpi_badges_earned'), value: summary.value.totalBadgesEarned },
+  { title: t('admin.analytics_kpi_points_awarded'), value: summary.value.totalPointsAwarded },
 ]);
 
 function toLineData(raw, valueKey, label, color) {
+  const filled = fillTimeSeries(
+    raw,
+    valueKey,
+    granularity.value,
+    dateRange.value.startDate,
+    dateRange.value.endDate,
+  );
   return {
-    labels: raw.map(d => d.period),
+    labels: filled.map(d => d.period),
     datasets: [{
       label,
-      data: raw.map(d => d[valueKey]),
+      data: filled.map(d => d[valueKey]),
       borderColor: color,
-      backgroundColor: color + '33', // Add some transparency for the fill
+      backgroundColor: color + '33',
       fill: true,
-      tension: 0.4,
+      tension: 0.3,
     }],
   };
 }
 
-const checkinsData = computed(() => toLineData(checkinsRaw.value, 'count', 'Check-ins', '#1976D2'));
-const activeUsersData = computed(() => toLineData(activeUsersRaw.value, 'uniqueUsers', 'Active Users', '#388E3C'));
-const pointsData = computed(() => toLineData(pointsRaw.value, 'totalPoints', 'Points', '#F57C00'));
-const badgesData = computed(() => toLineData(badgesRaw.value, 'count', 'Badges', '#7B1FA2'));
+const checkinsData = computed(() =>
+  toLineData(checkinsRaw.value, 'count', t('admin.analytics_series_checkins'), '#1976D2'),
+);
+const activeUsersData = computed(() =>
+  toLineData(activeUsersRaw.value, 'uniqueUsers', t('admin.analytics_series_active_users'), '#388E3C'),
+);
+const pointsData = computed(() =>
+  toLineData(pointsRaw.value, 'totalPoints', t('admin.analytics_series_points'), '#F57C00'),
+);
+const badgesData = computed(() =>
+  toLineData(badgesRaw.value, 'count', t('admin.analytics_series_badges'), '#7B1FA2'),
+);
+
+const strategyLegendItems = computed(() =>
+  Object.entries(STRATEGY_METADATA).map(([, meta]) => ({
+    label: t(meta.i18nKey),
+    color: meta.color,
+  })),
+);
+
+const strategyLabels = computed(() =>
+  strategyRaw.value.map(
+    s => `${s.projectName} (${getStrategyLabel(s.gamificationStrategy, t)})`,
+  ),
+);
 
 const strategyCheckinsData = computed(() => ({
-  labels: strategyRaw.value.map(s => s.projectName),
+  labels: strategyLabels.value,
   datasets: [{
-    label: 'Check-ins',
+    label: t('admin.analytics_series_checkins'),
     data: strategyRaw.value.map(s => s.checkinCount),
-    backgroundColor: strategyRaw.value.map(s =>
-      s.gamificationStrategy === 'ELASTICA' ? '#F57C00' : '#1976D2'
-    ),
+    backgroundColor: strategyRaw.value.map(s => getStrategyColor(s.gamificationStrategy)),
   }],
 }));
 
 const strategyPointsData = computed(() => ({
-  labels: strategyRaw.value.map(s => s.projectName),
+  labels: strategyLabels.value,
   datasets: [{
-    label: 'Avg pts / check-in',
-    data: strategyRaw.value.map(s => s.avgPointsPerCheckin),
-    backgroundColor: strategyRaw.value.map(s =>
-      s.gamificationStrategy === 'ELASTICA' ? '#F57C00' : '#1976D2'
-    ),
+    label: t('admin.analytics_series_avg_points'),
+    data: strategyRaw.value.map(s => +Number(s.avgPointsPerCheckin || 0).toFixed(1)),
+    backgroundColor: strategyRaw.value.map(s => getStrategyColor(s.gamificationStrategy)),
   }],
 }));
 
 const contributionData = computed(() => ({
   labels: contributionRaw.value.map(p => p.projectName),
   datasets: [{
-    label: 'Contribution Rate (%)',
+    label: t('admin.analytics_series_contribution_rate'),
     data: contributionRaw.value.map(p => +(p.rate * 100).toFixed(1)),
     backgroundColor: '#388E3C',
   }],
 }));
 </script>
+
+<style scoped>
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+</style>
