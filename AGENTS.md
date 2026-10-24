@@ -16,7 +16,9 @@ Rayuela is a full-stack citizen science platform with adaptive gamification for 
 - **ORG REPOSITORIES:** ALWAYS work exclusively in the repositories under the `Rayuela-v2` organization. NEVER perform actions in `cientopolis` source repositories.
 - **CLIENT APPLICATION SCOPES & TARGET AUDIENCE:**
   * `rayuela-frontend` is exclusively intended for **Administrator and Researcher profiles** (project configuration, spatial/temporal task constraints, adaptive gamification setup, badge fading dashboards, and admin oversight). Do not design contributor data collection workflows for the web frontend; contributors can technically log in, but their participation experience is delegated to the mobile app.
-  * `rayuela-mobile` is the official client for **Citizen Science Contributors and Volunteers** (field observations and GPS check-ins).
+  * `rayuela-mobile` is the official client for **Contributors** (field observations and GPS check-ins).
+- **ACTOR TERMINOLOGY (`Persona colaboradora` / `Contributor`):**
+  * When referring to the citizen science participant role in documentation, diagrams, or UI copy: ALWAYS use **"Persona colaboradora"** in Spanish and **"Contributor"** in English.
 - **ISSUE TRACKING:** All issues are tracked in the GitHub Project: [Rayuela Workspace Board](https://github.com/orgs/Rayuela-v2/projects/1). Note that the Project Board view is filtered to display issues from the `Rayuela-v2/rayuela-NodeBackend` repository. Therefore, even for Mobile or Frontend tasks, always create the issue in `Rayuela-v2/rayuela-NodeBackend` and link it to the project board.
 - **NO AI SIGNATURES:** Do not include agent signatures or attribution lines in PR descriptions or commits.
 - **LOCALIZATION / i18n (ZERO HARDCODED STRINGS):**
