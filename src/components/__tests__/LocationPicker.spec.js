@@ -2,6 +2,23 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
 import LocationPicker from '../LocationPicker.vue'
+import { OSM } from 'ol/source'
+
+// Mock axios so maps.service.js doesn't make real network requests in tests
+vi.mock('axios', () => ({
+  default: {
+    get: vi.fn().mockResolvedValue({
+      data: {
+        urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+        attributionText: '© OpenStreetMap contributors',
+        attributionUrl: 'https://www.openstreetmap.org/copyright',
+        fixMapUrl: 'https://www.openstreetmap.org/fixthemap',
+        minZoom: 2,
+        maxZoom: 19,
+      },
+    }),
+  },
+}))
 
 // Mock OpenLayers — jsdom can't render canvas maps
 vi.mock('ol', () => ({
@@ -262,6 +279,17 @@ describe('LocationPicker', () => {
       })
       expect(wrapper.vm.$props.initialLatitude).toBe('-34.603722')
       expect(wrapper.vm.$props.initialLongitude).toBe('-58.381592')
+    })
+
+    it('initializes TileLayer using centralized map config source', () => {
+      const wrapper = createWrapper({ modelValue: true })
+      wrapper.vm.initMap()
+      expect(OSM).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          maxZoom: 19,
+        }),
+      )
     })
   })
 })

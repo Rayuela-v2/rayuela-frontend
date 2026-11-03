@@ -6,7 +6,8 @@ import {onMounted, onUnmounted, ref, watch} from 'vue';
 import 'ol/ol.css';
 import {Map, Overlay, View} from 'ol';
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer';
-import {OSM, Vector as VectorSource} from 'ol/source';
+import {Vector as VectorSource} from 'ol/source';
+import {createMapTileSource} from '@/services/maps.service';
 import GeoJSON from 'ol/format/GeoJSON';
 import {Style, Fill, Stroke, Text} from 'ol/style';
 import {toast} from "vue3-toastify";
@@ -311,7 +312,7 @@ const initializeMap = () => {
         target: 'map',
         layers: [
           new TileLayer({
-            source: new OSM()
+            source: createMapTileSource()
           }),
           vectorLayer
         ],
@@ -371,7 +372,7 @@ watch(area, (newArea) => {
       source: vectorSource
     });
 
-    map.value.setLayers([new TileLayer({source: new OSM()}), vectorLayer]);
+    map.value.setLayers([new TileLayer({source: createMapTileSource()}), vectorLayer]);
 
     const extent = vectorSource.getExtent();
     map.value.getView().fit(extent, {padding: [20, 20, 20, 20], maxZoom: 18});
