@@ -4,7 +4,8 @@ import { useI18n } from 'vue-i18n';
 import 'ol/ol.css';
 import { Map, View } from 'ol';
 import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer';
-import { OSM, Vector as VectorSource } from 'ol/source';
+import { Vector as VectorSource } from 'ol/source';
+import { createMapTileSource } from '@/services/maps.service';
 import { Style, Fill, Stroke, Text } from 'ol/style';
 import Icon from 'ol/style/Icon';
 import Feature from 'ol/Feature';
@@ -87,7 +88,7 @@ function initMap() {
     map.value = null;
   }
 
-  const layers = [new TileLayer({ source: new OSM() })];
+  const layers = [new TileLayer({ source: createMapTileSource() })];
 
   // Add project areas if available
   let areaExtent = null;
