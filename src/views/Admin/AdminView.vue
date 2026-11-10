@@ -42,7 +42,7 @@ const addProject = async () => {
   const newP = await ProjectsService.createProject({
     name: t("admin.new_project_default_name"),
     description: t("admin.project_description_default"),
-    image: "https://example.com/image.jpg",
+    image: "",
     web: "https://example.com",
     available: true,
     areas: {

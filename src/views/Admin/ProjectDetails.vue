@@ -3,42 +3,6 @@
     <BreadCrumb items="projectDetailsPath"/>
     <h1 class="mb-6">{{ $t('admin.project_detail') }}</h1>
 
-    <!-- Banner de migración de imágenes externas -->
-    <v-alert
-      v-if="hasExternalImages"
-      type="warning"
-      variant="tonal"
-      class="mb-6"
-    >
-      <v-alert-title class="font-weight-bold mb-1">
-        {{ $t('admin.migrate_images_banner_title') }}
-      </v-alert-title>
-      <div class="mb-3">
-        {{ $t('admin.migrate_images_banner_text') }}
-      </div>
-      <div class="d-flex align-center flex-wrap ga-3">
-        <v-btn
-          color="warning"
-          variant="elevated"
-          :loading="migratingImages"
-          :disabled="migratingImages"
-          @click="runImageMigration"
-          prepend-icon="mdi-cloud-upload"
-        >
-          <template v-if="migratingImages">
-            {{ $t('admin.migrating_images', { count: externalImagesCount }) }}
-          </template>
-          <template v-else>
-            {{ $t('admin.migrate_images_btn') }} ({{ externalImagesCount }})
-          </template>
-        </v-btn>
-        <span v-if="migratingImages" class="d-inline-flex align-center text-body-2 font-weight-medium text-warning">
-          <v-progress-circular indeterminate color="warning" size="20" width="2" class="mr-2" />
-          {{ $t('admin.migrating_images', { count: externalImagesCount }) }}
-        </span>
-      </div>
-    </v-alert>
-
     <v-form @submit.prevent="saveProject">
       <!-- Información del proyecto -->
       <v-card class="pa-4 mb-6">
@@ -284,38 +248,6 @@ import router from "@/router";
 
 const route = useRoute();
 const uploadingImage = ref(false);
-const migratingImages = ref(false);
-
-const isExternalImageUrl = (url) => {
-  if (!url || typeof url !== 'string') return false;
-  const trimmed = url.trim();
-  if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
-    return false;
-  }
-  // Internal storage URLs (e.g. /storage/file?key=...) are already internal
-  if (trimmed.includes('/storage/file')) {
-    return false;
-  }
-  return true;
-};
-
-const externalImagesCount = computed(() => {
-  let count = 0;
-  if (isExternalImageUrl(project.value?.image)) {
-    count++;
-  }
-  const badges = project.value?.gamification?.badgesRules || [];
-  for (const b of badges) {
-    if (isExternalImageUrl(b.imageUrl)) {
-      count++;
-    }
-  }
-  return count;
-});
-
-const hasExternalImages = computed(() => {
-  return externalImagesCount.value > 0;
-});
 
 const onImageFileSelected = async (fileOrFiles) => {
   const file = Array.isArray(fileOrFiles) ? fileOrFiles[0] : fileOrFiles;
@@ -336,44 +268,6 @@ const onImageFileSelected = async (fileOrFiles) => {
   }
 };
 
-const runImageMigration = async () => {
-  const projectId = project.value?.id || project.value?._id || route.params.projectId;
-  if (!projectId || projectId === 'new') return;
-  migratingImages.value = true;
-  try {
-    const res = await ProjectsService.migrateImages(projectId);
-    if (res?.failures && res.failures.length > 0) {
-      toast.error(`${t('admin.migrate_images_error')}: ${res.failures.join(', ')}`);
-    } else {
-      toast.success(t('admin.migrate_images_success'));
-    }
-    // Refresh project details
-    const reloaded = await ProjectsService.getProjectById(projectId);
-    if (reloaded) {
-      if (reloaded.timeIntervals) {
-        reloaded.timeIntervals = reloaded.timeIntervals.map(interval => ({
-          ...interval,
-          time: {
-            start: typeof interval.time.start === 'string'
-              ? Number(interval.time.start.split(':')[0])
-              : interval.time.start,
-            end: typeof interval.time.end === 'string'
-              // ponytail: inverse of save (end-1):59:59); "23:59:59" -> 24, "17:00:00" -> 17
-              ? Math.ceil(interval.time.end.split(':').reduce((acc, v, i) => acc + Number(v) / 60 ** i, 0))
-              : interval.time.end,
-          }
-        }));
-      }
-      project.value = reloaded;
-    }
-  } catch (err) {
-    console.error('Error during image migration:', err);
-    const errorMsg = err?.response?.data?.message || err?.message || t('admin.migrate_images_error');
-    toast.error(`${t('admin.migrate_images_error')}: ${errorMsg}`);
-  } finally {
-    migratingImages.value = false;
-  }
-};
 const project = ref({
   _id: '',
   name: '',
