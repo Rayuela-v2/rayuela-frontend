@@ -225,7 +225,7 @@
         </ul>
       </v-alert>
       <v-btn type="submit" variant="elevated" color="primary" width="100%" :disabled="hasInvalidTimeIntervals">
-        {{ isNew ? $t('common.add') : $t('admin.project_updated_success').split(' ')[1] }}
+        {{ isNew ? $t('common.add') : $t('common.save') }}
       </v-btn>
     </v-form>
   </v-container>
